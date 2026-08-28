@@ -334,20 +334,20 @@ a { color: inherit; }
 
 @media (max-width: 720px) {
   .row a {
-    grid-template-columns: 58px 1fr;
+    grid-template-columns: 58px max-content minmax(0, 1fr);
     grid-template-areas:
-      "year  title"
-      "year  meta";
+      "year  title  title"
+      "year  client kind";
     gap: 4px 14px;
     padding: 17px 2px;
   }
   .row a:hover { padding-left: 2px; }
   .row__year   { grid-area: year; align-self: start; padding-top: 6px; }
   .row__title  { grid-area: title; }
-  .row__client { grid-area: meta; }
-  .row__kind   { grid-area: meta; justify-self: start; margin-left: 0; }
-  .row__client::after { content: " ／"; }
-  .row__client, .row__kind { display: inline; }
+  .row__client { grid-area: client; }
+  .row__kind   { grid-area: kind; justify-self: start; min-width: 0; }
+  .row__client::after { content: none; }
+  .row__kind::before { content: "／"; margin-right: .65em; color: var(--ink-soft); }
   .row__go { display: none; }
 }
 
