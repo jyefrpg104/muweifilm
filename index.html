@@ -461,15 +461,18 @@ a { color: inherit; }
 .process__list { list-style: none; margin: 0; padding: 0; }
 .process__list li {
   display: grid;
-  grid-template-columns: 46px 1fr;
-  gap: 16px;
+  grid-template-columns: 46px minmax(120px, 160px) minmax(0, 1fr);
+  grid-template-areas: "number title desc";
+  align-items: baseline;
+  column-gap: 20px;
   padding: 16px 0;
   border-bottom: 1px solid var(--rule);
   font-size: 14.5px;
   color: var(--ink-soft);
 }
 .process__list li:first-child { border-top: 1px solid var(--rule); }
-.process__list span {
+.process__list li > span:first-child {
+  grid-area: number;
   font-family: var(--mono);
   font-size: 11.5px;
   letter-spacing: .1em;
@@ -477,13 +480,26 @@ a { color: inherit; }
   padding-top: 4px;
 }
 .process__list strong {
-  display: block;
+  grid-area: title;
   font-family: var(--serif);
   font-weight: 700;
   font-size: 16.5px;
   color: var(--ink);
   letter-spacing: .04em;
-  margin-bottom: 2px;
+}
+.process__desc {
+  grid-area: desc;
+  min-width: 0;
+}
+@media (max-width: 620px) {
+  .process__list li {
+    grid-template-columns: 34px minmax(0, 1fr);
+    grid-template-areas:
+      "number title"
+      ".      desc";
+    gap: 5px 12px;
+    align-items: start;
+  }
 }
 
 /* ── 關於 ─────────────────────────────── */
@@ -850,11 +866,11 @@ a { color: inherit; }
   <div class="process">
     <p class="eyebrow">HOW WE WORK — 合作流程</p>
     <ol class="process__list">
-      <li><span>01</span><strong>需求訪談</strong>釐清目標受眾與這支片要達成的事。免費，約 60 分鐘。</li>
-      <li><span>02</span><strong>提案與報價</strong>方向、參考、預算、時程一次講清楚。</li>
-      <li><span>03</span><strong>前製</strong>腳本、分鏡、通告、場勘。確認後才開拍。</li>
-      <li><span>04</span><strong>拍攝</strong>依規模組隊，小案我自己執行導演與攝影。</li>
-      <li><span>05</span><strong>後期</strong>粗剪確認 → 精剪 → 調光混音 → 交付。含兩次修改。</li>
+      <li><span>01</span><strong>需求訪談</strong><span class="process__desc">釐清目標受眾與這支片要達成的事。免費，約 60 分鐘。</span></li>
+      <li><span>02</span><strong>提案與報價</strong><span class="process__desc">方向、參考、預算、時程一次講清楚。</span></li>
+      <li><span>03</span><strong>前製</strong><span class="process__desc">腳本、分鏡、通告、場勘。確認後才開拍。</span></li>
+      <li><span>04</span><strong>拍攝</strong><span class="process__desc">依規模組隊，小案我自己執行導演與攝影。</span></li>
+      <li><span>05</span><strong>後期</strong><span class="process__desc">粗剪確認 → 精剪 → 調光混音 → 交付。含兩次修改。</span></li>
     </ol>
   </div>
 </section>
@@ -872,18 +888,15 @@ a { color: inherit; }
     </figure>
 
     <div class="about__text">
-      <p>可以叫我 Jeffrey，或小楊。世新大學電影系畢業，來自洛杉磯。</p>
+      <p>我是楊文翔，Jeffrey，也可以叫我小楊。來自洛杉磯，世新大學電影系畢業，現在以編導、攝影與剪輯的身份工作。</p>
 
-      <p>2014 年第一次拿相機接案，那年十六歲。從紀實影像做到廣告和紀錄片，
-      從舊媒體一路走進新媒體，到現在剛好十年。</p>
+      <p>2014 年，十六歲的我第一次拿相機接案。一路從紀實影像、品牌廣告與紀錄片，做到 YouTube 長片、短影音、大型轉播、課程募資和商業攝影；從前期企劃、拍攝到後期，我習慣完整參與。</p>
 
-      <p>我做過形象廣告、紀錄片、YouTube 長片、短影音、大型轉播、課程募資影片。
-      大部分合作都是兩到三年以上的長期關係，不是一次性發案——
-      因為做內容這件事，數據要看得夠久才有意義。</p>
+      <p>我在意的不只是把畫面拍得好看，而是先找出一支片真正要回答的問題，再把人物、資訊與情緒整理成觀眾願意繼續看的敘事。對我來說，影像不是包裝，而是讓複雜的事情被理解。</p>
 
-      <p>目前的主要戰場是醫療與健康知識內容，每天在處理的問題是：
-      一個正確但無聊的事實，要怎麼變成有人願意看完的影片。
-      這也是我認為自己最值錢的地方。</p>
+      <p>近年主要投入醫療與健康知識內容，長期面對同一個挑戰：怎麼把正確、專業，甚至原本有點難講的內容，轉譯成清楚、可信、有人味的影片。這也是我最擅長、最想繼續做深的方向。</p>
+
+      <p>我喜歡長期合作，因為真正理解一個品牌、頻道與觀眾，需要時間，也需要回頭看內容成效。影像之外，我也是樂手；無論拍攝或剪輯，我都相信節奏不是把東西塞滿，而是知道哪裡該推進、哪裡該留下。</p>
 
       <p class="about__tags">#編導　#攝影師　#剪輯師　#樂手</p>
     </div>
