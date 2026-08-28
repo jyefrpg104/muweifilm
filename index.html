@@ -32,16 +32,16 @@
     <p class="hero-copy">十年來我在做同一件事：把資訊量大、不好懂、講起來容易無聊的題目，整理成一支有人願意看完的影片。從公部門紀錄片、企業形象片，到每天在做的醫學知識內容。</p>
     <p class="hero-poem">紀錄平行宇宙的美好日常</p>
     <div class="acts"><a class="btn btn--solid" href="works.html">看作品</a><a class="btn" href="contact.html">談合作</a></div>
-    <figure class="hero-image"><img src="images/works/hero.jpg" alt="Muwei Film 代表作劇照" onerror="this.remove()"></figure>
+    <div class="hero-reel" id="showreel"><button type="button" aria-label="播放 Muwei Film Showreel 2026"><img src="https://i.ytimg.com/vi/eg2QAqJp-qE/maxresdefault.jpg" alt="Muwei Film Showreel 2026" onerror="this.src='https://i.ytimg.com/vi/eg2QAqJp-qE/hqdefault.jpg'"><span class="hero-reel__play">播放 SHOWREEL 2026 →</span></button></div>
   </section>
 
   <section class="wrap section rule">
     <p class="eyebrow">01 — SELECTED WORKS</p><h2>精選作品</h2>
     <p class="section-note">挑出來的不是最多的，是最能說明我怎麼工作的。完整作品、年份與類型都收在作品頁。</p>
     <div class="featured" style="margin-top:32px">
-      <a class="work work--wide" href="https://youtu.be/vwCuuBZ5GuY" target="_blank" rel="noopener"><div class="work__meta"><span>2026</span><span>Cofit</span><span>知識型長片</span></div><h3>糖｜為什麼生活到處都是糖？</h3><p>把醫學與營養知識整理成能被看完的敘事。</p></a>
-      <a class="work" href="https://youtu.be/zqaKSOUnENA" target="_blank" rel="noopener"><div class="work__meta"><span>2025</span><span>Cofit</span></div><h3>初日會客室｜曾博恩</h3><p>訪談節目</p></a>
-      <a class="work" href="https://youtu.be/ra7F9SAmxVk" target="_blank" rel="noopener"><div class="work__meta"><span>2024</span><span>天下雜誌</span></div><h3>《男孩、鼴鼠、狐狸與馬》</h3><p>紀錄片</p></a>
+      <button class="work work--wide" type="button" data-youtube="vwCuuBZ5GuY" aria-expanded="false"><div class="work__meta"><span>2026</span><span>Cofit</span><span>知識型長片</span></div><h3>糖｜為什麼生活到處都是糖？</h3><p>把醫學與營養知識整理成能被看完的敘事。</p><span class="work__go">點開預覽 ＋</span></button>
+      <button class="work" type="button" data-youtube="zqaKSOUnENA" aria-expanded="false"><div class="work__meta"><span>2025</span><span>Cofit</span></div><h3>初日會客室｜曾博恩</h3><p>訪談節目</p><span class="work__go">點開預覽 ＋</span></button>
+      <button class="work" type="button" data-youtube="ra7F9SAmxVk" aria-expanded="false"><div class="work__meta"><span>2024</span><span>天下雜誌</span></div><h3>《男孩、鼴鼠、狐狸與馬》</h3><p>紀錄片</p><span class="work__go">點開預覽 ＋</span></button>
     </div>
     <p style="margin:24px 0 0"><a class="inline-link" href="works.html">查看全部作品 →</a></p>
   </section>
@@ -64,5 +64,6 @@
   </section>
 </main>
 <footer class="foot"><p class="foot__mark">MUWEI FILM 木尉影像</p><p>Make creativity valuable.</p><p>© 2026 楊文翔 Jeffrey Yang</p></footer>
+<script>const featuredWorks=[...document.querySelectorAll('.featured .work')];function closeFeatured(button){const preview=document.querySelector('.featured-preview');if(preview)preview.remove();button.setAttribute('aria-expanded','false');button.querySelector('.work__go').textContent='點開預覽 ＋'}featuredWorks.forEach(button=>button.addEventListener('click',()=>{if(button.getAttribute('aria-expanded')==='true'){closeFeatured(button);return}featuredWorks.forEach(b=>{if(b!==button)closeFeatured(b)});const id=button.dataset.youtube,preview=document.createElement('div');preview.className='featured-preview';preview.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+id+'?rel=0&playsinline=1" title="作品預覽" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><p class="featured-preview__foot"><a href="https://youtu.be/'+id+'" target="_blank" rel="noopener">在 YouTube 開啟 ↗</a></p>';button.insertAdjacentElement('afterend',preview);button.setAttribute('aria-expanded','true');button.querySelector('.work__go').textContent='收起預覽 ×';preview.scrollIntoView({behavior:'smooth',block:'nearest'})}));document.querySelector('#showreel button').addEventListener('click',()=>{document.getElementById('showreel').innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/eg2QAqJp-qE?rel=0&playsinline=1" title="Muwei Film Showreel 2026" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'})</script>
 </body>
 </html>
