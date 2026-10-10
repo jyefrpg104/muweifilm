@@ -20,7 +20,7 @@
     html {scroll-behavior:smooth}
     body {margin:0; color:var(--ink); background:var(--bg); font: 15px/1.8 var(--sans); -webkit-font-smoothing:antialiased}
     button,input {font:inherit}
-    button {cursor:pointer}
+    button {cursor:pointer; color:inherit}
     button:focus-visible, a:focus-visible, input:focus-visible {outline:3px solid #9DAF90; outline-offset:3px}
     a {color:inherit; text-decoration:none}
     .container {width:min(1240px,calc(100% - 64px)); margin:0 auto}
@@ -97,6 +97,7 @@
     .card-main {text-align:center; margin:auto 0; padding:14px 1px; min-height:0}
     .card-title {font-family:var(--serif); font-size:clamp(18px,1.65vw,28px); letter-spacing:.015em; line-height:1.55; overflow-wrap:anywhere; font-weight:500}
     .card-title.compact {font-size:clamp(14px,1.25vw,20px)}
+    .card-title,.quest-thumb-title,.mini-title {color:var(--ink)}
     .focal-title {white-space:nowrap}
     .card-format-note {display:block; margin-top:4px; font-family:var(--sans); font-size:11px; line-height:1.4; font-weight:400; letter-spacing:.02em; color:#8E958B}
     .card-hint {font-size:clamp(9px,.81vw,11px); line-height:1.7; color:#85887E; margin:13px 0 0; overflow-wrap:anywhere}
@@ -187,9 +188,9 @@
     .quest-detail {width:min(358px,calc(100% - 32px)); max-height:calc(100svh - 32px); overflow-y:auto; background:transparent; box-shadow:none; isolation:isolate}
     .quest-detail-surface {position:absolute; inset:0; z-index:-1; border-radius:15px; background:var(--bg); box-shadow:0 18px 80px rgba(26,41,30,.20); pointer-events:none}
     .quest-detail.motion-opening,.quest-detail.motion-closing {overflow:visible}
-    .quest-detail.motion-opening .quest-detail-surface {opacity:0}
-    .quest-detail.motion-opening::backdrop {animation:quest-backdrop-in .28s var(--motion-ease) both}
-    .quest-detail.motion-closing::backdrop {animation:quest-backdrop-out .24s .12s var(--motion-ease) both}
+    .quest-detail.motion-opening .quest-detail-surface,.quest-detail.motion-closing .quest-detail-surface {position:fixed; inset:auto; left:0; top:0}
+    .quest-detail.motion-opening::backdrop {animation:quest-backdrop-in .30s var(--motion-ease) both}
+    .quest-detail.motion-closing::backdrop {animation:quest-backdrop-out .26s var(--motion-ease) both}
     .quest-detail.motion-closing .quest-detail-content {pointer-events:none}
     .quest-motion-flight {position:fixed; z-index:2; overflow:hidden; border-radius:9px; background:var(--paper); pointer-events:none; will-change:transform,width,height}
     .quest-flight-detail {position:absolute; top:0; left:0; margin:0; transform-origin:top left; pointer-events:none}
@@ -636,8 +637,8 @@
       const scale=rect.width/base.width;
       return `translateY(${(rect.height-base.height*scale)/2}px) scale(${scale})`;
     }
-    function questDetailSurfaceClip(rect,panel){
-      return `inset(${Math.max(0,rect.top-panel.top)}px ${Math.max(0,panel.right-rect.right)}px ${Math.max(0,panel.bottom-rect.bottom)}px ${Math.max(0,rect.left-panel.left)}px round 9px)`;
+    function questDetailSurfaceFrame(rect,opacity,radius){
+      return {transform:`translate(${rect.left}px,${rect.top}px)`,width:`${rect.width}px`,height:`${rect.height}px`,opacity,borderRadius:radius};
     }
     function animateQuestDetail(rect,closing,startRect,surfaceState){
       const dialog=el('questDialog'),card=el('questDetailFlip'),surface=el('questDetailSurface');
@@ -646,7 +647,7 @@
       cancelQuestDetailMotion();
       const base=card.getBoundingClientRect(),panel=dialog.getBoundingClientRect(),id=detailMotionId;
       const from=closing?(startRect||base):rect,to=closing?rect:base;
-      const duration=closing?240:280,delay=closing?120:0,easing='cubic-bezier(.4,0,.2,1)';
+      const duration=closing?260:300,easing='cubic-bezier(.4,0,.2,1)';
       dialog.classList.add(closing?'motion-closing':'motion-opening');
       if(closing){dialog.style.setProperty('--quest-backdrop-start',surfaceState?.backdropColor||'rgba(48,54,45,.40)');dialog.style.setProperty('--quest-backdrop-blur',surfaceState?.backdropBlur||'blur(4px)')}
       const flight=document.createElement('div'),full=document.createElement('div'),mini=questDetailOrigin().querySelector('.quest-thumb').cloneNode(true);
@@ -655,21 +656,21 @@
       full.className=card.className+' quest-flight-detail';full.innerHTML=card.innerHTML;
       full.style.width=`${base.width}px`;full.style.height=`${base.height}px`;
       mini.classList.add('quest-flight-mini');flight.append(full,mini);dialog.append(flight);detailFlight=flight;card.style.visibility='hidden';
-      const flightOptions={duration,delay,easing,fill:'both'};
+      const flightOptions={duration,delay:0,easing,fill:'both'};
       detailAnimations.push(flight.animate([questDetailFrame(from,base),questDetailFrame(to,base)],flightOptions));
       detailAnimations.push(full.animate([
         {transform:questDetailContentTransform(from,base),opacity:closing?(surfaceState?.fullOpacity??1):0},
         {transform:questDetailContentTransform(to,base),opacity:closing?0:1}
       ],flightOptions));
       detailAnimations.push(mini.animate(closing?[{opacity:surfaceState?.miniOpacity??0},{opacity:1}]:[{opacity:1},{opacity:0}],flightOptions));
-      const collapsed=questDetailSurfaceClip(closing?from:base,panel),expanded='inset(0px 0px 0px 0px round 15px)';
       detailAnimations.push(surface.animate(closing?[
-        {clipPath:surfaceState?.clip&&surfaceState.clip!=='none'?surfaceState.clip:expanded,opacity:surfaceState?.opacity??1},{clipPath:collapsed,opacity:0}
+        questDetailSurfaceFrame(surfaceState?.rect||panel,surfaceState?.opacity??1,surfaceState?.radius||'15px'),
+        questDetailSurfaceFrame(rect,0,'9px')
       ]:[
-        {clipPath:collapsed,opacity:0.3},{clipPath:expanded,opacity:1}
-      ],{duration:closing?120:180,delay:closing?0:280,easing,fill:closing?'both':'forwards'}));
+        questDetailSurfaceFrame(rect,0.3,'9px'),questDetailSurfaceFrame(panel,1,'15px')
+      ],flightOptions));
       chrome.forEach((node,index)=>{
-        detailAnimations.push(node.animate(closing?[{opacity:chromeOpacity[index]},{opacity:0}]:[{opacity:0},{opacity:1}],{duration:closing?120:180,delay:closing?0:280,easing,fill:'both'}));
+        detailAnimations.push(node.animate(closing?[{opacity:chromeOpacity[index]},{opacity:0,offset:0.65},{opacity:0}]:[{opacity:0},{opacity:0,offset:0.25},{opacity:1}],flightOptions));
       });
       Promise.all(detailAnimations.map(animation=>animation.finished)).then(()=>{
         if(id!==detailMotionId)return;
@@ -691,7 +692,7 @@
       detailClosing=true;detailPointer=null;
       const surfaceStyle=getComputedStyle(el('questDetailSurface'));
       const backdropStyle=getComputedStyle(dialog,'::backdrop');
-      const surfaceState={clip:surfaceStyle.clipPath,opacity:Number(surfaceStyle.opacity),backdropColor:backdropStyle.backgroundColor,backdropBlur:backdropStyle.backdropFilter};
+      const surfaceState={rect:el('questDetailSurface').getBoundingClientRect(),radius:surfaceStyle.borderRadius,opacity:Number(surfaceStyle.opacity),backdropColor:backdropStyle.backgroundColor,backdropBlur:backdropStyle.backdropFilter};
       if(detailFlight){
         surfaceState.fullOpacity=Number(getComputedStyle(detailFlight.querySelector('.quest-flight-detail')).opacity);
         surfaceState.miniOpacity=Number(getComputedStyle(detailFlight.querySelector('.quest-flight-mini')).opacity);
