@@ -16,19 +16,24 @@
       --serif: "Iowan Old Style", "Noto Serif TC", "Songti TC", "STSong", Georgia, serif;
     }
     * {box-sizing: border-box}
-    html {scroll-behavior:smooth}
+    html {scroll-behavior:smooth; scroll-padding-top:110px}
     body {margin:0; color:var(--ink); background:var(--bg); font: 15px/1.8 var(--sans); -webkit-font-smoothing:antialiased}
     button,input {font:inherit}
     button {cursor:pointer}
     button:focus-visible, a:focus-visible, input:focus-visible {outline:3px solid #9DAF90; outline-offset:3px}
     a {color:inherit; text-decoration:none}
     .container {width:min(1240px,calc(100% - 64px)); margin:0 auto}
-    .topbar {height:80px; display:flex; align-items:center; border-bottom:1px solid var(--line)}
+    .topbar {height:80px; display:flex; align-items:center; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:30; background:var(--bg); padding-top:env(safe-area-inset-top)}
     .nav {display:flex; align-items:center; justify-content:space-between; gap:24px}
     .brand {font-size:15px; font-weight:740; letter-spacing:.18em; line-height:1.25}
     .brand small {display:block; font-weight:450; font-size:9px; letter-spacing:.23em; margin-top:6px; color:var(--sub)}
-    .navlinks {display:flex; gap:30px; align-items:center; font-size:13px; color:var(--sub)}
-    .navlinks a:hover {color:var(--ink)}
+    .navlinks {display:flex; gap:5px; align-items:center; font-size:13px; color:var(--sub)}
+    .page-tab {appearance:none; border:0; background:transparent; color:var(--sub); padding:10px 16px; min-height:44px; border-radius:8px; font-size:13px; transition:background .2s,color .2s; white-space:nowrap}
+    .page-tab:hover {color:var(--ink); background:var(--soft)}
+    .page-tab[aria-selected="true"] {color:var(--sage-deep); background:#E7EBE1; font-weight:700}
+    .page-stage {overflow-x:clip; min-height:calc(100svh - 150px)}
+    .page-panel[hidden] {display:none!important}
+    .page-panel > .section:first-child {border-top:0; padding-top:64px}
     .version {font-size:10px; letter-spacing:.14em; border:1px solid #DCDDD1; padding:7px 12px; border-radius:20px; color:var(--sub)}
     .eyebrow {font-size:11px; letter-spacing:.22em; font-weight:700; color:var(--sage-deep); text-transform:uppercase}
     h1,h2,h3,p {margin-top:0}
@@ -188,8 +193,14 @@
     }
     @media(max-width:750px){
       .container {width:min(100% - 36px,570px)}
-      .topbar {height:69px}
-      .navlinks,.version {display:none}
+      .topbar {height:auto; padding-top:calc(12px + env(safe-area-inset-top))}
+      .nav {flex-wrap:wrap; gap:12px}
+      .brand {font-size:13px}
+      .brand small {font-size:8px; margin-top:4px}
+      .version {display:none}
+      .navlinks {display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); width:100%; gap:4px; padding-bottom:8px}
+      .page-tab {padding:9px 5px; font-size:12px}
+      .page-panel > .section:first-child {padding-top:38px}
       .hero {grid-template-columns:1fr; padding:55px 0 47px; min-height:unset; gap:0}
       .hero-text {text-align:left}
       h1 {font-size:clamp(44px,10vw,67px); margin:23px 0 20px}
@@ -256,11 +267,12 @@
   <header class="topbar">
     <nav class="nav container" aria-label="主要導覽">
       <a class="brand" href="#top">PHOTO QUEST<small>AN EXERCISE IN SEEING</small></a>
-      <div class="navlinks"><a href="#play">抽取任務</a><a href="#library">卡片圖鑑</a><a href="#design">實體設計</a></div>
+      <div class="navlinks" id="pageTabs" role="tablist" aria-label="主要功能"><button class="page-tab" id="nav-play" type="button" role="tab" aria-selected="true" aria-controls="page-play" data-page="play">抽取任務</button><button class="page-tab" id="nav-library" type="button" role="tab" aria-selected="false" aria-controls="page-library" tabindex="-1" data-page="library">卡片圖鑑</button><button class="page-tab" id="nav-design" type="button" role="tab" aria-selected="false" aria-controls="page-design" tabindex="-1" data-page="design">實體設計</button></div>
       <span class="version">FIELD DECK / VOL. 01</span>
     </nav>
   </header>
-  <main id="top">
+  <main id="top" class="page-stage">
+    <div class="page-panel" id="page-play" role="tabpanel" aria-labelledby="nav-play">
     <section class="hero container" aria-labelledby="heroTitle">
       <div class="hero-text">
         <div class="eyebrow">THE PHOTO WALK CARD GAME · VOL. 01</div>
@@ -288,6 +300,9 @@
         <div class="quest-summary"><p id="questSentence"></p><div class="btn-row"><button class="btn btn-outline" id="copyQuest" type="button">複製任務摘要</button><button class="btn btn-outline" id="printQuest" type="button">列印這六張卡 ↗</button></div></div>
       </div>
     </section>
+    <div class="container"><div class="closing"><div><h3>不是要拍得更像別人，<br>而是練習看見自己眼中的世界。</h3><p>The world doesn't change. The way you see it does.</p></div><a href="#play" class="btn btn-primary">再抽一次 ↗</a></div></div>
+    </div>
+    <div class="page-panel" id="page-library" role="tabpanel" aria-labelledby="nav-library" hidden>
     <section class="section" id="library" aria-labelledby="libraryTitle">
       <div class="container">
         <div class="section-head"><div><div class="eyebrow">02 / THE CARD LIBRARY</div><h2 id="libraryTitle">一張卡，一種觀看方式。</h2><p class="section-desc">瀏覽整套卡片，包含 7 種相機與 20 款鏡頭。點進卡片可放大、翻面，也能直接加入今日任務。</p></div><div class="section-meta" id="totalCount">6 CATEGORIES</div></div>
@@ -297,6 +312,8 @@
         <div class="library-grid" id="libraryGrid"></div><div class="load-wrap"><button id="loadMore" class="btn btn-outline" type="button" hidden>顯示更多卡片 ↓</button></div>
       </div>
     </section>
+    </div>
+    <div class="page-panel" id="page-design" role="tabpanel" aria-labelledby="nav-design" hidden>
     <section class="section" id="design" aria-labelledby="designTitle">
       <div class="container design-grid">
         <div class="template-showcase" aria-label="卡片正面及背面設計參考">
@@ -310,7 +327,7 @@
         </div>
       </div>
     </section>
-    <div class="container"><div class="closing"><div><h3>不是要拍得更像別人，<br>而是練習看見自己眼中的世界。</h3><p>The world doesn't change. The way you see it does.</p></div><a href="#play" class="btn btn-primary">再抽一次 ↗</a></div></div>
+    </div>
   </main>
   <footer class="container"><span>PHOTO QUEST · AN EXERCISE IN SEEING</span><span>PERSONAL FIELD DECK · VOL. 01</span></footer>
   <dialog id="cardDialog" aria-labelledby="dialogTitle"><button id="dialogClose" class="dialog-close" type="button" aria-label="關閉卡片">×</button><div class="dialog-content"><button class="flip-button dialog-card" id="dialogFlip" type="button" aria-label="翻轉卡片"></button><div class="dialog-side"><div class="eyebrow" id="dialogGroup"></div><h3 id="dialogTitle"></h3><p id="dialogDescription"></p><div class="dialog-actions"><button id="dialogChoose" class="btn btn-primary" type="button">放進今日任務 ↗</button><button id="dialogTurn" class="btn btn-outline" type="button">翻轉看看</button></div></div></div></dialog>
@@ -545,7 +562,7 @@
         message='已切換至可換鏡 α6700 並選用此鏡頭';
       } else {quest[key]=item;}
       flipStates[key]=false;locked[key]=true;
-      renderQuest();el('cardDialog').close();document.getElementById('play').scrollIntoView({behavior:'smooth',block:'start'});toast(message);
+      renderQuest();el('cardDialog').close();switchPage('play',{section:'play',focusContent:true});toast(message);
     });
     // user-facing utilities and A4 printing: fronts only, 4 cards/page at physical A7 dimensions.
     let toastTimer;
@@ -558,7 +575,50 @@
     el('printCategory').addEventListener('click',()=>printCards(visibleItems().map(it=>[activeDeck,it])));
     document.addEventListener('keydown',e=>{if(e.key==='Escape'&&el('cardDialog').open)el('cardDialog').close()});
     el('questDate').textContent=new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'long',day:'numeric'}).format(new Date());
+    // Keep panel DOM mounted: switching never resets cards, filters or loaded results.
+    const PAGES=['play','library','design'];
+    const pageScroll=Object.fromEntries(PAGES.map(key=>[key,0]));
+    let activePage='play', pageAnimation=null;
+    const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+    function switchPage(key,{section=null,writeHistory=true,animate=true,focusContent=false}={}){
+      if(!PAGES.includes(key))return;
+      const previous=activePage,changed=key!==previous;
+      pageScroll[previous]=window.scrollY;
+      if(pageAnimation){pageAnimation.cancel();pageAnimation=null;}
+      activePage=key;
+      PAGES.forEach(page=>{
+        el('page-'+page).hidden=page!==key;
+        const tab=el('nav-'+page);
+        tab.setAttribute('aria-selected',String(page===key));tab.tabIndex=page===key?0:-1;
+      });
+      const panel=el('page-'+key);
+      const header=document.querySelector('.topbar').getBoundingClientRect().height;
+      const target=section==='top'?0:section?Math.max(0,el(section).getBoundingClientRect().top+window.scrollY-header-20):pageScroll[key];
+      window.scrollTo({top:target,behavior:'instant'});
+      if(writeHistory){const hash='#'+(section==='top'?'top':key);if(location.hash!==hash)history.pushState(null,'',hash);}
+      if(changed&&animate&&!reducedMotion.matches&&panel.animate){
+        const direction=PAGES.indexOf(key)>PAGES.indexOf(previous)?1:-1;
+        pageAnimation=panel.animate([{transform:`translateX(${direction*40}px)`,opacity:.55},{transform:'translateX(0)',opacity:1}],{duration:260,easing:'cubic-bezier(.2,.75,.2,1)'});
+      }
+      if(focusContent){const heading=el(key+'Title');heading.tabIndex=-1;heading.focus({preventScroll:true});}
+    }
+    el('pageTabs').addEventListener('click',e=>{const tab=e.target.closest('[data-page]');if(tab)switchPage(tab.dataset.page)});
+    el('pageTabs').addEventListener('keydown',e=>{
+      const tab=e.target.closest('[data-page]');if(!tab)return;
+      const index=PAGES.indexOf(tab.dataset.page);
+      const next=e.key==='ArrowRight'?(index+1)%3:e.key==='ArrowLeft'?(index+2)%3:e.key==='Home'?0:e.key==='End'?2:null;
+      if(next===null)return;e.preventDefault();switchPage(PAGES[next]);el('nav-'+PAGES[next]).focus({preventScroll:true});
+    });
+    document.addEventListener('click',e=>{
+      const link=e.target.closest('a[href^="#"]');if(!link)return;
+      const target=link.getAttribute('href').slice(1);if(target!=='top'&&!PAGES.includes(target))return;
+      e.preventDefault();switchPage(target==='top'?'play':target,{section:target,focusContent:target!=='top'});
+    });
+    function restorePage({initial=false}={}){const target=location.hash.slice(1);switchPage(PAGES.includes(target)?target:'play',{section:target==='top'?'top':initial&&target==='play'?'play':null,writeHistory:false,animate:false})}
+    window.addEventListener('popstate',restorePage);
+    window.addEventListener('hashchange',restorePage);
     renderQuest();renderLibrary();
+    restorePage({initial:true});
   </script>
 </body>
 </html>
