@@ -387,7 +387,6 @@
     ];
     const FIXED_FRAMES = {
       'C02':{id:'B02',title:'24–70mm 內建',hint:'Sony ZV-1 · 全片幅等效變焦，不可換鏡'},
-      'C03':{id:'B03',title:'手機內建鏡頭',hint:'依手機型號選擇原生視角，非可換鏡'},
       'C04':{id:'B04',title:'iPhone 原生鏡頭',hint:'iPhone 17 Pro · 使用內建多鏡頭與拍攝模式'},
       'C05':{id:'B05',title:'固定超廣角',hint:'DJI Osmo Action 4 · 內建超廣角鏡頭'},
       'C06':{id:'B06',title:'360° 內建鏡頭',hint:'DJI Osmo 360 · 全景雙鏡頭，不可換鏡'},
@@ -405,13 +404,13 @@
     ].map(lens=>({...lens,hint:(lens.code==='AP'||lens.code==='AZ'?'APS-C 規格':'鏡頭標示焦距')+' · 請確認實際接環'}));
     const DECKS = {
       camera:[
-        {id:'C01',title:'Sony α6700',hint:'APS-C · E 接環可換鏡機身',interchangeable:true},
-        {id:'C02',title:'Sony ZV-1',hint:'固定式鏡頭 · 24–70mm 等效變焦'},
-        {id:'C03',title:'其他手機',hint:'適用任何其他手機的內建相機'},
-        {id:'C04',title:'iPhone 17 Pro',hint:'手機攝影 · 多鏡頭系統'},
-        {id:'C05',title:'DJI Osmo Action 4',hint:'運動相機 · 固定式超廣角'},
-        {id:'C06',title:'DJI Osmo 360',hint:'360° 全景相機 · 內建鏡頭'},
-        {id:'C07',title:'Insta360 Luna Ultra',hint:'手持雲台相機 · 內建雙鏡頭'}
+        {id:'C01',title:'Sony α6700',hint:'APS-C · E 接環可換鏡機身',interchangeable:true,cropFactor:1.5,weight:18},
+        {id:'C02',title:'Sony ZV-1',hint:'固定式鏡頭 · 24–70mm 等效變焦',weight:9},
+        {id:'C03',title:'Sony a7M5',hint:'全片幅 · E 接環可換鏡機身',interchangeable:true,cropFactor:1,weight:18},
+        {id:'C04',title:'iPhone 17 Pro',hint:'手機攝影 · 多鏡頭系統',weight:9},
+        {id:'C05',title:'DJI Osmo Action 4',hint:'運動相機 · 固定式超廣角',weight:2},
+        {id:'C06',title:'DJI Osmo 360',hint:'360° 全景相機 · 內建鏡頭',weight:2},
+        {id:'C07',title:'Insta360 Luna Ultra',hint:'手持雲台相機 · 內建雙鏡頭',weight:2}
       ],
       frame:lensCards,
       time:[['清晨','日出前後的光線'],['上午','城市開始運作'],['正午','直射的陽光與影子'],['午後','日常緩慢流動'],['黃昏','白日與夜晚的交界'],['夜晚','讓人造光成為線索']].map(([title,hint],i)=>({id:'T0'+(i+1),title,hint})),
@@ -420,9 +419,17 @@
     };
     const KEYS = Object.keys(DECKS);
     const choice = arr => arr[Math.floor(Math.random()*arr.length)];
+    // Camera weights: 30%, 15%, 30%, 15%, 3⅓%, 3⅓%, 3⅓% before excluding a previous card.
+    function drawCard(key,excludeId=null){
+      const pool=excludeId===null?DECKS[key]:DECKS[key].filter(item=>item.id!==excludeId);
+      if(key!=='camera')return choice(pool);
+      let ticket=Math.random()*pool.reduce((sum,item)=>sum+item.weight,0);
+      for(const item of pool){ticket-=item.weight;if(ticket<0)return item;}
+      return pool[pool.length-1];
+    }
     let pairingEnabled = true;
     const frameForCamera = camera => camera.interchangeable?choice(DECKS.frame):FIXED_FRAMES[camera.id];
-    const quest = Object.fromEntries(KEYS.map(key=>[key,choice(DECKS[key])]));
+    const quest = Object.fromEntries(KEYS.map(key=>[key,drawCard(key)]));
     quest.frame = frameForCamera(quest.camera);
     const locked = Object.fromEntries(KEYS.map(key=>[key,false]));
     const flipStates = Object.fromEntries(KEYS.map(key=>[key,false]));
@@ -440,7 +447,9 @@
     }
     function frameHint(item){
       if(!smartPairingActive() || !quest.camera.interchangeable || !DECKS.frame.some(l=>l.id===item.id))return item.hint||'';
-      return `α6700 等效約 ${focalEquivalent(item)} · 接環須相容`;
+      if(quest.camera.cropFactor===1.5)return `α6700 等效約 ${focalEquivalent(item)} · 接環須相容`;
+      if(item.code==='AP'||item.code==='AZ')return `${quest.camera.title} · APS-C 裁切等效約 ${focalEquivalent(item)} · 接環須相容`;
+      return `${quest.camera.title} · 全片幅 ${item.title} · 接環須相容`;
     }
     function faceMarkup(key,item){
       const m=DECK_META[key], count=DECKS[key].length;
@@ -495,7 +504,7 @@
         toast('這台相機使用內建鏡頭；切換至自由組合可獨立抽鏡頭');return false;
       }
       const arr=DECKS[key];if(arr.length<2)return false;
-      let next=choice(arr);while(next.id===quest[key].id)next=choice(arr);
+      const next=drawCard(key,quest[key].id);
       quest[key]=next;flipStates[key]=false;
       if(key==='camera' && smartPairingActive()){quest.frame=frameForCamera(next);flipStates.frame=false;}
       return true;
@@ -555,7 +564,7 @@
       if(key==='camera' && smartPairingActive()){
         quest.camera=item;quest.frame=frameForCamera(item);
         locked.frame=false;flipStates.frame=false;
-        message=item.interchangeable?'已選擇 α6700，並重新搭配鏡頭':'已選擇相機，鏡頭自動改為內建規格';
+        message=item.interchangeable?`已選擇 ${item.title}，並重新搭配鏡頭`:'已選擇相機，鏡頭自動改為內建規格';
       } else if(key==='frame' && smartPairingActive() && !quest.camera.interchangeable){
         quest.camera=DECKS.camera.find(x=>x.interchangeable);
         quest.frame=item;locked.camera=true;flipStates.camera=false;
