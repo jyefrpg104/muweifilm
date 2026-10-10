@@ -211,10 +211,6 @@
     .quest-detail-card .card-hint {font-size:12px; line-height:1.8}
     .quest-detail-card .back-mark {font-size:18px}
     .quest-detail-card .back-sub {font-size:12px}
-    .quest-detail-sides {display:flex; justify-content:center; gap:6px; align-items:center}
-    .quest-detail-sides button {min-width:62px; min-height:36px; padding:5px 12px; border:1px solid var(--line); background:transparent; border-radius:20px; color:var(--sub); font-size:12px}
-    .quest-detail-sides button[aria-pressed="true"] {background:var(--soft); border-color:#CCD6C6; color:var(--sage-deep); font-weight:650}
-    .quest-detail-sides button:disabled {opacity:.4; cursor:default}
     .quest-detail-commands {width:100%; margin:0}
     .quest-detail-commands button {flex:1; min-height:44px; font-size:12px; border:1px solid #DDE1D6; border-radius:7px; background:var(--paper); padding:9px 4px}
     .quest-detail-note {margin:0; font-size:11px; color:var(--sub); text-align:center}
@@ -421,9 +417,8 @@
     <div class="quest-detail-content">
       <div class="quest-detail-head"><h3 id="questDetailTitle"></h3><button id="questDetailClose" class="quest-detail-close" type="button" aria-label="關閉任務卡片" autofocus>×</button></div>
       <button id="questDetailFlip" class="flip-button dialog-card quest-detail-card" type="button" aria-label="翻轉任務卡片" aria-describedby="questDetailNote"></button>
-      <div class="quest-detail-sides" aria-label="卡片正反面"><button id="questDetailFront" type="button" aria-pressed="true">正面</button><button id="questDetailBack" type="button" aria-pressed="false">背面</button></div>
       <div class="card-commands quest-detail-commands"><button id="questDetailRedraw" type="button">↻ 重抽</button><button id="questDetailLock" type="button">○ 固定</button><button id="questDetailCover" type="button">▱ 蓋牌</button></div>
-      <p id="questDetailNote" class="quest-detail-note">左右滑動或點正面／背面翻看</p>
+      <p id="questDetailNote" class="quest-detail-note">左右拖動或點卡片翻面</p>
     </div>
   </dialog>
   <dialog id="cardDialog" aria-labelledby="dialogTitle"><button id="dialogClose" class="dialog-close" type="button" aria-label="關閉卡片">×</button><div class="dialog-content"><button class="flip-button dialog-card" id="dialogFlip" type="button" aria-label="翻轉卡片"></button><div class="dialog-side"><div class="eyebrow" id="dialogGroup"></div><h3 id="dialogTitle"></h3><p id="dialogDescription"></p><div class="dialog-actions"><button id="dialogChoose" class="btn btn-primary" type="button">放進今日任務 ↗</button><button id="dialogTurn" class="btn btn-outline" type="button">翻轉看看</button></div></div></div></dialog>
@@ -605,20 +600,19 @@
       card.innerHTML=`<div class="flip-inner">${isCovered?`<div class="card-face back covered-face"><span class="covered-label">${m.cn} · 已蓋牌</span><div class="back-mark">PHOTO<br>QUEST</div><div class="back-sub">本回合不抽取</div></div>`:faceMarkup(key,item)}</div>`;
       detailTurnAngle=back?180:0;
       if(!isCovered)writeQuestDetailTurn();
-      el('questDetailFront').disabled=isCovered;el('questDetailBack').disabled=isCovered;
-      el('questDetailFront').setAttribute('aria-pressed',String(!isCovered&&!back));el('questDetailBack').setAttribute('aria-pressed',String(back));
       el('questDetailRedraw').disabled=isCovered;el('questDetailLock').disabled=isCovered;
       el('questDetailRedraw').setAttribute('aria-label',`重抽${m.cn}`);
       el('questDetailLock').textContent=locked[key]?'● 已固定':'○ 固定';el('questDetailLock').setAttribute('aria-pressed',String(locked[key]));
       el('questDetailLock').setAttribute('aria-label',`${locked[key]?'解除固定':'固定'}${m.cn}卡`);
       el('questDetailCover').textContent=isCovered?'↗ 翻開':'▱ 蓋牌';el('questDetailCover').setAttribute('aria-pressed',String(isCovered));
       el('questDetailCover').setAttribute('aria-label',`${isCovered?'翻開並啟用':'蓋牌並停用'}${m.cn}牌組`);
-      el('questDetailNote').textContent=isCovered?'已略過這個牌組，翻開後恢復抽取':'左右拖動翻面 · 放開完成或復位';
+      el('questDetailNote').textContent=isCovered?'已略過這個牌組，翻開後恢復抽取':'左右拖動或點卡片翻面';
     }
     function openQuestDetail(key){
       if(!KEYS.includes(key)||!mobileLayout.matches||el('questDialog').open)return;
       const origin=el('questGrid').querySelector(`[data-flip="${key}"]`),from=origin?.getBoundingClientRect();
       detailKey=key;detailPointer=null;detailSwipeAt=0;
+      if(!covered[key])flipStates[key]=false;
       renderQuestDetail();document.body.classList.add('quest-detail-open');el('questDialog').showModal();
       if(canAnimateQuestDetail(from)){
         origin.classList.add('quest-origin');
@@ -648,7 +642,7 @@
     }
     function animateQuestDetail(rect,closing,startRect,surfaceState){
       const dialog=el('questDialog'),card=el('questDetailFlip'),surface=el('questDetailSurface');
-      const chrome=['questDetailTitle','questDetailClose'].map(el).concat(Array.from(dialog.querySelectorAll('.quest-detail-sides,.quest-detail-commands,.quest-detail-note')));
+      const chrome=['questDetailTitle','questDetailClose'].map(el).concat(Array.from(dialog.querySelectorAll('.quest-detail-commands,.quest-detail-note')));
       const chromeOpacity=closing?chrome.map(node=>Number(getComputedStyle(node).opacity)):[];
       cancelQuestDetailMotion();
       const base=card.getBoundingClientRect(),panel=dialog.getBoundingClientRect(),id=detailMotionId;
@@ -694,7 +688,6 @@
       const card=el('questDetailFlip'),m=DECK_META[detailKey];
       card.classList.toggle('flipped',back);card.setAttribute('aria-pressed',String(back));
       card.setAttribute('aria-label',`翻轉${m.cn}卡：${quest[detailKey].title}，目前${back?'背面':'正面'}`);
-      el('questDetailFront').setAttribute('aria-pressed',String(!back));el('questDetailBack').setAttribute('aria-pressed',String(back));
     }
     function stopQuestDetailTurn(){
       const motion=detailTurnMotion;
@@ -783,8 +776,6 @@
       detailKey=null;detailPointer=null;detailClosing=false;document.body.classList.remove('quest-detail-open');
       if(key&&mobileLayout.matches)el('questGrid').querySelector(`[data-flip="${key}"]`)?.focus({preventScroll:true});
     });
-    el('questDetailFront').addEventListener('click',()=>setQuestDetailFace(false));
-    el('questDetailBack').addEventListener('click',()=>setQuestDetailFace(true));
     el('questDetailFlip').addEventListener('click',()=>{
       // A swipe can generate a click afterwards; it must only flip once.
       if(Date.now()-detailSwipeAt<500)return;
