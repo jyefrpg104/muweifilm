@@ -12,6 +12,7 @@
       --line: #E5E3D8; --sage: #82987D; --sage-deep: #647760;
       --clay: #BB7F68; --sand: #D4BE98; --soft: #EBEDE5;
       --shadow: 0 17px 45px rgba(62, 62, 44, .055); --radius: 18px;
+      --motion-ease: cubic-bezier(.4,0,.2,1);
       --sans: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
       --serif: "Iowan Old Style", "Noto Serif TC", "Songti TC", "STSong", Georgia, serif;
     }
@@ -87,7 +88,7 @@
     .quest-thumb,.mobile-card-note,.mobile-draw-dock {display:none}
     .quest-col {min-width:0}
     .flip-button {width:100%; appearance:none; border:0; text-align:left; padding:0; background:transparent; display:block; perspective:900px; aspect-ratio:74 / 105; cursor:pointer; border-radius:10px}
-    .flip-inner {position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .57s cubic-bezier(.2,.75,.2,1)}
+    .flip-inner {position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .57s var(--motion-ease)}
     .flip-button.flipped .flip-inner {transform:rotateY(180deg)}
     .card-face {position:absolute; inset:0; border-radius:10px; backface-visibility:hidden; -webkit-backface-visibility:hidden; box-shadow:0 4px 13px rgba(36,44,34,.055); border:1px solid #E2E0D6; display:flex; flex-direction:column; padding:clamp(12px,1.5vw,19px); background:var(--paper); overflow:hidden}
     .card-face.front:before {content:""; height:3px; width:30px; border-radius:3px; background:var(--card-accent); position:absolute; top:0; left:clamp(12px,1.5vw,19px)}
@@ -186,15 +187,16 @@
     .quest-detail {width:min(358px,calc(100% - 32px)); max-height:calc(100svh - 32px); overflow-y:auto; background:transparent; box-shadow:none; isolation:isolate}
     .quest-detail-surface {position:absolute; inset:0; z-index:-1; border-radius:15px; background:var(--bg); box-shadow:0 18px 80px rgba(26,41,30,.20); pointer-events:none}
     .quest-detail.motion-opening,.quest-detail.motion-closing {overflow:visible}
-    .quest-detail.motion-opening::backdrop {animation:quest-backdrop-in .28s ease-out both}
-    .quest-detail.motion-closing::backdrop {animation:quest-backdrop-out .23s .11s ease-in both}
+    .quest-detail.motion-opening .quest-detail-surface {opacity:0}
+    .quest-detail.motion-opening::backdrop {animation:quest-backdrop-in .28s var(--motion-ease) both}
+    .quest-detail.motion-closing::backdrop {animation:quest-backdrop-out .24s .12s var(--motion-ease) both}
     .quest-detail.motion-closing .quest-detail-content {pointer-events:none}
     .quest-motion-flight {position:fixed; z-index:2; overflow:hidden; border-radius:9px; background:var(--paper); pointer-events:none; will-change:transform,width,height}
     .quest-flight-detail {position:absolute; top:0; left:0; margin:0; transform-origin:top left; pointer-events:none}
     .quest-flight-mini {position:absolute; inset:0; width:100%; margin:0}
     .quest-grid .quest-origin {visibility:hidden}
     @keyframes quest-backdrop-in {from{background:rgba(48,54,45,0);backdrop-filter:blur(0)} to{background:rgba(48,54,45,.40);backdrop-filter:blur(4px)}}
-    @keyframes quest-backdrop-out {from{background:rgba(48,54,45,.40);backdrop-filter:blur(4px)} to{background:rgba(48,54,45,0);backdrop-filter:blur(0)}}
+    @keyframes quest-backdrop-out {from{background:var(--quest-backdrop-start,rgba(48,54,45,.40));backdrop-filter:var(--quest-backdrop-blur,blur(4px))} to{background:rgba(48,54,45,0);backdrop-filter:blur(0)}}
     .quest-detail-content {padding:18px 22px 20px; display:flex; flex-direction:column; align-items:center; gap:12px}
     .quest-detail-head {width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px}
     .quest-detail-head h3 {margin:0; font-size:12px; letter-spacing:.1em; font-weight:650; color:var(--sage-deep)}
@@ -216,6 +218,7 @@
     #toast {position:fixed; bottom:25px; left:50%; transform:translate(-50%,18px); background:#394A3A; color:white; font-size:12px; border-radius:7px; padding:10px 17px; box-shadow:0 8px 28px #343c3030; opacity:0; pointer-events:none; transition:opacity .24s,transform .24s; z-index:20}
     #toast.show {opacity:1; transform:translate(-50%,0)}
     #printArea {display:none}
+    .page-tab,.btn,.switch-track,.switch-track::after,.tab,.library-card,#toast {transition-timing-function:var(--motion-ease)}
     @media(max-width:1100px){
       .quest-grid {grid-template-columns:repeat(3,minmax(0,1fr)); gap:17px}
       .library-grid {grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -622,6 +625,7 @@
     function cancelQuestDetailMotion(){
       detailMotionId++;detailAnimations.forEach(animation=>animation.cancel());detailAnimations=[];
       detailFlight?.remove();detailFlight=null;el('questDetailFlip').style.visibility='';
+      el('questDialog').style.removeProperty?.('--quest-backdrop-start');el('questDialog').style.removeProperty?.('--quest-backdrop-blur');
       el('questDialog').classList.remove('motion-opening','motion-closing');
     }
     function questDetailFrame(rect,base){
@@ -635,13 +639,16 @@
     function questDetailSurfaceClip(rect,panel){
       return `inset(${Math.max(0,rect.top-panel.top)}px ${Math.max(0,panel.right-rect.right)}px ${Math.max(0,panel.bottom-rect.bottom)}px ${Math.max(0,rect.left-panel.left)}px round 9px)`;
     }
-    function animateQuestDetail(rect,closing,startRect,surfaceClip){
+    function animateQuestDetail(rect,closing,startRect,surfaceState){
       const dialog=el('questDialog'),card=el('questDetailFlip'),surface=el('questDetailSurface');
+      const chrome=['questDetailTitle','questDetailClose'].map(el).concat(Array.from(dialog.querySelectorAll('.quest-detail-sides,.quest-detail-commands,.quest-detail-note')));
+      const chromeOpacity=closing?chrome.map(node=>Number(getComputedStyle(node).opacity)):[];
       cancelQuestDetailMotion();
       const base=card.getBoundingClientRect(),panel=dialog.getBoundingClientRect(),id=detailMotionId;
       const from=closing?(startRect||base):rect,to=closing?rect:base;
-      const duration=closing?230:280,delay=closing?110:0,easing='cubic-bezier(.22,.75,.25,1)';
+      const duration=closing?240:280,delay=closing?120:0,easing='cubic-bezier(.4,0,.2,1)';
       dialog.classList.add(closing?'motion-closing':'motion-opening');
+      if(closing){dialog.style.setProperty('--quest-backdrop-start',surfaceState?.backdropColor||'rgba(48,54,45,.40)');dialog.style.setProperty('--quest-backdrop-blur',surfaceState?.backdropBlur||'blur(4px)')}
       const flight=document.createElement('div'),full=document.createElement('div'),mini=questDetailOrigin().querySelector('.quest-thumb').cloneNode(true);
       flight.className='quest-motion-flight';flight.setAttribute('aria-hidden','true');
       flight.style.cssText=`left:${base.left}px;top:${base.top}px;width:${base.width}px;height:${base.height}px;--card-accent:${DECK_META[detailKey].accent};--card-back:${DECK_META[detailKey].back}`;
@@ -651,18 +658,18 @@
       const flightOptions={duration,delay,easing,fill:'both'};
       detailAnimations.push(flight.animate([questDetailFrame(from,base),questDetailFrame(to,base)],flightOptions));
       detailAnimations.push(full.animate([
-        {transform:questDetailContentTransform(from,base),opacity:closing?1:0},
+        {transform:questDetailContentTransform(from,base),opacity:closing?(surfaceState?.fullOpacity??1):0},
         {transform:questDetailContentTransform(to,base),opacity:closing?0:1}
       ],flightOptions));
-      detailAnimations.push(mini.animate(closing?[{opacity:0},{opacity:1}]:[{opacity:1},{opacity:0}],flightOptions));
+      detailAnimations.push(mini.animate(closing?[{opacity:surfaceState?.miniOpacity??0},{opacity:1}]:[{opacity:1},{opacity:0}],flightOptions));
       const collapsed=questDetailSurfaceClip(closing?from:base,panel),expanded='inset(0px 0px 0px 0px round 15px)';
       detailAnimations.push(surface.animate(closing?[
-        {clipPath:surfaceClip&&surfaceClip!=='none'?surfaceClip:expanded,opacity:1},{clipPath:collapsed,opacity:0}
+        {clipPath:surfaceState?.clip&&surfaceState.clip!=='none'?surfaceState.clip:expanded,opacity:surfaceState?.opacity??1},{clipPath:collapsed,opacity:0}
       ]:[
-        {clipPath:collapsed,opacity:0},{clipPath:collapsed,opacity:1,offset:0.01},{clipPath:expanded,opacity:1}
-      ],{duration:closing?110:140,delay:closing?0:280,easing,fill:'both'}));
-      ['questDetailTitle','questDetailClose'].map(el).concat(Array.from(dialog.querySelectorAll('.quest-detail-sides,.quest-detail-commands,.quest-detail-note'))).forEach(node=>{
-        detailAnimations.push(node.animate(closing?[{opacity:1},{opacity:0}]:[{opacity:0},{opacity:1}],{duration:closing?90:140,delay:closing?0:280,fill:'both'}));
+        {clipPath:collapsed,opacity:0.3},{clipPath:expanded,opacity:1}
+      ],{duration:closing?120:180,delay:closing?0:280,easing,fill:closing?'both':'forwards'}));
+      chrome.forEach((node,index)=>{
+        detailAnimations.push(node.animate(closing?[{opacity:chromeOpacity[index]},{opacity:0}]:[{opacity:0},{opacity:1}],{duration:closing?120:180,delay:closing?0:280,easing,fill:'both'}));
       });
       Promise.all(detailAnimations.map(animation=>animation.finished)).then(()=>{
         if(id!==detailMotionId)return;
@@ -682,7 +689,14 @@
       const origin=questDetailOrigin()?.getBoundingClientRect();
       if(!canAnimateQuestDetail(origin)){cancelQuestDetailMotion();dialog.close();return}
       detailClosing=true;detailPointer=null;
-      animateQuestDetail(origin,true,(detailFlight||el('questDetailFlip')).getBoundingClientRect(),getComputedStyle(el('questDetailSurface')).clipPath);
+      const surfaceStyle=getComputedStyle(el('questDetailSurface'));
+      const backdropStyle=getComputedStyle(dialog,'::backdrop');
+      const surfaceState={clip:surfaceStyle.clipPath,opacity:Number(surfaceStyle.opacity),backdropColor:backdropStyle.backgroundColor,backdropBlur:backdropStyle.backdropFilter};
+      if(detailFlight){
+        surfaceState.fullOpacity=Number(getComputedStyle(detailFlight.querySelector('.quest-flight-detail')).opacity);
+        surfaceState.miniOpacity=Number(getComputedStyle(detailFlight.querySelector('.quest-flight-mini')).opacity);
+      }
+      animateQuestDetail(origin,true,(detailFlight||el('questDetailFlip')).getBoundingClientRect(),surfaceState);
     }
     el('questDetailClose').addEventListener('click',()=>closeQuestDetail());
     el('questDialog').addEventListener('click',e=>{if(e.target===el('questDialog'))closeQuestDetail()});
@@ -848,7 +862,7 @@
       if(writeHistory){const hash='#'+(section==='top'?'top':key);if(location.hash!==hash)history.pushState(null,'',hash);}
       if(changed&&animate&&!reducedMotion.matches&&panel.animate){
         const direction=PAGES.indexOf(key)>PAGES.indexOf(previous)?1:-1;
-        pageAnimation=panel.animate([{transform:`translateX(${direction*40}px)`,opacity:.55},{transform:'translateX(0)',opacity:1}],{duration:260,easing:'cubic-bezier(.2,.75,.2,1)'});
+        pageAnimation=panel.animate([{transform:`translateX(${direction*40}px)`,opacity:.55},{transform:'translateX(0)',opacity:1}],{duration:280,easing:'cubic-bezier(.4,0,.2,1)'});
       }
       if(focusContent){const heading=el(key+'Title');heading.tabIndex=-1;heading.focus({preventScroll:true});}
     }
