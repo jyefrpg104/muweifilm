@@ -184,16 +184,15 @@
     .dialog-close {position:absolute; top:12px; right:16px; background:transparent; border:0; font-size:21px; width:34px; height:34px; line-height:1; color:#72796D}
     body.quest-detail-open {overflow:hidden}
     .quest-detail {width:min(358px,calc(100% - 32px)); max-height:calc(100svh - 32px); overflow-y:auto; background:transparent; box-shadow:none; isolation:isolate}
-    .quest-detail::before {content:""; position:absolute; inset:0; z-index:-1; border-radius:15px; background:var(--bg); box-shadow:0 18px 80px rgba(26,41,30,.20)}
+    .quest-detail-surface {position:absolute; inset:0; z-index:-1; border-radius:15px; background:var(--bg); box-shadow:0 18px 80px rgba(26,41,30,.20); pointer-events:none}
     .quest-detail.motion-opening,.quest-detail.motion-closing {overflow:visible}
-    .quest-detail.motion-opening::before {animation:quest-surface-in .30s ease-out both}
-    .quest-detail.motion-opening::backdrop {animation:quest-backdrop-in .30s ease-out both}
-    .quest-detail.motion-closing::before {animation:quest-surface-out .24s ease-in both}
-    .quest-detail.motion-closing::backdrop {animation:quest-backdrop-out .24s ease-in both}
+    .quest-detail.motion-opening::backdrop {animation:quest-backdrop-in .28s ease-out both}
+    .quest-detail.motion-closing::backdrop {animation:quest-backdrop-out .23s .11s ease-in both}
     .quest-detail.motion-closing .quest-detail-content {pointer-events:none}
+    .quest-motion-flight {position:fixed; z-index:2; overflow:hidden; border-radius:9px; background:var(--paper); pointer-events:none; will-change:transform,width,height}
+    .quest-flight-detail {position:absolute; top:0; left:0; margin:0; transform-origin:top left; pointer-events:none}
+    .quest-flight-mini {position:absolute; inset:0; width:100%; margin:0}
     .quest-grid .quest-origin {visibility:hidden}
-    @keyframes quest-surface-in {from{opacity:0} to{opacity:1}}
-    @keyframes quest-surface-out {from{opacity:1} to{opacity:0}}
     @keyframes quest-backdrop-in {from{background:rgba(48,54,45,0);backdrop-filter:blur(0)} to{background:rgba(48,54,45,.40);backdrop-filter:blur(4px)}}
     @keyframes quest-backdrop-out {from{background:rgba(48,54,45,.40);backdrop-filter:blur(4px)} to{background:rgba(48,54,45,0);backdrop-filter:blur(0)}}
     .quest-detail-content {padding:18px 22px 20px; display:flex; flex-direction:column; align-items:center; gap:12px}
@@ -412,6 +411,7 @@
   <div class="mobile-draw-dock"><button id="mobileDrawAll" class="btn btn-primary" type="button">↻　重新抽取六張</button></div>
   <footer class="container"><span>PHOTO QUEST · AN EXERCISE IN SEEING</span><span>PERSONAL FIELD DECK · VOL. 01</span></footer>
   <dialog id="questDialog" class="quest-detail" aria-labelledby="questDetailTitle">
+    <div id="questDetailSurface" class="quest-detail-surface" aria-hidden="true"></div>
     <div class="quest-detail-content">
       <div class="quest-detail-head"><h3 id="questDetailTitle"></h3><button id="questDetailClose" class="quest-detail-close" type="button" aria-label="關閉任務卡片" autofocus>×</button></div>
       <button id="questDetailFlip" class="flip-button dialog-card quest-detail-card" type="button" aria-label="翻轉任務卡片" aria-describedby="questDetailNote"></button>
@@ -528,7 +528,7 @@
     const smartPairingActive = () => pairingEnabled && !covered.camera && !covered.frame;
     const mobileLayout=window.matchMedia('(max-width:750px)');
     let detailKey=null,detailPointer=null,detailSwipeAt=0;
-    let detailAnimations=[],detailMotionId=0,detailClosing=false;
+    let detailAnimations=[],detailMotionId=0,detailClosing=false,detailFlight=null;
     const el=id=>document.getElementById(id);
     const escapeHTML=(str)=>String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     function titleClass(t){return [...t].length>9?' compact':''}
@@ -621,23 +621,48 @@
     }
     function cancelQuestDetailMotion(){
       detailMotionId++;detailAnimations.forEach(animation=>animation.cancel());detailAnimations=[];
+      detailFlight?.remove();detailFlight=null;el('questDetailFlip').style.visibility='';
       el('questDialog').classList.remove('motion-opening','motion-closing');
     }
-    function questDetailTransform(rect,base){
-      return `translate(${rect.left-base.left}px,${rect.top-base.top}px) scale(${rect.width/base.width},${rect.height/base.height})`;
+    function questDetailFrame(rect,base){
+      return {transform:`translate(${rect.left-base.left}px,${rect.top-base.top}px)`,width:`${rect.width}px`,height:`${rect.height}px`};
     }
-    function animateQuestDetail(rect,closing,startRect){
-      const dialog=el('questDialog'),card=el('questDetailFlip');
+    function questDetailContentTransform(rect,base){
+      // Only uniform scale is applied to text; the outer shell changes shape independently.
+      const scale=rect.width/base.width;
+      return `translateY(${(rect.height-base.height*scale)/2}px) scale(${scale})`;
+    }
+    function questDetailSurfaceClip(rect,panel){
+      return `inset(${Math.max(0,rect.top-panel.top)}px ${Math.max(0,panel.right-rect.right)}px ${Math.max(0,panel.bottom-rect.bottom)}px ${Math.max(0,rect.left-panel.left)}px round 9px)`;
+    }
+    function animateQuestDetail(rect,closing,startRect,surfaceClip){
+      const dialog=el('questDialog'),card=el('questDetailFlip'),surface=el('questDetailSurface');
       cancelQuestDetailMotion();
-      const base=card.getBoundingClientRect(),id=detailMotionId,duration=closing?240:300;
+      const base=card.getBoundingClientRect(),panel=dialog.getBoundingClientRect(),id=detailMotionId;
+      const from=closing?(startRect||base):rect,to=closing?rect:base;
+      const duration=closing?230:280,delay=closing?110:0,easing='cubic-bezier(.22,.75,.25,1)';
       dialog.classList.add(closing?'motion-closing':'motion-opening');
-      const originTransform=questDetailTransform(rect,base);
-      const frames=closing
-        ?[{transform:startRect?questDetailTransform(startRect,base):'none',opacity:1},{transform:originTransform,opacity:0.85}]
-        :[{transform:originTransform,opacity:0.85},{transform:'none',opacity:1}];
-      detailAnimations.push(card.animate(frames,{duration,easing:'cubic-bezier(.22,.75,.25,1)',fill:'both'}));
+      const flight=document.createElement('div'),full=document.createElement('div'),mini=questDetailOrigin().querySelector('.quest-thumb').cloneNode(true);
+      flight.className='quest-motion-flight';flight.setAttribute('aria-hidden','true');
+      flight.style.cssText=`left:${base.left}px;top:${base.top}px;width:${base.width}px;height:${base.height}px;--card-accent:${DECK_META[detailKey].accent};--card-back:${DECK_META[detailKey].back}`;
+      full.className=card.className+' quest-flight-detail';full.innerHTML=card.innerHTML;
+      full.style.width=`${base.width}px`;full.style.height=`${base.height}px`;
+      mini.classList.add('quest-flight-mini');flight.append(full,mini);dialog.append(flight);detailFlight=flight;card.style.visibility='hidden';
+      const flightOptions={duration,delay,easing,fill:'both'};
+      detailAnimations.push(flight.animate([questDetailFrame(from,base),questDetailFrame(to,base)],flightOptions));
+      detailAnimations.push(full.animate([
+        {transform:questDetailContentTransform(from,base),opacity:closing?1:0},
+        {transform:questDetailContentTransform(to,base),opacity:closing?0:1}
+      ],flightOptions));
+      detailAnimations.push(mini.animate(closing?[{opacity:0},{opacity:1}]:[{opacity:1},{opacity:0}],flightOptions));
+      const collapsed=questDetailSurfaceClip(closing?from:base,panel),expanded='inset(0px 0px 0px 0px round 15px)';
+      detailAnimations.push(surface.animate(closing?[
+        {clipPath:surfaceClip&&surfaceClip!=='none'?surfaceClip:expanded,opacity:1},{clipPath:collapsed,opacity:0}
+      ]:[
+        {clipPath:collapsed,opacity:0},{clipPath:collapsed,opacity:1,offset:0.01},{clipPath:expanded,opacity:1}
+      ],{duration:closing?110:140,delay:closing?0:280,easing,fill:'both'}));
       ['questDetailTitle','questDetailClose'].map(el).concat(Array.from(dialog.querySelectorAll('.quest-detail-sides,.quest-detail-commands,.quest-detail-note'))).forEach(node=>{
-        detailAnimations.push(node.animate(closing?[{opacity:1},{opacity:0}]:[{opacity:0},{opacity:1}],{duration:closing?160:220,delay:closing?0:80,fill:'both'}));
+        detailAnimations.push(node.animate(closing?[{opacity:1},{opacity:0}]:[{opacity:0},{opacity:1}],{duration:closing?90:140,delay:closing?0:280,fill:'both'}));
       });
       Promise.all(detailAnimations.map(animation=>animation.finished)).then(()=>{
         if(id!==detailMotionId)return;
@@ -657,7 +682,7 @@
       const origin=questDetailOrigin()?.getBoundingClientRect();
       if(!canAnimateQuestDetail(origin)){cancelQuestDetailMotion();dialog.close();return}
       detailClosing=true;detailPointer=null;
-      animateQuestDetail(origin,true,el('questDetailFlip').getBoundingClientRect());
+      animateQuestDetail(origin,true,(detailFlight||el('questDetailFlip')).getBoundingClientRect(),getComputedStyle(el('questDetailSurface')).clipPath);
     }
     el('questDetailClose').addEventListener('click',()=>closeQuestDetail());
     el('questDialog').addEventListener('click',e=>{if(e.target===el('questDialog'))closeQuestDetail()});
