@@ -84,7 +84,7 @@
     .switch-control input:checked + .switch-track:after {transform:translateX(17px)}
     .switch-control input:focus-visible + .switch-track {outline:3px solid #9DAF90; outline-offset:3px}
     .quest-grid {display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:13px}
-    .quest-carousel-controls,.mobile-draw-dock {display:none}
+    .quest-thumb,.mobile-card-note,.mobile-draw-dock {display:none}
     .quest-col {min-width:0}
     .flip-button {width:100%; appearance:none; border:0; text-align:left; padding:0; background:transparent; display:block; perspective:900px; aspect-ratio:74 / 105; cursor:pointer; border-radius:10px}
     .flip-inner {position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .57s cubic-bezier(.2,.75,.2,1)}
@@ -180,6 +180,26 @@
     .dialog-side p {font-size:12px; color:var(--sub); line-height:1.9; margin-bottom:22px}
     .dialog-actions {display:flex; flex-direction:column; gap:9px; align-items:stretch}
     .dialog-close {position:absolute; top:12px; right:16px; background:transparent; border:0; font-size:21px; width:34px; height:34px; line-height:1; color:#72796D}
+    body.quest-detail-open {overflow:hidden}
+    .quest-detail {width:min(358px,calc(100% - 32px)); max-height:calc(100svh - 32px); overflow-y:auto}
+    .quest-detail-content {padding:18px 22px 20px; display:flex; flex-direction:column; align-items:center; gap:12px}
+    .quest-detail-head {width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .quest-detail-head h3 {margin:0; font-size:12px; letter-spacing:.1em; font-weight:650; color:var(--sage-deep)}
+    .quest-detail-close {width:44px; height:44px; border:1px solid var(--line); border-radius:50%; background:var(--paper); color:var(--sub); font-size:23px; line-height:1}
+    .quest-detail-card {width:min(270px,calc(100vw - 88px),calc((100svh - 210px) * .7048)); touch-action:pan-y; user-select:none; -webkit-user-select:none}
+    .quest-detail-card .card-title {font-size:30px}
+    .quest-detail-card .card-title.compact {font-size:23px}
+    .quest-detail-card .card-topline,.quest-detail-card .card-footer {font-size:10px}
+    .quest-detail-card .card-hint {font-size:12px; line-height:1.8}
+    .quest-detail-card .back-mark {font-size:18px}
+    .quest-detail-card .back-sub {font-size:12px}
+    .quest-detail-sides {display:flex; justify-content:center; gap:6px; align-items:center}
+    .quest-detail-sides button {min-width:62px; min-height:36px; padding:5px 12px; border:1px solid var(--line); background:transparent; border-radius:20px; color:var(--sub); font-size:12px}
+    .quest-detail-sides button[aria-pressed="true"] {background:var(--soft); border-color:#CCD6C6; color:var(--sage-deep); font-weight:650}
+    .quest-detail-sides button:disabled {opacity:.4; cursor:default}
+    .quest-detail-commands {width:100%; margin:0}
+    .quest-detail-commands button {flex:1; min-height:44px; font-size:12px; border:1px solid #DDE1D6; border-radius:7px; background:var(--paper); padding:9px 4px}
+    .quest-detail-note {margin:0; font-size:11px; color:var(--sub); text-align:center}
     #toast {position:fixed; bottom:25px; left:50%; transform:translate(-50%,18px); background:#394A3A; color:white; font-size:12px; border-radius:7px; padding:10px 17px; box-shadow:0 8px 28px #343c3030; opacity:0; pointer-events:none; transition:opacity .24s,transform .24s; z-index:20}
     #toast.show {opacity:1; transform:translate(-50%,0)}
     #printArea {display:none}
@@ -212,8 +232,10 @@
       body[data-page="play"] #toast {bottom:calc(var(--mobile-nav-height) + var(--mobile-draw-height) + 12px + env(safe-area-inset-bottom))}
       .page-panel > .section:first-child {padding-top:38px}
       #page-play .hero,#page-play .closing {display:none}
-      #play {padding:28px 0 36px; border-top:0}
-      #play .section-head {margin-bottom:20px}
+      #play {padding:18px 0 36px; border-top:0}
+      #play .section-head {margin-bottom:14px}
+      #play .section-head .eyebrow,#play .section-desc {display:none}
+      #play .section-head h2 {font-size:30px; margin:0; line-height:1.4}
       .hero {grid-template-columns:1fr; padding:55px 0 47px; min-height:unset; gap:0}
       .hero-text {text-align:left}
       h1 {font-size:clamp(44px,10vw,67px); margin:23px 0 20px}
@@ -228,31 +250,24 @@
       .section-head {align-items:start}
       .section-meta {display:none}
       .quest-panel {padding:15px; border-radius:14px}
-      .quest-toolbar {align-items:center; gap:10px; margin-bottom:15px}
+      .quest-toolbar {align-items:center; gap:10px; margin-bottom:10px}
       .toolbar-caption {font-size:11px}
       #drawAll {display:none}
       .toolbar-actions .btn {padding:8px 10px; font-size:11px; min-height:44px}
-      .gear-control {align-items:flex-start; flex-direction:column; gap:6px; margin-bottom:13px; padding:12px}
-      .gear-control p {text-align:left; font-size:10px}
-      .quest-grid {position:relative; display:flex; gap:14px; overflow-x:auto; scroll-snap-type:x mandatory; overscroll-behavior-x:contain; scrollbar-width:none; padding:4px 4px 10px; margin:0 -4px; scroll-padding-left:4px}
-      .quest-grid::-webkit-scrollbar {display:none}
-      .quest-col {flex:0 0 calc(100% - 28px); scroll-snap-align:start}
-      .quest-grid .card-face {padding:20px}
-      .quest-grid .card-face.front:before {left:20px}
-      .quest-grid .card-title {font-size:clamp(26px,7vw,34px)}
-      .quest-grid .card-title.compact {font-size:clamp(21px,5.5vw,27px)}
-      .quest-grid .card-hint {font-size:12px; line-height:1.9; margin-top:20px}
-      .quest-grid .card-topline,.quest-grid .card-footer {font-size:10px}
-      .quest-grid .back-mark {font-size:18px}
-      .quest-grid .back-sub {font-size:12px}
-      .card-commands {gap:8px; margin-top:8px}
-      .card-commands button {min-height:44px; flex:1; padding:9px 4px; font-size:12px; border:1px solid #DDE1D6; border-radius:7px; background:#F7F8F2}
-      .card-commands button:hover {text-decoration:none}
-      .quest-carousel-controls {display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:4px}
-      .quest-carousel-controls button {height:44px; width:44px; border:1px solid #D8DCCF; border-radius:50%; background:var(--paper); color:var(--sage-deep); font-size:19px; line-height:1}
-      .quest-carousel-controls button:disabled {opacity:.35; cursor:default}
-      .quest-carousel-status {color:var(--sub); font-size:12px; letter-spacing:.08em; text-align:center}
-      .card-note {font-size:10px; margin-top:14px}
+      .gear-control {gap:8px; margin-bottom:12px; padding:10px 12px}
+      .gear-control p {display:none}
+      .quest-grid {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+      .quest-grid .flip-button {height:clamp(98px,27vw,132px); aspect-ratio:auto; perspective:none}
+      .quest-grid .flip-inner,.quest-grid .card-commands {display:none}
+      .quest-thumb {height:100%; display:flex; flex-direction:column; padding:11px 12px 9px; background:var(--paper); border:1px solid #E2E0D6; border-top:3px solid var(--card-accent); border-radius:9px; box-shadow:0 3px 9px #323A3305}
+      .quest-thumb-top {font-size:10px; color:var(--sub); display:flex; justify-content:space-between; gap:5px; line-height:1.4}
+      .quest-thumb-title {margin:auto 0; font-family:var(--serif); font-size:21px; line-height:1.4; text-align:center; overflow-wrap:anywhere}
+      .quest-thumb-title.compact {font-size:16px}
+      .quest-thumb-state {font-size:10px; line-height:1.4; color:#AB705B; min-height:14px; text-align:center}
+      .quest-thumb.covered {background:var(--card-back); border-style:dashed; border-top-style:solid}
+      .quest-thumb.covered .quest-thumb-title {color:var(--sub); font-size:18px}
+      #play .card-note {display:none}
+      .mobile-card-note {display:block; text-align:center; color:var(--sub); font-size:10px; margin:12px 0 0}
       .card-face {padding:14px}
       .card-face.front:before {left:14px}
       .card-title {font-size:clamp(18px,5vw,27px)}
@@ -329,8 +344,8 @@
           <div class="quest-toolbar"><div class="toolbar-caption"><strong>今日任務</strong>　<span id="questDate"></span></div><div class="toolbar-actions"><button id="drawAll" class="btn btn-primary" type="button">↻　重新抽取六張</button><button id="unlockAll" class="btn btn-outline" type="button">解除所有鎖定</button></div></div>
           <div class="gear-control"><label class="switch-control" for="pairingMode"><input id="pairingMode" type="checkbox" checked><span class="switch-track" aria-hidden="true"></span><span>智慧器材搭配</span></label><p id="pairingNote">開啟時，可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。</p></div>
           <div class="quest-grid" id="questGrid" aria-live="polite"></div>
-          <div class="quest-carousel-controls" aria-label="查看任務卡片"><button id="previousQuestCard" type="button" aria-label="查看上一張任務卡" aria-controls="questGrid">←</button><span class="quest-carousel-status" id="questCarouselStatus" role="status" aria-live="polite">相機 · 1 / 6</span><button id="nextQuestCard" type="button" aria-label="查看下一張任務卡" aria-controls="questGrid">→</button></div>
           <p class="card-note">輕點卡片翻面 · 固定會保留該卡 · 蓋牌會略過整個類別，翻開後恢復</p>
+          <p class="mobile-card-note">點卡片放大 · 查看提示、翻面與調整任務</p>
         </div>
         <div class="quest-summary"><p id="questSentence"></p><div class="btn-row"><button class="btn btn-outline" id="copyQuest" type="button">複製任務摘要</button><button class="btn btn-outline" id="printQuest" type="button">列印這六張卡 ↗</button></div></div>
       </div>
@@ -366,6 +381,15 @@
   </main>
   <div class="mobile-draw-dock"><button id="mobileDrawAll" class="btn btn-primary" type="button">↻　重新抽取六張</button></div>
   <footer class="container"><span>PHOTO QUEST · AN EXERCISE IN SEEING</span><span>PERSONAL FIELD DECK · VOL. 01</span></footer>
+  <dialog id="questDialog" class="quest-detail" aria-labelledby="questDetailTitle">
+    <div class="quest-detail-content">
+      <div class="quest-detail-head"><h3 id="questDetailTitle"></h3><button id="questDetailClose" class="quest-detail-close" type="button" aria-label="關閉任務卡片" autofocus>×</button></div>
+      <button id="questDetailFlip" class="flip-button dialog-card quest-detail-card" type="button" aria-label="翻轉任務卡片" aria-describedby="questDetailNote"></button>
+      <div class="quest-detail-sides" aria-label="卡片正反面"><button id="questDetailFront" type="button" aria-pressed="true">正面</button><button id="questDetailBack" type="button" aria-pressed="false">背面</button></div>
+      <div class="card-commands quest-detail-commands"><button id="questDetailRedraw" type="button">↻ 重抽</button><button id="questDetailLock" type="button">○ 固定</button><button id="questDetailCover" type="button">▱ 蓋牌</button></div>
+      <p id="questDetailNote" class="quest-detail-note">左右滑動或點正面／背面翻看</p>
+    </div>
+  </dialog>
   <dialog id="cardDialog" aria-labelledby="dialogTitle"><button id="dialogClose" class="dialog-close" type="button" aria-label="關閉卡片">×</button><div class="dialog-content"><button class="flip-button dialog-card" id="dialogFlip" type="button" aria-label="翻轉卡片"></button><div class="dialog-side"><div class="eyebrow" id="dialogGroup"></div><h3 id="dialogTitle"></h3><p id="dialogDescription"></p><div class="dialog-actions"><button id="dialogChoose" class="btn btn-primary" type="button">放進今日任務 ↗</button><button id="dialogTurn" class="btn btn-outline" type="button">翻轉看看</button></div></div></div></dialog>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="printArea" aria-hidden="true"></div>
@@ -473,7 +497,7 @@
     const activeKeys = () => KEYS.filter(key=>!covered[key]);
     const smartPairingActive = () => pairingEnabled && !covered.camera && !covered.frame;
     const mobileLayout=window.matchMedia('(max-width:750px)');
-    let currentQuestIndex=0,questScrollFrame=null;
+    let detailKey=null,detailPointer=null,detailSwipeAt=0;
     const el=id=>document.getElementById(id);
     const escapeHTML=(str)=>String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     function titleClass(t){return [...t].length>9?' compact':''}
@@ -499,7 +523,9 @@
       el('questGrid').innerHTML=KEYS.map(key=>{
         const m=DECK_META[key],item=quest[key],isCovered=covered[key];
         const faces=isCovered?`<div class="card-face back covered-face"><span class="covered-label">${m.cn} · 已蓋牌</span><div class="back-mark">PHOTO<br>QUEST</div><div class="back-emblem"></div><div class="back-sub">本回合不抽取</div><span class="back-num">${m.en} / 01</span></div>`:faceMarkup(key,item);
-        return `<div class="quest-col" data-quest-key="${key}" style="--card-accent:${m.accent};--card-back:${m.back}"><button type="button" class="flip-button ${!isCovered&&flipStates[key]?'flipped':''}" data-flip="${key}" aria-label="${isCovered?m.cn+'牌組已停用':'翻轉'+m.cn+'卡：'+escapeHTML(item.title)}" aria-pressed="${!isCovered&&flipStates[key]}" ${isCovered?'disabled':''}><div class="flip-inner">${faces}</div></button><div class="card-commands"><button type="button" data-redraw="${key}" aria-label="重抽${m.cn}" ${isCovered?'disabled':''}>↻ 重抽</button><button type="button" data-lock="${key}" aria-label="${locked[key]?'解除固定':'固定'}${m.cn}卡" aria-pressed="${locked[key]}" ${isCovered?'disabled':''}>${locked[key]?'● 已固定':'○ 固定'}</button><button type="button" data-cover="${key}" aria-label="${isCovered?'翻開並啟用':'蓋牌並停用'}${m.cn}牌組" aria-pressed="${isCovered}">${isCovered?'↗ 翻開':'▱ 蓋牌'}</button></div></div>`;
+        const label=mobileLayout.matches?`放大${m.cn}卡：${isCovered?'已蓋牌':item.title}`:isCovered?m.cn+'牌組已停用':'翻轉'+m.cn+'卡：'+item.title;
+        const state=[locked[key]?'● 已固定':'',isCovered?'▱ 已蓋牌':''].filter(Boolean).join(' · ');
+        return `<div class="quest-col" data-quest-key="${key}" style="--card-accent:${m.accent};--card-back:${m.back}"><button type="button" class="flip-button ${!isCovered&&flipStates[key]?'flipped':''}" data-flip="${key}" aria-label="${escapeHTML(label)}" ${mobileLayout.matches?'aria-haspopup="dialog" aria-controls="questDialog"':`aria-pressed="${!isCovered&&flipStates[key]}"`} ${isCovered&&!mobileLayout.matches?'disabled':''}><div class="flip-inner" ${mobileLayout.matches?'aria-hidden="true"':''}>${faces}</div><span class="quest-thumb${isCovered?' covered':''}" aria-hidden="true"><span class="quest-thumb-top"><span>${m.cn}</span><span>${m.en}</span></span><span class="quest-thumb-title${!isCovered?titleClass(item.title):''}">${isCovered?'本回合略過':escapeHTML(item.title)}</span><span class="quest-thumb-state">${state}</span></span></button><div class="card-commands"><button type="button" data-redraw="${key}" aria-label="重抽${m.cn}" ${isCovered?'disabled':''}>↻ 重抽</button><button type="button" data-lock="${key}" aria-label="${locked[key]?'解除固定':'固定'}${m.cn}卡" aria-pressed="${locked[key]}" ${isCovered?'disabled':''}>${locked[key]?'● 已固定':'○ 固定'}</button><button type="button" data-cover="${key}" aria-label="${isCovered?'翻開並啟用':'蓋牌並停用'}${m.cn}牌組" aria-pressed="${isCovered}">${isCovered?'↗ 翻開':'▱ 蓋牌'}</button></div></div>`;
       }).join('');
       const count=activeKeys().length;
       el('questCount').textContent=`${count} CARDS · 1 WALK`;
@@ -519,37 +545,65 @@
       el('pairingNote').textContent=pairingEnabled
         ? covered.camera||covered.frame?'相機與鏡頭皆啟用時會智慧搭配；蓋牌的類別不參與抽取。':'可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。鏡頭接環仍請依實物確認。'
         : '自由組合模式：機身與鏡頭各自隨機。部分組合無法實際安裝，請把它當作視角創作練習。';
-      goToQuestCard(currentQuestIndex,{smooth:false});
+      if(detailKey)renderQuestDetail();
     }
-    function updateQuestCarousel(){
-      const key=KEYS[currentQuestIndex];
-      el('questCarouselStatus').textContent=`${DECK_META[key].cn} · ${currentQuestIndex+1} / ${KEYS.length}${covered[key]?' · 已蓋牌':''}`;
-      el('previousQuestCard').disabled=currentQuestIndex===0;
-      el('nextQuestCard').disabled=currentQuestIndex===KEYS.length-1;
+    function renderQuestDetail(){
+      if(!detailKey)return;
+      const key=detailKey,m=DECK_META[key],item=quest[key],isCovered=covered[key],back=!isCovered&&flipStates[key],card=el('questDetailFlip');
+      el('questDetailTitle').textContent=`${m.cn} · ${isCovered?'已蓋牌':item.id}`;
+      card.style.setProperty('--card-accent',m.accent);card.style.setProperty('--card-back',m.back);
+      card.classList.toggle('flipped',back);card.setAttribute('aria-pressed',String(back));
+      card.setAttribute('aria-label',isCovered?`${m.cn}已蓋牌`:`翻轉${m.cn}卡：${item.title}，目前${back?'背面':'正面'}`);
+      card.disabled=isCovered;
+      card.innerHTML=`<div class="flip-inner">${isCovered?`<div class="card-face back covered-face"><span class="covered-label">${m.cn} · 已蓋牌</span><div class="back-mark">PHOTO<br>QUEST</div><div class="back-sub">本回合不抽取</div></div>`:faceMarkup(key,item)}</div>`;
+      el('questDetailFront').disabled=isCovered;el('questDetailBack').disabled=isCovered;
+      el('questDetailFront').setAttribute('aria-pressed',String(!isCovered&&!back));el('questDetailBack').setAttribute('aria-pressed',String(back));
+      el('questDetailRedraw').disabled=isCovered;el('questDetailLock').disabled=isCovered;
+      el('questDetailRedraw').setAttribute('aria-label',`重抽${m.cn}`);
+      el('questDetailLock').textContent=locked[key]?'● 已固定':'○ 固定';el('questDetailLock').setAttribute('aria-pressed',String(locked[key]));
+      el('questDetailLock').setAttribute('aria-label',`${locked[key]?'解除固定':'固定'}${m.cn}卡`);
+      el('questDetailCover').textContent=isCovered?'↗ 翻開':'▱ 蓋牌';el('questDetailCover').setAttribute('aria-pressed',String(isCovered));
+      el('questDetailCover').setAttribute('aria-label',`${isCovered?'翻開並啟用':'蓋牌並停用'}${m.cn}牌組`);
+      el('questDetailNote').textContent=isCovered?'已略過這個牌組，翻開後恢復抽取':'左右滑動或點正面／背面翻看';
     }
-    function goToQuestCard(index,{smooth=true}={}){
-      currentQuestIndex=Math.max(0,Math.min(KEYS.length-1,index));
-      updateQuestCarousel();
-      if(!mobileLayout.matches||el('page-play').hidden)return;
-      const grid=el('questGrid'),cards=grid.querySelectorAll('.quest-col');
-      if(!cards.length)return;
-      grid.scrollTo({left:cards[currentQuestIndex].offsetLeft-cards[0].offsetLeft,behavior:smooth&&!reducedMotion.matches?'smooth':'instant'});
+    function openQuestDetail(key){
+      if(!KEYS.includes(key)||!mobileLayout.matches)return;
+      detailKey=key;detailPointer=null;detailSwipeAt=0;
+      renderQuestDetail();document.body.classList.add('quest-detail-open');el('questDialog').showModal();
     }
-    el('previousQuestCard').addEventListener('click',()=>goToQuestCard(currentQuestIndex-1));
-    el('nextQuestCard').addEventListener('click',()=>goToQuestCard(currentQuestIndex+1));
-    el('questGrid').addEventListener('scroll',()=>{
-      if(!mobileLayout.matches||el('page-play').hidden)return;
-      if(questScrollFrame!==null)cancelAnimationFrame(questScrollFrame);
-      questScrollFrame=requestAnimationFrame(()=>{
-        questScrollFrame=null;
-        const grid=el('questGrid'),cards=[...grid.querySelectorAll('.quest-col')];
-        if(!cards.length)return;
-        const first=cards[0].offsetLeft;
-        currentQuestIndex=cards.reduce((nearest,card,index)=>Math.abs(card.offsetLeft-first-grid.scrollLeft)<Math.abs(cards[nearest].offsetLeft-first-grid.scrollLeft)?index:nearest,0);
-        updateQuestCarousel();
-      });
-    },{passive:true});
-    window.addEventListener('resize',()=>goToQuestCard(currentQuestIndex,{smooth:false}));
+    function setQuestDetailFace(back){
+      if(!detailKey||covered[detailKey])return;
+      flipStates[detailKey]=back;renderQuestDetail();
+    }
+    function closeQuestDetail(){if(el('questDialog').open)el('questDialog').close()}
+    el('questDetailClose').addEventListener('click',closeQuestDetail);
+    el('questDialog').addEventListener('click',e=>{if(e.target===el('questDialog'))closeQuestDetail()});
+    el('questDialog').addEventListener('close',()=>{
+      const key=detailKey;detailKey=null;detailPointer=null;document.body.classList.remove('quest-detail-open');
+      if(key&&mobileLayout.matches)el('questGrid').querySelector(`[data-flip="${key}"]`)?.focus({preventScroll:true});
+    });
+    el('questDetailFront').addEventListener('click',()=>setQuestDetailFace(false));
+    el('questDetailBack').addEventListener('click',()=>setQuestDetailFace(true));
+    el('questDetailFlip').addEventListener('click',()=>{
+      // A swipe can generate a click afterwards; it must only flip once.
+      if(Date.now()-detailSwipeAt<500)return;
+      if(detailKey)setQuestDetailFace(!flipStates[detailKey]);
+    });
+    el('questDetailFlip').addEventListener('pointerdown',e=>{
+      if(e.isPrimary&&e.button===0){detailPointer={id:e.pointerId,x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId);}
+    });
+    el('questDetailFlip').addEventListener('pointerup',e=>{
+      const start=detailPointer;detailPointer=null;
+      if(!start||start.id!==e.pointerId)return;
+      const dx=e.clientX-start.x,dy=e.clientY-start.y;
+      if(Math.abs(dx)<40||Math.abs(dx)<Math.abs(dy)*1.3)return;
+      detailSwipeAt=Date.now();setQuestDetailFace(!flipStates[detailKey]);
+    });
+    el('questDetailFlip').addEventListener('pointercancel',()=>{detailPointer=null});
+    el('questDetailRedraw').addEventListener('click',()=>{if(detailKey){reroll(detailKey);renderQuest()}});
+    el('questDetailLock').addEventListener('click',()=>{if(detailKey&&!covered[detailKey]){locked[detailKey]=!locked[detailKey];renderQuest()}});
+    el('questDetailCover').addEventListener('click',()=>{if(detailKey)toggleCover(detailKey)});
+    mobileLayout.addEventListener('change',()=>{if(!mobileLayout.matches)closeQuestDetail();renderQuest()});
     function syncActiveFrame(rerollLens=false){
       if(covered.frame)return;
       let next=quest.frame;
@@ -580,7 +634,7 @@
     }
     el('questGrid').addEventListener('click',e=>{
       const flip=e.target.closest('[data-flip]');const redraw=e.target.closest('[data-redraw]');const lock=e.target.closest('[data-lock]');const cover=e.target.closest('[data-cover]');
-      if(flip&&!covered[flip.dataset.flip]){flipStates[flip.dataset.flip]=!flipStates[flip.dataset.flip];renderQuest()}
+      if(flip){if(mobileLayout.matches)openQuestDetail(flip.dataset.flip);else if(!covered[flip.dataset.flip]){flipStates[flip.dataset.flip]=!flipStates[flip.dataset.flip];renderQuest()}}
       if(redraw){reroll(redraw.dataset.redraw);renderQuest()}
       if(lock&&!covered[lock.dataset.lock]){locked[lock.dataset.lock]=!locked[lock.dataset.lock];renderQuest()}
       if(cover)toggleCover(cover.dataset.cover);
@@ -634,7 +688,6 @@
     el('dialogChoose').addEventListener('click',()=>{
       if(!activeModal)return;
       const {key,item}=activeModal;
-      currentQuestIndex=KEYS.indexOf(key);
       covered[key]=false;
       let message='已放入今日任務，並固定這張卡片';
       if(key==='camera' && smartPairingActive()){
@@ -681,7 +734,6 @@
       const header=document.querySelector('.topbar').getBoundingClientRect().height;
       const target=section==='top'?0:section?Math.max(0,el(section).getBoundingClientRect().top+window.scrollY-header-20):pageScroll[key];
       window.scrollTo({top:target,behavior:'instant'});
-      if(key==='play')goToQuestCard(currentQuestIndex,{smooth:false});
       if(writeHistory){const hash='#'+(section==='top'?'top':key);if(location.hash!==hash)history.pushState(null,'',hash);}
       if(changed&&animate&&!reducedMotion.matches&&panel.animate){
         const direction=PAGES.indexOf(key)>PAGES.indexOf(previous)?1:-1;
