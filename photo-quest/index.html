@@ -717,11 +717,16 @@
         detailTurnAngle=questDetailTurnBack(target)?180:0;writeQuestDetailTurn();
       }).catch(()=>{});
     }
-    function setQuestDetailFace(back){
+    function setQuestDetailFace(back,direction=0){
       if(!detailKey||covered[detailKey]||detailClosing||detailFlight)return;
       releaseQuestDetailPointer();stopQuestDetailTurn();
       const anchor=Math.round(detailTurnAngle/180)*180;
-      const target=questDetailTurnBack(anchor)===back?anchor:anchor+(detailTurnAngle<anchor?-180:180);
+      let target=questDetailTurnBack(anchor)===back?anchor:anchor+(detailTurnAngle<anchor?-180:180);
+      if(direction){
+        target=(direction>0?Math.ceil(detailTurnAngle/180):Math.floor(detailTurnAngle/180))*180;
+        if(Math.abs(target-detailTurnAngle)<0.1)target+=direction*180;
+        if(questDetailTurnBack(target)!==back)target+=direction*180;
+      }
       settleQuestDetailTurn(target);
     }
     function moveQuestDetailPointer(e){
@@ -776,13 +781,16 @@
       detailKey=null;detailPointer=null;detailClosing=false;document.body.classList.remove('quest-detail-open');
       if(key&&mobileLayout.matches)el('questGrid').querySelector(`[data-flip="${key}"]`)?.focus({preventScroll:true});
     });
-    el('questDetailFlip').addEventListener('click',()=>{
+    el('questDetailFlip').addEventListener('click',e=>{
       // A swipe can generate a click afterwards; it must only flip once.
-      if(Date.now()-detailSwipeAt<500)return;
-      if(detailKey)setQuestDetailFace(!flipStates[detailKey]);
+      if(e.detail!==0&&Date.now()-detailSwipeAt<500)return;
+      const rect=el('questDetailFlip').getBoundingClientRect();
+      const direction=e.detail!==0&&Number.isFinite(e.clientX)&&e.clientX<rect.left+rect.width/2?-1:1;
+      if(detailKey)setQuestDetailFace(!flipStates[detailKey],direction);
     });
     el('questDetailFlip').addEventListener('pointerdown',e=>{
       if(!e.isPrimary||e.button!==0||!detailKey||covered[detailKey]||detailClosing||detailFlight||detailPointer)return;
+      detailSwipeAt=0;
       stopQuestDetailTurn();
       const anchor=Math.round(detailTurnAngle/180)*180;
       detailPointer={id:e.pointerId,x:e.clientX,y:e.clientY,angle:detailTurnAngle,anchor,width:e.currentTarget.getBoundingClientRect().width||270,axis:null,samples:[{x:e.clientX,time:e.timeStamp??Date.now()}]};
