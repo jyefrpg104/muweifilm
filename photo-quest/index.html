@@ -183,12 +183,24 @@
     .dialog-actions {display:flex; flex-direction:column; gap:9px; align-items:stretch}
     .dialog-close {position:absolute; top:12px; right:16px; background:transparent; border:0; font-size:21px; width:34px; height:34px; line-height:1; color:#72796D}
     body.quest-detail-open {overflow:hidden}
-    .quest-detail {width:min(358px,calc(100% - 32px)); max-height:calc(100svh - 32px); overflow-y:auto}
+    .quest-detail {width:min(358px,calc(100% - 32px)); max-height:calc(100svh - 32px); overflow-y:auto; background:transparent; box-shadow:none; isolation:isolate}
+    .quest-detail::before {content:""; position:absolute; inset:0; z-index:-1; border-radius:15px; background:var(--bg); box-shadow:0 18px 80px rgba(26,41,30,.20)}
+    .quest-detail.motion-opening,.quest-detail.motion-closing {overflow:visible}
+    .quest-detail.motion-opening::before {animation:quest-surface-in .30s ease-out both}
+    .quest-detail.motion-opening::backdrop {animation:quest-backdrop-in .30s ease-out both}
+    .quest-detail.motion-closing::before {animation:quest-surface-out .24s ease-in both}
+    .quest-detail.motion-closing::backdrop {animation:quest-backdrop-out .24s ease-in both}
+    .quest-detail.motion-closing .quest-detail-content {pointer-events:none}
+    .quest-grid .quest-origin {visibility:hidden}
+    @keyframes quest-surface-in {from{opacity:0} to{opacity:1}}
+    @keyframes quest-surface-out {from{opacity:1} to{opacity:0}}
+    @keyframes quest-backdrop-in {from{background:rgba(48,54,45,0);backdrop-filter:blur(0)} to{background:rgba(48,54,45,.40);backdrop-filter:blur(4px)}}
+    @keyframes quest-backdrop-out {from{background:rgba(48,54,45,.40);backdrop-filter:blur(4px)} to{background:rgba(48,54,45,0);backdrop-filter:blur(0)}}
     .quest-detail-content {padding:18px 22px 20px; display:flex; flex-direction:column; align-items:center; gap:12px}
     .quest-detail-head {width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px}
     .quest-detail-head h3 {margin:0; font-size:12px; letter-spacing:.1em; font-weight:650; color:var(--sage-deep)}
     .quest-detail-close {width:44px; height:44px; border:1px solid var(--line); border-radius:50%; background:var(--paper); color:var(--sub); font-size:23px; line-height:1}
-    .quest-detail-card {width:min(270px,calc(100vw - 88px),calc((100svh - 210px) * .7048)); touch-action:pan-y; user-select:none; -webkit-user-select:none}
+    .quest-detail-card {width:min(270px,calc(100vw - 88px),calc((100svh - 210px) * .7048)); transform-origin:top left; touch-action:pan-y; user-select:none; -webkit-user-select:none}
     .quest-detail-card .card-title {font-size:30px}
     .quest-detail-card .card-title.compact {font-size:23px}
     .quest-detail-card .card-topline,.quest-detail-card .card-footer {font-size:10px}
@@ -516,6 +528,7 @@
     const smartPairingActive = () => pairingEnabled && !covered.camera && !covered.frame;
     const mobileLayout=window.matchMedia('(max-width:750px)');
     let detailKey=null,detailPointer=null,detailSwipeAt=0;
+    let detailAnimations=[],detailMotionId=0,detailClosing=false;
     const el=id=>document.getElementById(id);
     const escapeHTML=(str)=>String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     function titleClass(t){return [...t].length>9?' compact':''}
@@ -571,7 +584,7 @@
       el('pairingNote').textContent=pairingEnabled
         ? covered.camera||covered.frame?'相機與鏡頭皆啟用時會智慧搭配；蓋牌的類別不參與抽取。':'可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。鏡頭接環仍請依實物確認。'
         : '自由組合模式：機身與鏡頭各自隨機。部分組合無法實際安裝，請把它當作視角創作練習。';
-      if(detailKey)renderQuestDetail();
+      if(detailKey){renderQuestDetail();questDetailOrigin()?.classList.add('quest-origin')}
     }
     function renderQuestDetail(){
       if(!detailKey)return;
@@ -593,19 +606,65 @@
       el('questDetailNote').textContent=isCovered?'已略過這個牌組，翻開後恢復抽取':'左右滑動或點正面／背面翻看';
     }
     function openQuestDetail(key){
-      if(!KEYS.includes(key)||!mobileLayout.matches)return;
+      if(!KEYS.includes(key)||!mobileLayout.matches||el('questDialog').open)return;
+      const origin=el('questGrid').querySelector(`[data-flip="${key}"]`),from=origin?.getBoundingClientRect();
       detailKey=key;detailPointer=null;detailSwipeAt=0;
       renderQuestDetail();document.body.classList.add('quest-detail-open');el('questDialog').showModal();
+      if(canAnimateQuestDetail(from)){
+        origin.classList.add('quest-origin');
+        animateQuestDetail(from,false);
+      }
+    }
+    function questDetailOrigin(){return detailKey?el('questGrid').querySelector(`[data-flip="${detailKey}"]`):null}
+    function canAnimateQuestDetail(rect){
+      return !reducedMotion.matches&&mobileLayout.matches&&!!el('questDetailFlip').animate&&rect?.width>0&&rect?.height>0;
+    }
+    function cancelQuestDetailMotion(){
+      detailMotionId++;detailAnimations.forEach(animation=>animation.cancel());detailAnimations=[];
+      el('questDialog').classList.remove('motion-opening','motion-closing');
+    }
+    function questDetailTransform(rect,base){
+      return `translate(${rect.left-base.left}px,${rect.top-base.top}px) scale(${rect.width/base.width},${rect.height/base.height})`;
+    }
+    function animateQuestDetail(rect,closing,startRect){
+      const dialog=el('questDialog'),card=el('questDetailFlip');
+      cancelQuestDetailMotion();
+      const base=card.getBoundingClientRect(),id=detailMotionId,duration=closing?240:300;
+      dialog.classList.add(closing?'motion-closing':'motion-opening');
+      const originTransform=questDetailTransform(rect,base);
+      const frames=closing
+        ?[{transform:startRect?questDetailTransform(startRect,base):'none',opacity:1},{transform:originTransform,opacity:0.85}]
+        :[{transform:originTransform,opacity:0.85},{transform:'none',opacity:1}];
+      detailAnimations.push(card.animate(frames,{duration,easing:'cubic-bezier(.22,.75,.25,1)',fill:'both'}));
+      ['questDetailTitle','questDetailClose'].map(el).concat(Array.from(dialog.querySelectorAll('.quest-detail-sides,.quest-detail-commands,.quest-detail-note'))).forEach(node=>{
+        detailAnimations.push(node.animate(closing?[{opacity:1},{opacity:0}]:[{opacity:0},{opacity:1}],{duration:closing?160:220,delay:closing?0:80,fill:'both'}));
+      });
+      Promise.all(detailAnimations.map(animation=>animation.finished)).then(()=>{
+        if(id!==detailMotionId)return;
+        cancelQuestDetailMotion();
+        if(closing)dialog.close();
+      }).catch(()=>{if(id===detailMotionId){cancelQuestDetailMotion();if(closing)dialog.close()}});
     }
     function setQuestDetailFace(back){
       if(!detailKey||covered[detailKey])return;
       flipStates[detailKey]=back;renderQuestDetail();
     }
-    function closeQuestDetail(){if(el('questDialog').open)el('questDialog').close()}
-    el('questDetailClose').addEventListener('click',closeQuestDetail);
+    function closeQuestDetail(immediate=false){
+      const dialog=el('questDialog');
+      if(!dialog.open)return;
+      if(immediate){cancelQuestDetailMotion();dialog.close();return}
+      if(detailClosing)return;
+      const origin=questDetailOrigin()?.getBoundingClientRect();
+      if(!canAnimateQuestDetail(origin)){cancelQuestDetailMotion();dialog.close();return}
+      detailClosing=true;detailPointer=null;
+      animateQuestDetail(origin,true,el('questDetailFlip').getBoundingClientRect());
+    }
+    el('questDetailClose').addEventListener('click',()=>closeQuestDetail());
     el('questDialog').addEventListener('click',e=>{if(e.target===el('questDialog'))closeQuestDetail()});
+    el('questDialog').addEventListener('cancel',e=>{e.preventDefault();closeQuestDetail()});
     el('questDialog').addEventListener('close',()=>{
-      const key=detailKey;detailKey=null;detailPointer=null;document.body.classList.remove('quest-detail-open');
+      const key=detailKey;cancelQuestDetailMotion();questDetailOrigin()?.classList.remove('quest-origin');
+      detailKey=null;detailPointer=null;detailClosing=false;document.body.classList.remove('quest-detail-open');
       if(key&&mobileLayout.matches)el('questGrid').querySelector(`[data-flip="${key}"]`)?.focus({preventScroll:true});
     });
     el('questDetailFront').addEventListener('click',()=>setQuestDetailFace(false));
@@ -629,7 +688,8 @@
     el('questDetailRedraw').addEventListener('click',()=>{if(detailKey){reroll(detailKey);renderQuest()}});
     el('questDetailLock').addEventListener('click',()=>{if(detailKey&&!covered[detailKey]){locked[detailKey]=!locked[detailKey];renderQuest()}});
     el('questDetailCover').addEventListener('click',()=>{if(detailKey)toggleCover(detailKey)});
-    mobileLayout.addEventListener('change',()=>{if(!mobileLayout.matches)closeQuestDetail();renderQuest()});
+    mobileLayout.addEventListener('change',()=>{if(!mobileLayout.matches)closeQuestDetail(true);renderQuest()});
+    window.addEventListener('resize',()=>{if(el('questDialog').open){cancelQuestDetailMotion();if(detailClosing)closeQuestDetail(true)}});
     function syncActiveFrame(rerollLens=false){
       if(covered.frame)return;
       let next=quest.frame;
