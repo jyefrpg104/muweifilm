@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#F7F5EE" />
+  <meta name="description" content="PHOTO QUEST — 一套以隨機條件重新觀看日常的攝影散步卡牌。抽取任務、瀏覽卡片、列印卡牌。" />
+  <title>PHOTO QUEST — An Exercise in Seeing</title>
+  <style>
+    :root {
+      --bg: #F7F5EE; --paper: #FFFEFA; --ink: #323A33; --sub: #70776D;
+      --line: #E5E3D8; --sage: #82987D; --sage-deep: #647760;
+      --clay: #BB7F68; --sand: #D4BE98; --soft: #EBEDE5;
+      --shadow: 0 17px 45px rgba(62, 62, 44, .055); --radius: 18px;
+      --sans: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      --serif: "Iowan Old Style", "Noto Serif TC", "Songti TC", "STSong", Georgia, serif;
+    }
+    * {box-sizing: border-box}
+    html {scroll-behavior:smooth}
+    body {margin:0; color:var(--ink); background:var(--bg); font: 15px/1.8 var(--sans); -webkit-font-smoothing:antialiased}
+    button,input {font:inherit}
+    button {cursor:pointer}
+    button:focus-visible, a:focus-visible, input:focus-visible {outline:3px solid #9DAF90; outline-offset:3px}
+    a {color:inherit; text-decoration:none}
+    .container {width:min(1240px,calc(100% - 64px)); margin:0 auto}
+    .topbar {height:80px; display:flex; align-items:center; border-bottom:1px solid var(--line)}
+    .nav {display:flex; align-items:center; justify-content:space-between; gap:24px}
+    .brand {font-size:15px; font-weight:740; letter-spacing:.18em; line-height:1.25}
+    .brand small {display:block; font-weight:450; font-size:9px; letter-spacing:.23em; margin-top:6px; color:var(--sub)}
+    .navlinks {display:flex; gap:30px; align-items:center; font-size:13px; color:var(--sub)}
+    .navlinks a:hover {color:var(--ink)}
+    .version {font-size:10px; letter-spacing:.14em; border:1px solid #DCDDD1; padding:7px 12px; border-radius:20px; color:var(--sub)}
+    .eyebrow {font-size:11px; letter-spacing:.22em; font-weight:700; color:var(--sage-deep); text-transform:uppercase}
+    h1,h2,h3,p {margin-top:0}
+    h1,h2,.serif {font-family:var(--serif); font-weight:500}
+    .hero {display:grid; grid-template-columns: 1.1fr .9fr; gap:30px; min-height:555px; align-items:center; padding:48px 0 58px}
+    .hero-text {padding:8px 0 10px}
+    h1 {font-size:clamp(45px,5.1vw,76px); line-height:1.38; letter-spacing:-.045em; margin:28px 0 26px}
+    h1 em {font-style:normal; color:var(--sage-deep)}
+    .hero-desc {font-size:15px; color:var(--sub); line-height:2.1; max-width:515px; margin-bottom:36px}
+    .btn-row {display:flex; flex-wrap:wrap; gap:12px; align-items:center}
+    .btn {display:inline-flex; gap:10px; align-items:center; justify-content:center; border-radius:9px; border:1px solid transparent; padding:12px 19px; min-height:44px; font-size:13px; font-weight:650; transition:transform .2s,background .2s,border-color .2s,color .2s}
+    .btn:hover {transform:translateY(-2px)}
+    .btn-primary {background:#657E66; color:#fff}
+    .btn-primary:hover {background:#4E6B52}
+    .btn-outline {border-color:#D8D9CF; background:rgba(255,255,255,.5); color:var(--ink)}
+    .btn-outline:hover {background:white; border-color:#BFCABD}
+    .btn-text {padding-left:0; color:var(--sub); background:transparent}
+    .hero-foot {color:#90948A; font-size:11px; margin-top:47px; letter-spacing:.08em}
+    .hero-art {min-height:460px; position:relative; isolation:isolate; display:grid; place-items:center}
+    .hero-art:before {content:""; position:absolute; width:430px; height:430px; max-width:100%; border-radius:50%; background:radial-gradient(circle,#E6E9DE 0%,#F1EFE5 56%,transparent 70%); z-index:-1}
+    .hero-art .art-card {position:absolute; width:225px; height:319px; border-radius:12px; background:var(--paper); border:1px solid #E3E2D7; box-shadow:0 23px 55px rgba(56,65,48,.10); padding:21px; display:flex; flex-direction:column; overflow:hidden}
+    .art-card.art-left {transform:translate(-88px,8px) rotate(-14deg); background:#E6E9DE}
+    .art-card.art-right {transform:translate(92px,-10px) rotate(13deg); background:#EFE0D5}
+    .art-card.art-front {transform:translate(0,8px) rotate(-2deg); z-index:2}
+    .art-top {font-size:9px; letter-spacing:.18em; display:flex; justify-content:space-between; font-weight:750}
+    .art-mid {margin:auto 0; text-align:center; font-family:var(--serif); font-size:35px; line-height:1.6; letter-spacing:.07em}
+    .art-bottom {font-size:10px; letter-spacing:.1em; color:#72786B; display:flex; justify-content:space-between; align-items:end; border-top:1px solid #D8D8CD; padding-top:12px}
+    .art-petal {font-family:var(--serif); font-size:90px; line-height:1; font-weight:400; margin:auto; opacity:.35}
+    .hero-caption {position:absolute; bottom:12px; text-align:center; color:#969A90; font-size:10px; letter-spacing:.2em}
+    .section {padding:96px 0 98px; border-top:1px solid var(--line); scroll-margin-top:20px}
+    .section-head {display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:32px}
+    .section-head h2 {font-size:clamp(30px,3.5vw,45px); letter-spacing:-.035em; margin:12px 0 9px; line-height:1.4}
+    .section-desc {font-size:13px; color:var(--sub); margin:0; line-height:1.95}
+    .section-meta {font-size:11px; color:#91948A; letter-spacing:.1em; white-space:nowrap}
+    .quest-panel {background:#EEEFE7; border:1px solid #E4E7DE; border-radius:20px; padding:26px}
+    .quest-toolbar {display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:25px; padding:0 1px}
+    .toolbar-caption {font-size:12px; color:var(--sub)}
+    .toolbar-caption strong {color:var(--ink); font-weight:650}
+    .toolbar-actions {display:flex; align-items:center; gap:9px; flex-wrap:wrap}
+    .toolbar-actions .btn {min-height:40px; padding:8px 13px}
+    .gear-control {display:flex; align-items:center; justify-content:space-between; gap:20px; border:1px solid #DFE5D8; border-radius:11px; background:rgba(255,254,250,.52); padding:12px 15px; margin-bottom:20px}
+    .gear-control p {margin:0; color:#798379; font-size:11px; line-height:1.6; max-width:620px; text-align:right}
+    .switch-control {display:inline-flex; align-items:center; gap:10px; color:#4C604E; font-size:12px; font-weight:650; white-space:nowrap; cursor:pointer}
+    .switch-control input {position:absolute; opacity:0; width:1px; height:1px}
+    .switch-track {height:20px; width:37px; border-radius:20px; background:#D3D7CE; display:inline-block; position:relative; transition:background .2s}
+    .switch-track:after {content:''; position:absolute; top:3px; left:3px; width:14px; height:14px; background:white; border-radius:50%; box-shadow:0 1px 3px #0002; transition:transform .2s}
+    .switch-control input:checked + .switch-track {background:#79947A}
+    .switch-control input:checked + .switch-track:after {transform:translateX(17px)}
+    .switch-control input:focus-visible + .switch-track {outline:3px solid #9DAF90; outline-offset:3px}
+    .quest-grid {display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:13px}
+    .quest-col {min-width:0}
+    .flip-button {width:100%; appearance:none; border:0; text-align:left; padding:0; background:transparent; display:block; perspective:900px; aspect-ratio:74 / 105; cursor:pointer; border-radius:10px}
+    .flip-inner {position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .57s cubic-bezier(.2,.75,.2,1)}
+    .flip-button.flipped .flip-inner {transform:rotateY(180deg)}
+    .card-face {position:absolute; inset:0; border-radius:10px; backface-visibility:hidden; -webkit-backface-visibility:hidden; box-shadow:0 4px 13px rgba(36,44,34,.055); border:1px solid #E2E0D6; display:flex; flex-direction:column; padding:clamp(12px,1.5vw,19px); background:var(--paper); overflow:hidden}
+    .card-face.front:before {content:""; height:3px; width:30px; border-radius:3px; background:var(--card-accent); position:absolute; top:0; left:clamp(12px,1.5vw,19px)}
+    .card-topline {display:flex; justify-content:space-between; align-items:start; gap:4px; color:#696E63; font-size:clamp(8px,.78vw,10px); letter-spacing:.08em; line-height:1.45; font-weight:750; padding-top:8px}
+    .card-topline span:last-child {white-space:nowrap; opacity:.65}
+    .card-main {text-align:center; margin:auto 0; padding:14px 1px; min-height:0}
+    .card-title {font-family:var(--serif); font-size:clamp(18px,1.65vw,28px); letter-spacing:.015em; line-height:1.55; overflow-wrap:anywhere; font-weight:500}
+    .card-title.compact {font-size:clamp(14px,1.25vw,20px)}
+    .card-hint {font-size:clamp(9px,.81vw,11px); line-height:1.7; color:#85887E; margin:13px 0 0; overflow-wrap:anywhere}
+    .card-footer {margin-top:auto; padding-top:11px; border-top:1px solid #E8E7DF; display:flex; justify-content:space-between; gap:4px; font-size:clamp(8px,.76vw,10px); letter-spacing:.06em; color:#8E9188}
+    .card-face.back {background:var(--card-back); transform:rotateY(180deg); border-color:transparent; align-items:center; justify-content:center; text-align:center; color:#3C453D}
+    .back-mark {font-weight:760; letter-spacing:.18em; font-size:clamp(11px,1vw,15px); line-height:1.6}
+    .back-sub {font-family:var(--serif); font-size:clamp(9px,.85vw,11px); letter-spacing:.03em; margin-top:13px; font-style:italic}
+    .back-emblem {width:34px; height:34px; border:1px solid #859383; transform:rotate(45deg); opacity:.5; margin:28px 0 30px; display:grid; place-items:center}
+    .back-emblem:after {content:""; width:12px; height:12px; border:1px solid #859383; border-radius:50%}
+    .back-num {position:absolute; bottom:19px; font-size:10px; letter-spacing:.2em; opacity:.55}
+    .card-commands {display:flex; justify-content:space-between; gap:6px; margin-top:10px}
+    .card-commands button {background:none; border:0; border-radius:4px; font-size:11px; padding:4px 2px; color:#687269; line-height:1.4}
+    .card-commands button:hover {color:var(--ink); text-decoration:underline}
+    .card-commands button[aria-pressed=true] {color:#AB705B; font-weight:750}
+    .card-commands button:disabled {opacity:.4; cursor:default; text-decoration:none}
+    .flip-button:disabled {cursor:default}
+    .card-face.covered-face {transform:none; opacity:.75}
+    .covered-label {position:absolute; top:18px; font-size:11px; letter-spacing:.08em}
+    .card-note {text-align:center; color:#888E84; font-size:11px; margin:22px 0 0}
+    .quest-summary {display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; padding:23px 4px 0; gap:18px}
+    .quest-summary p {color:var(--sub); font-size:12px; line-height:1.9; margin:0; max-width:730px}
+    .quest-summary .btn {min-height:39px; padding:8px 12px}
+    .gallery-toolbar {display:flex; justify-content:space-between; gap:15px; align-items:center; flex-wrap:wrap; margin-bottom:20px}
+    .tabs {display:flex; gap:7px; overflow-x:auto; padding-bottom:5px; max-width:100%; scrollbar-width:thin}
+    .tab {white-space:nowrap; background:transparent; padding:9px 15px; border:1px solid #D9DBD1; color:#677269; border-radius:7px; font-size:12px; transition:.15s}
+    .tab[aria-selected=true] {color:#fff; border-color:#697E66; background:#697E66}
+    .tab:hover:not([aria-selected=true]) {background:#ECEEE6}
+    .gallery-right {display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+    .search {padding:9px 12px; border-radius:7px; background:var(--paper); border:1px solid #D9DBD1; color:var(--ink); width:200px; min-height:39px; font-size:12px}
+    .search::placeholder {color:#A3A69D}
+    .search:focus {outline:2px solid #BBCDB6; border-color:#97AB91}
+    .filters {display:flex; gap:8px; flex-wrap:wrap; margin:0 0 25px}
+    .filter {background:transparent; border:1px solid #DDDCD2; border-radius:30px; color:#81857B; font-size:11px; padding:6px 12px; min-height:32px}
+    .filter[aria-pressed=true] {border-color:#687E69; color:#455846; background:#E8EDE4}
+    .filter:hover {border-color:#9CAD93}
+    .library-count {font-size:11px; color:#8B9086; margin: 0 0 17px; letter-spacing:.04em}
+    .library-grid {display:grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap:18px}
+    .library-card {aspect-ratio:74 / 105; border:1px solid #E1DED3; background:var(--paper); border-radius:10px; width:100%; padding:15px; display:flex; flex-direction:column; min-width:0; text-align:left; position:relative; box-shadow:0 5px 16px rgba(40,49,40,.035); transition:transform .22s,box-shadow .22s,border-color .22s}
+    .library-card:hover {transform:translateY(-5px); box-shadow:var(--shadow); border-color:var(--card-accent)}
+    .library-card:before {position:absolute; content:""; top:0; left:15px; width:31px; height:3px; background:var(--card-accent)}
+    .mini-top {display:flex; justify-content:space-between; gap:3px; font-size:9px; font-weight:750; line-height:1.4; color:#656D63; letter-spacing:.07em; padding-top:6px}
+    .mini-top span:last-child {white-space:nowrap; color:#989B91; font-weight:400}
+    .mini-title {font-family:var(--serif); font-size:clamp(16px,1.48vw,24px); line-height:1.48; letter-spacing:.01em; text-align:center; margin:auto 0; padding:10px 0 0; font-weight:500; overflow-wrap:anywhere}
+    .mini-title.long {font-size:clamp(13px,1.15vw,18px)}
+    .mini-hint {font-size:10px; color:#858A80; text-align:center; line-height:1.65; margin:8px 0 auto; overflow-wrap:anywhere}
+    .mini-footer {font-size:9px; color:#989B91; border-top:1px solid #EAE9E0; padding-top:8px; margin-top:15px; letter-spacing:.04em}
+    .empty {padding:80px 15px; text-align:center; border:1px dashed #CFD2C7; border-radius:14px; color:var(--sub)}
+    .load-wrap {display:flex; justify-content:center; margin-top:32px}
+    .design-grid {display:grid; grid-template-columns:.94fr 1.06fr; gap:55px; align-items:center}
+    .template-showcase {display:flex; justify-content:center; gap:19px; padding:25px 0}
+    .sample-card {width:min(45%,235px); aspect-ratio:74 / 105; background:var(--paper); border:1px solid #E2E0D6; border-radius:10px; padding:20px; box-shadow:var(--shadow); display:flex; flex-direction:column}
+    .sample-card > .card-topline {font-size:10px}
+    .sample-card .card-main {display:grid; place-items:center}
+    .sample-card .card-title {font-size:31px}
+    .sample-card .card-hint {font-size:11px}
+    .sample-card .card-footer {font-size:9px}
+    .sample-card.alt {background:#E7EBDF; align-items:center; justify-content:center; text-align:center}
+    .sample-card .back-mark {font-size:15px}
+    .design-copy h2 {font-size:clamp(30px,3.5vw,46px); line-height:1.35; margin:12px 0 23px}
+    .design-copy p {font-size:13px; color:var(--sub); line-height:2.15; max-width:475px}
+    .specs {display:grid; gap:0; margin:30px 0}
+    .spec {display:grid; grid-template-columns:130px 1fr; gap:15px; border-top:1px solid var(--line); padding:13px 0; font-size:12px}
+    .spec:last-child {border-bottom:1px solid var(--line)}
+    .spec dt {color:#989D92}
+    .spec dd {margin:0; color:#505B50}
+    .swatches {display:flex; gap:12px; flex-wrap:wrap; margin-top:30px}
+    .swatch {display:flex; align-items:center; gap:8px; font-size:11px; color:#8D9188}
+    .swatch-dot {width:21px; height:21px; border-radius:50%; border:1px solid rgba(0,0,0,.05)}
+    .closing {background:#E8EBE1; border-radius:15px; display:flex; justify-content:space-between; align-items:center; gap:30px; padding:32px 40px; margin:0 0 75px}
+    .closing h3 {font-family:var(--serif); font-weight:500; font-size:23px; line-height:1.5; margin:0 0 5px}
+    .closing p {font-size:12px; color:#788176; margin:0}
+    footer {border-top:1px solid var(--line); padding:24px 0 35px; display:flex; justify-content:space-between; color:#949990; font-size:10px; letter-spacing:.07em}
+    dialog {padding:0; border:0; border-radius:15px; background:var(--bg); max-width:calc(100% - 32px); box-shadow:0 18px 80px rgba(26,41,30,.20); color:var(--ink)}
+    dialog::backdrop {background:rgba(48,54,45,.40); backdrop-filter:blur(4px)}
+    .dialog-content {display:grid; grid-template-columns:260px 240px; align-items:center; gap:38px; padding:36px; min-height:410px}
+    .dialog-card {width:260px; aspect-ratio:74/105; --card-accent:var(--clay); --card-back:#EADDD3}
+    .dialog-card .card-face {padding:20px}
+    .dialog-card .card-title {font-size:31px}
+    .dialog-card .card-title.compact {font-size:23px}
+    .dialog-card .card-topline {font-size:10px}
+    .dialog-card .card-hint {font-size:12px}
+    .dialog-side .eyebrow {margin-bottom:15px}
+    .dialog-side h3 {font-family:var(--serif); font-size:25px; font-weight:500; line-height:1.5; margin:0 0 12px}
+    .dialog-side p {font-size:12px; color:var(--sub); line-height:1.9; margin-bottom:22px}
+    .dialog-actions {display:flex; flex-direction:column; gap:9px; align-items:stretch}
+    .dialog-close {position:absolute; top:12px; right:16px; background:transparent; border:0; font-size:21px; width:34px; height:34px; line-height:1; color:#72796D}
+    #toast {position:fixed; bottom:25px; left:50%; transform:translate(-50%,18px); background:#394A3A; color:white; font-size:12px; border-radius:7px; padding:10px 17px; box-shadow:0 8px 28px #343c3030; opacity:0; pointer-events:none; transition:opacity .24s,transform .24s; z-index:20}
+    #toast.show {opacity:1; transform:translate(-50%,0)}
+    #printArea {display:none}
+    @media(max-width:1100px){
+      .quest-grid {grid-template-columns:repeat(3,minmax(0,1fr)); gap:17px}
+      .library-grid {grid-template-columns:repeat(4,minmax(0,1fr))}
+      .card-title {font-size:clamp(19px,2.45vw,28px)}
+      .card-title.compact {font-size:clamp(16px,2.05vw,23px)}
+      .card-hint {font-size:11px}
+      .card-topline,.card-footer {font-size:10px}
+      .quest-panel {padding:22px}
+    }
+    @media(max-width:750px){
+      .container {width:min(100% - 36px,570px)}
+      .topbar {height:69px}
+      .navlinks,.version {display:none}
+      .hero {grid-template-columns:1fr; padding:55px 0 47px; min-height:unset; gap:0}
+      .hero-text {text-align:left}
+      h1 {font-size:clamp(44px,10vw,67px); margin:23px 0 20px}
+      .hero-desc {font-size:14px; line-height:2}
+      .hero-foot {margin-top:31px}
+      .hero-art {min-height:400px; margin-top:10px}
+      .hero-art .art-card {width:190px; height:270px; padding:17px}
+      .hero-art .art-left {transform:translate(-67px,12px) rotate(-14deg)}
+      .hero-art .art-right {transform:translate(72px,-5px) rotate(13deg)}
+      .art-mid {font-size:29px}
+      .section {padding:70px 0}
+      .section-head {align-items:start}
+      .section-meta {display:none}
+      .quest-panel {padding:15px; border-radius:14px}
+      .quest-toolbar {align-items:start; flex-direction:column; gap:13px}
+      .gear-control {align-items:flex-start; flex-direction:column; gap:6px; margin-bottom:13px; padding:12px}
+      .gear-control p {text-align:left; font-size:10px}
+      .quest-grid {grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+      .card-face {padding:14px}
+      .card-face.front:before {left:14px}
+      .card-title {font-size:clamp(18px,5vw,27px)}
+      .card-title.compact {font-size:clamp(15px,4.1vw,21px)}
+      .card-hint {font-size:10px}
+      .card-topline,.card-footer {font-size:9px}
+      .quest-summary {align-items:start}
+      .gallery-toolbar {align-items:stretch}
+      .gallery-right {width:100%}
+      .search {flex:1; min-width:120px}
+      .library-grid {grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+      .mini-title {font-size:clamp(20px,5vw,27px)}
+      .mini-title.long {font-size:clamp(15px,4vw,20px)}
+      .design-grid {grid-template-columns:1fr; gap:20px}
+      .design-copy {order:-1}
+      .sample-card {width:min(45%,210px); padding:15px}
+      .sample-card .card-title {font-size:27px}
+      .closing {padding:27px; flex-direction:column; align-items:start}
+      footer {gap:15px; flex-wrap:wrap}
+      .dialog-content {grid-template-columns:1fr; padding:31px 21px 23px; gap:20px; max-height:85vh; overflow:auto}
+      .dialog-card {width:min(225px,70vw); justify-self:center}
+      .dialog-card .card-title {font-size:26px}
+      .dialog-side h3 {font-size:21px}
+    }
+    @media(max-width:360px){.container {width:calc(100% - 28px)}.quest-panel {padding:10px}.card-face{padding:10px}.card-topline,.card-footer {font-size:8px}.card-title {font-size:18px}.mini-title {font-size:17px}.mini-top{font-size:8px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto} *,*::before,*::after {animation:none!important; transition:none!important}}
+    @page {size:A4 portrait; margin:14mm 16mm}
+    @media print {
+      html,body {background:white!important; margin:0!important; padding:0!important; color:#30372F!important}
+      body > header,body > main,body > footer,dialog,#toast {display:none!important}
+      #printArea {display:block!important}
+      .print-page {break-after:page; page-break-after:always; display:grid; grid-template-columns:74mm 74mm; grid-template-rows:105mm 105mm; gap:8mm 9mm; width:157mm; margin:0 auto; align-content:start}
+      .print-page:last-child {break-after:auto;page-break-after:auto}
+      .print-card {width:74mm;height:105mm;border:1px solid #CFCFC7;position:relative;background:#FFFEFA;display:flex;flex-direction:column;padding:8mm 7mm;overflow:hidden;page-break-inside:avoid;break-inside:avoid}
+      .print-card::before {content:"";position:absolute;left:7mm;top:0;width:11mm;height:1.2mm;background:var(--card-accent);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .print-card-header {font-size:7pt;letter-spacing:1.2px;font-weight:bold;display:flex;justify-content:space-between;gap:5px;color:#60685D}
+      .print-card-main {margin:auto 0;text-align:center}
+      .print-card-title {font-family:var(--serif);font-size:21pt;line-height:1.5;overflow-wrap:anywhere}
+      .print-card-title.compact {font-size:15pt}
+      .print-card-hint {font-size:8pt;line-height:1.7;color:#797E75;margin-top:4mm}
+      .print-card-bottom {font-size:7pt;letter-spacing:.6px;color:#888E84;border-top:1px solid #E6E4DB;padding-top:3mm;display:flex;justify-content:space-between}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <nav class="nav container" aria-label="主要導覽">
+      <a class="brand" href="#top">PHOTO QUEST<small>AN EXERCISE IN SEEING</small></a>
+      <div class="navlinks"><a href="#play">抽取任務</a><a href="#library">卡片圖鑑</a><a href="#design">實體設計</a></div>
+      <span class="version">FIELD DECK / VOL. 01</span>
+    </nav>
+  </header>
+  <main id="top">
+    <section class="hero container" aria-labelledby="heroTitle">
+      <div class="hero-text">
+        <div class="eyebrow">THE PHOTO WALK CARD GAME · VOL. 01</div>
+        <h1 id="heroTitle">帶著一點偶然，<br><em>重新觀看世界。</em></h1>
+        <p class="hero-desc">相機、鏡頭、時間、對象、故事、張數。<br>抽六張卡，走出門。讓限制成為靈感，讓日常成為作品。</p>
+        <div class="btn-row"><a class="btn btn-primary" href="#play">開始一場攝影散步 <span aria-hidden="true">↗</span></a><a class="btn btn-outline" href="#library">探索卡片</a></div>
+        <div class="hero-foot">6 DECKS&nbsp; / &nbsp;A MILLION POSSIBLE WALKS&nbsp; / &nbsp;ONE WAY OF SEEING</div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="art-card art-left"><div class="art-top"><span>PHOTO QUEST</span><span>04 / 08</span></div><div class="art-petal">✳</div><div class="art-bottom"><span>SUBJECT</span><span>VOL. 01</span></div></div>
+        <div class="art-card art-right"><div class="art-top"><span>PHOTO QUEST</span><span>07 / 08</span></div><div class="art-petal">◌</div><div class="art-bottom"><span>STORY</span><span>VOL. 01</span></div></div>
+        <div class="art-card art-front"><div class="art-top"><span>PHOTO QUEST</span><span>STORY / T02</span></div><div class="art-mid">剛剛<br>離開</div><div class="art-bottom"><span>「這裡還留著誰的痕跡？」</span><span>↗</span></div></div>
+        <div class="hero-caption">SMALL PROMPTS, NEW PERSPECTIVES.</div>
+      </div>
+    </section>
+    <section class="section" id="play" aria-labelledby="playTitle">
+      <div class="container">
+        <div class="section-head"><div><div class="eyebrow">01 / DRAW YOUR QUEST</div><h2 id="playTitle">今天，拍什麼？</h2><p class="section-desc">每個啟用的類別各抽一張。點擊卡片可以翻面，也能重抽、固定或蓋牌略過該類別。</p></div><div class="section-meta" id="questCount">6 CARDS · 1 WALK</div></div>
+        <div class="quest-panel">
+          <div class="quest-toolbar"><div class="toolbar-caption"><strong>今日任務</strong>　<span id="questDate"></span></div><div class="toolbar-actions"><button id="drawAll" class="btn btn-primary" type="button">↻　重新抽取六張</button><button id="unlockAll" class="btn btn-outline" type="button">解除所有鎖定</button></div></div>
+          <div class="gear-control"><label class="switch-control" for="pairingMode"><input id="pairingMode" type="checkbox" checked><span class="switch-track" aria-hidden="true"></span><span>智慧器材搭配</span></label><p id="pairingNote">開啟時，可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。</p></div>
+          <div class="quest-grid" id="questGrid" aria-live="polite"></div>
+          <p class="card-note">輕點卡片翻面 · 固定會保留該卡 · 蓋牌會略過整個類別，翻開後恢復</p>
+        </div>
+        <div class="quest-summary"><p id="questSentence"></p><div class="btn-row"><button class="btn btn-outline" id="copyQuest" type="button">複製任務摘要</button><button class="btn btn-outline" id="printQuest" type="button">列印這六張卡 ↗</button></div></div>
+      </div>
+    </section>
+    <section class="section" id="library" aria-labelledby="libraryTitle">
+      <div class="container">
+        <div class="section-head"><div><div class="eyebrow">02 / THE CARD LIBRARY</div><h2 id="libraryTitle">一張卡，一種觀看方式。</h2><p class="section-desc">瀏覽整套卡片，包含 7 種相機與 20 款鏡頭。點進卡片可放大、翻面，也能直接加入今日任務。</p></div><div class="section-meta" id="totalCount">6 CATEGORIES</div></div>
+        <div class="gallery-toolbar"><div class="tabs" id="deckTabs" role="tablist" aria-label="卡片類別"></div><div class="gallery-right"><input class="search" id="cardSearch" type="search" aria-label="搜尋卡片" placeholder="搜尋主題或提示…"><button class="btn btn-outline" id="printCategory" type="button" title="依目前搜尋和子分類，列印符合的卡片正面">列印目前卡片 ↗</button></div></div>
+        <div class="filters" id="subFilters" aria-label="子分類篩選"></div>
+        <div class="library-count" id="libraryCount" aria-live="polite"></div>
+        <div class="library-grid" id="libraryGrid"></div><div class="load-wrap"><button id="loadMore" class="btn btn-outline" type="button" hidden>顯示更多卡片 ↓</button></div>
+      </div>
+    </section>
+    <section class="section" id="design" aria-labelledby="designTitle">
+      <div class="container design-grid">
+        <div class="template-showcase" aria-label="卡片正面及背面設計參考">
+          <div class="sample-card" style="--card-accent:#BB7F68"><div class="card-topline"><span>PHOTO QUEST<br>STORY</span><span>T02 / 64</span></div><div class="card-main"><div class="card-title">剛剛離開</div><div class="card-hint">「這裡還留著誰的痕跡？」</div></div><div class="card-footer"><span>FIELD CARD</span><span>VOL. 01</span></div></div>
+          <div class="sample-card alt"><div class="back-mark">PHOTO<br>QUEST</div><div class="back-emblem"></div><div class="back-sub">An Exercise in Seeing.</div><div style="margin-top:30px;font-size:9px;letter-spacing:.19em;opacity:.6">FIELD DECK / 01</div></div>
+        </div>
+        <div class="design-copy"><div class="eyebrow">03 / MADE TO BE HELD</div><h2 id="designTitle">給手的質感，<br>給眼睛的留白。</h2><p>以自然白紙張作為底色，用明亮、低飽和的大地色系區分卡組。像是攝影檔案館的索引卡，而不是喧鬧的桌遊道具。</p>
+          <dl class="specs"><div class="spec"><dt>卡片尺寸</dt><dd>A7 · 74 × 105 mm</dd></div><div class="spec"><dt>推薦紙材</dt><dd>300–350g 自然白象牙卡／細紋美術卡</dd></div><div class="spec"><dt>加工方式</dt><dd>不覆膜、R3–R4 圓角、細色條區分卡組</dd></div><div class="spec"><dt>製作建議</dt><dd>基本資訊印刷，主題可手寫；單面 A4 列印後裁切</dd></div></dl>
+          <p>本頁的「列印」使用 <strong>74 × 105 mm</strong> 實際尺寸排版，每張 A4 排 4 張正面卡。列印時請選擇 <strong>100%／實際大小</strong>，避免瀏覽器自動縮放。</p>
+          <div class="swatches" aria-label="配色範例"><span class="swatch"><span class="swatch-dot" style="background:#F7F5EE"></span>Ivory</span><span class="swatch"><span class="swatch-dot" style="background:#82987D"></span>Sage</span><span class="swatch"><span class="swatch-dot" style="background:#BB7F68"></span>Clay</span><span class="swatch"><span class="swatch-dot" style="background:#D4BE98"></span>Oat</span><span class="swatch"><span class="swatch-dot" style="background:#74796F"></span>Stone</span></div>
+        </div>
+      </div>
+    </section>
+    <div class="container"><div class="closing"><div><h3>不是要拍得更像別人，<br>而是練習看見自己眼中的世界。</h3><p>The world doesn't change. The way you see it does.</p></div><a href="#play" class="btn btn-primary">再抽一次 ↗</a></div></div>
+  </main>
+  <footer class="container"><span>PHOTO QUEST · AN EXERCISE IN SEEING</span><span>PERSONAL FIELD DECK · VOL. 01</span></footer>
+  <dialog id="cardDialog" aria-labelledby="dialogTitle"><button id="dialogClose" class="dialog-close" type="button" aria-label="關閉卡片">×</button><div class="dialog-content"><button class="flip-button dialog-card" id="dialogFlip" type="button" aria-label="翻轉卡片"></button><div class="dialog-side"><div class="eyebrow" id="dialogGroup"></div><h3 id="dialogTitle"></h3><p id="dialogDescription"></p><div class="dialog-actions"><button id="dialogChoose" class="btn btn-primary" type="button">放進今日任務 ↗</button><button id="dialogTurn" class="btn btn-outline" type="button">翻轉看看</button></div></div></div></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="printArea" aria-hidden="true"></div>
+  <script>
+    'use strict';
+    // This entire page works offline. Add, remove or rewrite cards in these lists.
+    const DECK_META = {
+      camera:{cn:'相機',en:'CAMERA',accent:'#74796F',back:'#E4E6DE'},
+      frame:{cn:'鏡頭',en:'LENS',accent:'#97A69A',back:'#E2EAE1'},
+      time:{cn:'時間',en:'TIME',accent:'#D0B58C',back:'#F1E8D8'},
+      subject:{cn:'對象',en:'SUBJECT',accent:'#82987D',back:'#E2EADD'},
+      story:{cn:'故事',en:'STORY',accent:'#BB7F68',back:'#EFDED4'},
+      output:{cn:'張數',en:'OUTPUT',accent:'#ADA59A',back:'#EAE5DD'}
+    };
+    const SUBJECT_GROUPS = [
+      ['P','人物與存在',[
+        ['陌生人','Stranger'],['背影','Back / Silhouette'],['一雙手','Hands'],['人群','Crowd'],['獨自一人','Alone'],['兩個人','Two People'],['工作中的人','At Work'],['人與人的距離','Distance']]],
+      ['S','城市與空間',[
+        ['街角','Street Corner'],['巷弄','Alley'],['車站／站牌','Station'],['商店','Shop'],['空蕩的場所','Empty Place'],['公園','Park'],['走廊','Corridor'],['十字路口','Intersection']]],
+      ['A','建築與結構',[
+        ['一扇門','Door'],['窗戶','Window'],['樓梯','Staircase'],['橋梁','Bridge'],['牆面','Wall'],['屋頂','Rooftop'],['欄杆','Railing'],['招牌','Signboard']]],
+      ['O','日常物件',[
+        ['一張椅子','Chair'],['一只杯子','Cup'],['雨傘','Umbrella'],['腳踏車','Bicycle'],['餐點','Food'],['垃圾桶','Trash Bin'],['一件衣服','Clothing'],['被放置的物品','Left Behind']]],
+      ['N','自然與生命',[
+        ['一棵樹','Tree'],['一片葉子','Leaf'],['花','Flower'],['天空','Sky'],['水','Water'],['石頭','Stone'],['動物','Animal'],['草地','Grass']]],
+      ['L','光線與視覺現象',[
+        ['影子','Shadow'],['倒影','Reflection'],['逆光','Backlight'],['人造光源','Artificial Light'],['光斑','Light Spot'],['玻璃反射','Glass Reflection'],['明暗交界','Light & Dark'],['單一色彩','One Color']]],
+      ['M','行為與動態',[
+        ['行走','Walking'],['等待','Waiting'],['交通移動','Transport'],['交談','Conversation'],['飲食','Eating'],['勞動','Working'],['休息','Resting'],['交換','Exchange']]],
+      ['T','時間與生活痕跡',[
+        ['破損','Broken'],['遺留物','Remains'],['修補痕跡','Repairs'],['褪色','Faded'],['塗鴉','Graffiti'],['老舊物件','Old Object'],['使用痕跡','Signs of Use'],['新與舊','Old & New']]]
+    ];
+    const STORY_GROUPS = [
+      ['E','情緒與感受',[
+        ['孤獨','即使身處人群，也可能感到孤單。'],['安心','一個讓人不需要防備的地方。'],['期待','有什麼事情即將發生。'],['失落','原本以為會得到什麼。'],['喜悅','一個平凡卻讓人開心的瞬間。'],['焦躁','有些事情似乎無法按照計畫進行。'],['懷念','某個事物讓人想起過去。'],['自由','不必在意目的地的感覺。']]],
+      ['C','人與關係',[
+        ['陪伴','即使沒有互動，仍能感受到彼此的存在。'],['擦肩而過','兩件沒有關係的事物短暫相遇。'],['很近，卻很遠','物理距離與心理距離產生落差。'],['被遺忘的存在','某個似乎不再受到關注的東西。'],['沒說出口的話','一個尚未被表達的念頭。'],['依靠','某個存在支撐著另一個存在。'],['保持距離','不靠近，也是一種相處方式。'],['沒有說再見','一段關係在不知不覺中結束。']]],
+      ['T','時間與記憶',[
+        ['遲了一步','某個事情已經錯過。'],['剛剛離開','有人或某物不久前還在這裡。'],['即將發生','一個故事似乎正準備開始。'],['日復一日','不斷重複的生活。'],['僅此一次','不太可能再次發生的瞬間。'],['還來得及','一切似乎仍有改變的可能。'],['曾經的模樣','過去留下的痕跡。'],['明天就不在了','一件可能即將消失的事物。']]],
+      ['N','未完成的故事',[
+        ['這裡發生過什麼？','找到某件事情發生後留下的線索。'],['有人在等待一個答案','暗示某種尚未解決的疑問。'],['只有一個人知道','某個不為人知的秘密。'],['原本不是這樣的','某件事情出現意料之外的變化。'],['這是最後一份','某個事物即將結束或售罄。'],['沒有人發現','一個容易被忽略的細節。'],['意外留下來的東西','不經意保留下來的事物。'],['故事還沒有結束','某件事情仍在持續發展。']]],
+      ['X','矛盾與反差',[
+        ['熱鬧中的寂寞','周圍很熱鬧，卻存在某種孤獨。'],['井然有序的混亂','混亂之中似乎存在某種規律。'],['熟悉的陌生','熟悉的地方突然產生陌生感。'],['看似堅固的脆弱','強大的外表下隱藏不穩定。'],['過時的未來','曾經代表未來的東西，如今已經過時。'],['被困住的自由','自由與限制同時存在。'],['安靜的抗議','沒有激烈動作，卻充滿反抗意味。'],['微不足道的大事','將一件小事呈現得格外重要。']]],
+      ['I','看不見的事物',[
+        ['風經過的證據','讓人感覺到風的存在。'],['這個地方的聲音','透過畫面讓觀眾想像聲音。'],['空氣裡的溫度','讓人感受到冷或熱。'],['記憶的氣味','拍出可能喚起嗅覺記憶的東西。'],['時間的重量','讓人感覺某段時間非常漫長。'],['已經消失的東西','透過留下的痕跡暗示不存在的事物。'],['看不見的界線','呈現一條無形但確實存在的分界。'],['不在場的主角','主角沒有出現，卻能感受到它的存在。']]],
+      ['P','觀看的視角',[
+        ['第一次來到這裡','用陌生人的眼光重新看待環境。'],['我不屬於這裡','尋找格格不入的感覺。'],['離開前的最後一眼','假設這是最後一次看到眼前的景色。'],['回到原點','重新面對熟悉的事物。'],['站在局外','從不參與事件的立場觀察。'],['如果我是小孩子','用充滿好奇的視角觀看。'],['替某個人記住','想像照片是為了一個特定的人而拍。'],['這是我的秘密基地','找到一個只有自己特別在意的地方。']]],
+      ['F','荒謬與趣味',[
+        ['把小事當成大事','用非常認真的方式呈現無關緊要的事情。'],['今天非常不合理','尋找日常裡不合邏輯的畫面。'],['一場無聲的喜劇','不靠文字，讓觀眾感覺有趣。'],['意外的主角','原本不是主角的東西成為焦點。'],['最不適合的地方','某個東西出現在奇怪的位置。'],['看起來很有用','充滿功能感，實際用途卻令人懷疑。'],['差一點就完美','尋找某個破壞完美的小細節。'],['原來答案這麼簡單','用簡單的畫面呈現出人意料的答案。']]]
+    ];
+    const makeEntries = (groups) => groups.flatMap(([code,group,items])=>items.map(([title,hint],index)=>({id:code+String(index+1).padStart(2,'0'),title,hint,group,code})));
+    const FRAME_GROUPS = [
+      ['PR','定焦鏡',[]], ['ZM','變焦鏡',[]],
+      ['AP','APS-C 定焦鏡',[]], ['AZ','APS-C 變焦鏡',[]]
+    ];
+    const FIXED_FRAMES = {
+      'C02':{id:'B02',title:'24–70mm 內建',hint:'Sony ZV-1 · 全片幅等效變焦，不可換鏡'},
+      'C03':{id:'B03',title:'手機內建鏡頭',hint:'依手機型號選擇原生視角，非可換鏡'},
+      'C04':{id:'B04',title:'iPhone 原生鏡頭',hint:'iPhone 17 Pro · 使用內建多鏡頭與拍攝模式'},
+      'C05':{id:'B05',title:'固定超廣角',hint:'DJI Osmo Action 4 · 內建超廣角鏡頭'},
+      'C06':{id:'B06',title:'360° 內建鏡頭',hint:'DJI Osmo 360 · 全景雙鏡頭，不可換鏡'},
+      'C07':{id:'B07',title:'內建雙鏡頭',hint:'Insta360 Luna Ultra · 內建廣角與望遠系統'}
+    };
+    const PRIME_LENSES = ['10mm','20mm','24mm','25mm','35mm','50mm','58mm','85mm','90mm','105mm'];
+    const ZOOM_LENSES = ['17–28mm','28–75mm','24–70mm','70–180mm','28–200mm'];
+    const APSC_PRIMES = ['16mm (APS-C)','30mm (APS-C)','56mm (APS-C)'];
+    const APSC_ZOOMS = ['16–50mm (APS-C)','18–50mm (APS-C)'];
+    const lensCards = [
+      ...PRIME_LENSES.map((title,i)=>({id:'F'+String(i+1).padStart(2,'0'),title,group:'定焦鏡',code:'PR'})),
+      ...ZOOM_LENSES.map((title,i)=>({id:'F'+String(i+11).padStart(2,'0'),title,group:'變焦鏡',code:'ZM'})),
+      ...APSC_PRIMES.map((title,i)=>({id:'F'+String(i+16).padStart(2,'0'),title,group:'APS-C 定焦鏡',code:'AP'})),
+      ...APSC_ZOOMS.map((title,i)=>({id:'F'+String(i+19).padStart(2,'0'),title,group:'APS-C 變焦鏡',code:'AZ'}))
+    ].map(lens=>({...lens,hint:(lens.code==='AP'||lens.code==='AZ'?'APS-C 規格':'鏡頭標示焦距')+' · 請確認實際接環'}));
+    const DECKS = {
+      camera:[
+        {id:'C01',title:'Sony α6700',hint:'APS-C · E 接環可換鏡機身',interchangeable:true},
+        {id:'C02',title:'Sony ZV-1',hint:'固定式鏡頭 · 24–70mm 等效變焦'},
+        {id:'C03',title:'其他手機',hint:'適用任何其他手機的內建相機'},
+        {id:'C04',title:'iPhone 17 Pro',hint:'手機攝影 · 多鏡頭系統'},
+        {id:'C05',title:'DJI Osmo Action 4',hint:'運動相機 · 固定式超廣角'},
+        {id:'C06',title:'DJI Osmo 360',hint:'360° 全景相機 · 內建鏡頭'},
+        {id:'C07',title:'Insta360 Luna Ultra',hint:'手持雲台相機 · 內建雙鏡頭'}
+      ],
+      frame:lensCards,
+      time:[['清晨','日出前後的光線'],['上午','城市開始運作'],['正午','直射的陽光與影子'],['午後','日常緩慢流動'],['黃昏','白日與夜晚的交界'],['夜晚','讓人造光成為線索']].map(([title,hint],i)=>({id:'T0'+(i+1),title,hint})),
+      subject:makeEntries(SUBJECT_GROUPS), story:makeEntries(STORY_GROUPS),
+      output:[1,3,5,7,9].map((num,i)=>({id:'O0'+(i+1),title:num+' 張',hint:({1:'一張決定性瞬間',3:'一段微型故事',5:'一組主題攝影',7:'一則影像散文',9:'一個完整影像系列'})[num]}))
+    };
+    const KEYS = Object.keys(DECKS);
+    const choice = arr => arr[Math.floor(Math.random()*arr.length)];
+    let pairingEnabled = true;
+    const frameForCamera = camera => camera.interchangeable?choice(DECKS.frame):FIXED_FRAMES[camera.id];
+    const quest = Object.fromEntries(KEYS.map(key=>[key,choice(DECKS[key])]));
+    quest.frame = frameForCamera(quest.camera);
+    const locked = Object.fromEntries(KEYS.map(key=>[key,false]));
+    const flipStates = Object.fromEntries(KEYS.map(key=>[key,false]));
+    const covered = Object.fromEntries(KEYS.map(key=>[key,false]));
+    const activeKeys = () => KEYS.filter(key=>!covered[key]);
+    const smartPairingActive = () => pairingEnabled && !covered.camera && !covered.frame;
+    const el=id=>document.getElementById(id);
+    const escapeHTML=(str)=>String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    function titleClass(t){return [...t].length>9?' compact':''}
+    function focalEquivalent(lens){
+      const vals=lens.title.match(/\d+/g);
+      if(!vals)return '';
+      const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(1);
+      return vals.map(n=>fmt(Number(n)*1.5)).join('–')+'mm';
+    }
+    function frameHint(item){
+      if(!smartPairingActive() || !quest.camera.interchangeable || !DECKS.frame.some(l=>l.id===item.id))return item.hint||'';
+      return `α6700 等效約 ${focalEquivalent(item)} · 接環須相容`;
+    }
+    function faceMarkup(key,item){
+      const m=DECK_META[key], count=DECKS[key].length;
+      const serial=key==='frame'&&item.id.startsWith('B')?'BUILT-IN':item.id+' / '+count;
+      const hint=key==='frame'?frameHint(item):item.hint;
+      return `<div class="card-face front"><div class="card-topline"><span>PHOTO QUEST<br>${m.en}</span><span>${escapeHTML(serial)}</span></div><div class="card-main"><div class="card-title${titleClass(item.title)}">${escapeHTML(item.title)}</div><div class="card-hint">${escapeHTML(hint||'')}</div></div><div class="card-footer"><span>FIELD CARD</span><span>VOL. 01</span></div></div><div class="card-face back"><div class="back-mark">PHOTO<br>QUEST</div><div class="back-emblem"></div><div class="back-sub">An Exercise in Seeing.</div><span class="back-num">${m.en} / 01</span></div>`;
+    }
+    function renderQuest(){
+      el('questGrid').innerHTML=KEYS.map(key=>{
+        const m=DECK_META[key],item=quest[key],isCovered=covered[key];
+        const faces=isCovered?`<div class="card-face back covered-face"><span class="covered-label">${m.cn} · 已蓋牌</span><div class="back-mark">PHOTO<br>QUEST</div><div class="back-emblem"></div><div class="back-sub">本回合不抽取</div><span class="back-num">${m.en} / 01</span></div>`:faceMarkup(key,item);
+        return `<div class="quest-col" style="--card-accent:${m.accent};--card-back:${m.back}"><button type="button" class="flip-button ${!isCovered&&flipStates[key]?'flipped':''}" data-flip="${key}" aria-label="${isCovered?m.cn+'牌組已停用':'翻轉'+m.cn+'卡：'+escapeHTML(item.title)}" aria-pressed="${!isCovered&&flipStates[key]}" ${isCovered?'disabled':''}><div class="flip-inner">${faces}</div></button><div class="card-commands"><button type="button" data-redraw="${key}" aria-label="重抽${m.cn}" ${isCovered?'disabled':''}>↻ 重抽</button><button type="button" data-lock="${key}" aria-label="${locked[key]?'解除固定':'固定'}${m.cn}卡" aria-pressed="${locked[key]}" ${isCovered?'disabled':''}>${locked[key]?'● 已固定':'○ 固定'}</button><button type="button" data-cover="${key}" aria-label="${isCovered?'翻開並啟用':'蓋牌並停用'}${m.cn}牌組" aria-pressed="${isCovered}">${isCovered?'↗ 翻開':'▱ 蓋牌'}</button></div></div>`;
+      }).join('');
+      const count=activeKeys().length;
+      el('questCount').textContent=`${count} CARDS · 1 WALK`;
+      el('drawAll').textContent=count===6?'↻　重新抽取六張':count?`↻　重新抽取 ${count} 張`:'↻　重新抽取任務';
+      el('printQuest').textContent=count?`列印這 ${count} 張卡 ↗`:'列印任務卡 ↗';
+      const parts=[];
+      if(!covered.camera)parts.push(`帶著 ${quest.camera.title}`);
+      if(!covered.frame)parts.push(`${smartPairingActive()&&!quest.camera.interchangeable?'使用':covered.camera?'使用':'搭配'} ${quest.frame.title}`);
+      const timePhrase=covered.time?'':`在${quest.time.title}`;
+      if(!covered.subject)parts.push(`${timePhrase}尋找「${quest.subject.title}」`);
+      else if(timePhrase)parts.push(`${timePhrase}拍攝`);
+      if(!covered.story)parts.push(`用「${quest.story.title}」詮釋`);
+      if(!covered.output)parts.push(`最後選出 ${quest.output.title}作品`);
+      const freeNote=!pairingEnabled&&!covered.camera&&!covered.frame?'（自由組合僅為創意提示，不保證實際器材相容）':'';
+      el('questSentence').textContent=parts.length?parts.join('，')+'。'+freeNote:'所有牌組皆已蓋牌；翻開至少一個牌組，再抽取任務。';
+      el('pairingNote').textContent=pairingEnabled
+        ? covered.camera||covered.frame?'相機與鏡頭皆啟用時會智慧搭配；蓋牌的類別不參與抽取。':'可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。鏡頭接環仍請依實物確認。'
+        : '自由組合模式：機身與鏡頭各自隨機。部分組合無法實際安裝，請把它當作視角創作練習。';
+    }
+    function syncActiveFrame(rerollLens=false){
+      if(covered.frame)return;
+      let next=quest.frame;
+      if(smartPairingActive()){
+        if(!quest.camera.interchangeable)next=frameForCamera(quest.camera);
+        else if(rerollLens||next.id.startsWith('B'))next=choice(DECKS.frame);
+      } else if(next.id.startsWith('B'))next=choice(DECKS.frame);
+      if(next.id!==quest.frame.id){quest.frame=next;locked.frame=false;flipStates.frame=false;}
+    }
+    function toggleCover(key){
+      covered[key]=!covered[key];flipStates[key]=false;
+      if(key==='camera'||key==='frame')syncActiveFrame();
+      renderQuest();toast(covered[key]?`${DECK_META[key].cn}已蓋牌，本回合不抽取`:`${DECK_META[key].cn}已翻開，恢復參與抽卡`);
+    }
+    function reroll(key){
+      if(covered[key])return false;
+      if(key==='camera' && smartPairingActive() && locked.frame){
+        toast('鏡頭已固定；先解除鏡頭鎖定，才能重抽相機');return false;
+      }
+      if(key==='frame' && smartPairingActive() && !quest.camera.interchangeable){
+        toast('這台相機使用內建鏡頭；切換至自由組合可獨立抽鏡頭');return false;
+      }
+      const arr=DECKS[key];if(arr.length<2)return false;
+      let next=choice(arr);while(next.id===quest[key].id)next=choice(arr);
+      quest[key]=next;flipStates[key]=false;
+      if(key==='camera' && smartPairingActive()){quest.frame=frameForCamera(next);flipStates.frame=false;}
+      return true;
+    }
+    el('questGrid').addEventListener('click',e=>{
+      const flip=e.target.closest('[data-flip]');const redraw=e.target.closest('[data-redraw]');const lock=e.target.closest('[data-lock]');const cover=e.target.closest('[data-cover]');
+      if(flip&&!covered[flip.dataset.flip]){flipStates[flip.dataset.flip]=!flipStates[flip.dataset.flip];renderQuest()}
+      if(redraw){reroll(redraw.dataset.redraw);renderQuest()}
+      if(lock&&!covered[lock.dataset.lock]){locked[lock.dataset.lock]=!locked[lock.dataset.lock];renderQuest()}
+      if(cover)toggleCover(cover.dataset.cover);
+    });
+    el('drawAll').addEventListener('click',()=>{
+      // Keep the camera when the lens is pinned: the pairing remains physically coherent.
+      const keys=activeKeys();
+      if(!keys.length){toast('所有牌組皆已蓋牌；請先翻開至少一個牌組');return;}
+      keys.forEach(key=>{
+        if(locked[key])return;
+        if(key==='camera' && smartPairingActive() && locked.frame)return;
+        if(key==='frame' && smartPairingActive() && !quest.camera.interchangeable)return;
+        reroll(key);
+      });
+      renderQuest();toast('新的攝影任務已抽出');
+    });
+    el('unlockAll').addEventListener('click',()=>{KEYS.forEach(key=>locked[key]=false);renderQuest();toast('所有卡片已解除固定')});
+    el('pairingMode').addEventListener('change',e=>{
+      pairingEnabled=e.target.checked;
+      syncActiveFrame(pairingEnabled);
+      if(pairingEnabled&&!covered.frame){locked.frame=false;flipStates.frame=false;}
+      renderQuest();toast(pairingEnabled?'已開啟智慧器材搭配':'已切換自由組合模式');
+    });
+    // card library
+    let activeDeck='story', activeGroup='all', activeQuery='', shownCount=12, activeModal=null;
+    function renderTabs(){el('deckTabs').innerHTML=KEYS.map(key=>`<button type="button" class="tab" role="tab" aria-selected="${key===activeDeck}" data-tab="${key}">${DECK_META[key].cn} <span style="opacity:.72">${DECKS[key].length}</span></button>`).join('')}
+    function getGroups(){return activeDeck==='subject'?SUBJECT_GROUPS:activeDeck==='story'?STORY_GROUPS:activeDeck==='frame'?FRAME_GROUPS:[]}
+    function renderFilters(){let groups=getGroups(); el('subFilters').innerHTML=groups.length?`<button type="button" class="filter" aria-pressed="${activeGroup==='all'}" data-group="all">全部類別</button>`+groups.map(([code,name])=>`<button type="button" class="filter" aria-pressed="${activeGroup===code}" data-group="${code}">${name}</button>`).join(''):'';el('subFilters').style.display=groups.length?'flex':'none'}
+    function visibleItems(){return DECKS[activeDeck].filter(item=>(activeGroup==='all'||item.code===activeGroup)&&(!activeQuery||[item.title,item.hint,item.group,item.id].join(' ').toLocaleLowerCase().includes(activeQuery.toLocaleLowerCase())))}
+    function renderLibrary(){renderTabs();renderFilters();let items=visibleItems(),m=DECK_META[activeDeck]; el('libraryCount').textContent=`${m.en} / ${items.length} 張符合條件 · 點選卡片可查看正反面`;el('totalCount').textContent=`${KEYS.length} DECKS / ${KEYS.reduce((sum,k)=>sum+DECKS[k].length,0)} CARDS`;
+      el('libraryGrid').innerHTML=items.slice(0,shownCount).map(item=>`<button type="button" class="library-card" style="--card-accent:${m.accent}" data-card="${item.id}" aria-label="查看${escapeHTML(item.title)}卡片"><div class="mini-top"><span>${m.en}</span><span>${item.id}</span></div><div class="mini-title${[...item.title].length>9?' long':''}">${escapeHTML(item.title)}</div><div class="mini-hint">${escapeHTML(item.hint||'')}</div><div class="mini-footer">${escapeHTML(item.group||'FIELD CARD')} · VOL.01</div></button>`).join('');
+      const empty=el('libraryGrid').querySelector('.empty'); if(!items.length)el('libraryGrid').innerHTML='<p class="empty" style="grid-column:1/-1">沒有符合條件的卡片，試試其他關鍵字。</p>';
+      el('loadMore').hidden=shownCount>=items.length;el('loadMore').textContent=`顯示更多卡片（尚有 ${Math.max(0,items.length-shownCount)} 張） ↓`;
+    }
+    el('deckTabs').addEventListener('click',e=>{let b=e.target.closest('[data-tab]');if(!b)return;activeDeck=b.dataset.tab;activeGroup='all';activeQuery='';el('cardSearch').value='';shownCount=12;renderLibrary()});
+    el('subFilters').addEventListener('click',e=>{let b=e.target.closest('[data-group]');if(!b)return;activeGroup=b.dataset.group;shownCount=12;renderLibrary()});
+    el('cardSearch').addEventListener('input',e=>{activeQuery=e.target.value.trim();shownCount=12;renderLibrary()});
+    el('loadMore').addEventListener('click',()=>{shownCount+=12;renderLibrary()});
+    el('libraryGrid').addEventListener('click',e=>{let card=e.target.closest('[data-card]');if(!card)return;let item=DECKS[activeDeck].find(x=>x.id===card.dataset.card);if(item)showModal(activeDeck,item)});
+    function showModal(key,item){activeModal={key,item};let m=DECK_META[key],d=el('cardDialog');const card=el('dialogFlip');card.style.setProperty('--card-accent',m.accent);card.style.setProperty('--card-back',m.back);card.classList.remove('flipped');card.setAttribute('aria-pressed','false');card.innerHTML=`<div class="flip-inner">${faceMarkup(key,item)}</div>`;el('dialogGroup').textContent=`${m.en} / ${item.id}${item.group?' · '+item.group:''}`;el('dialogTitle').textContent=item.title;el('dialogDescription').textContent=item.hint||'一張卡，一次新的觀察。';d.showModal()}
+    function toggleModalFlip(){const c=el('dialogFlip');let next=!c.classList.contains('flipped');c.classList.toggle('flipped',next);c.setAttribute('aria-pressed',String(next))}
+    el('dialogFlip').addEventListener('click',toggleModalFlip);el('dialogTurn').addEventListener('click',toggleModalFlip);
+    el('dialogClose').addEventListener('click',()=>el('cardDialog').close());
+    el('cardDialog').addEventListener('click',e=>{if(e.target===el('cardDialog'))el('cardDialog').close()});
+    el('dialogChoose').addEventListener('click',()=>{
+      if(!activeModal)return;
+      const {key,item}=activeModal;
+      covered[key]=false;
+      let message='已放入今日任務，並固定這張卡片';
+      if(key==='camera' && smartPairingActive()){
+        quest.camera=item;quest.frame=frameForCamera(item);
+        locked.frame=false;flipStates.frame=false;
+        message=item.interchangeable?'已選擇 α6700，並重新搭配鏡頭':'已選擇相機，鏡頭自動改為內建規格';
+      } else if(key==='frame' && smartPairingActive() && !quest.camera.interchangeable){
+        quest.camera=DECKS.camera.find(x=>x.interchangeable);
+        quest.frame=item;locked.camera=true;flipStates.camera=false;
+        message='已切換至可換鏡 α6700 並選用此鏡頭';
+      } else {quest[key]=item;}
+      flipStates[key]=false;locked[key]=true;
+      renderQuest();el('cardDialog').close();document.getElementById('play').scrollIntoView({behavior:'smooth',block:'start'});toast(message);
+    });
+    // user-facing utilities and A4 printing: fronts only, 4 cards/page at physical A7 dimensions.
+    let toastTimer;
+    function toast(s){let t=el('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2500)}
+    function questText(){return `PHOTO QUEST — AN EXERCISE IN SEEING\n${activeKeys().map(k=>`${DECK_META[k].cn}｜${quest[k].title}${(k==='frame'?frameHint(quest[k]):quest[k].hint)?' — '+(k==='frame'?frameHint(quest[k]):quest[k].hint):''}`).join('\n')}\n\n${el('questSentence').textContent}`}
+    el('copyQuest').addEventListener('click',async()=>{let value=questText();try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(value)}else{let t=document.createElement('textarea');t.value=value;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();if(!document.execCommand('copy'))throw Error('failed');t.remove()}toast('任務摘要已複製')}catch(e){let blob=new Blob([value],{type:'text/plain;charset=utf-8'});let u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='photo-quest.txt';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);toast('已改為下載文字摘要')}});
+    function printCard(key,item){let m=DECK_META[key];return `<div class="print-card" style="--card-accent:${m.accent}"><div class="print-card-header"><span>PHOTO QUEST / ${m.en}</span><span>${escapeHTML(item.id)}</span></div><div class="print-card-main"><div class="print-card-title${titleClass(item.title)}">${escapeHTML(item.title)}</div><div class="print-card-hint">${escapeHTML(item.hint||'')}</div></div><div class="print-card-bottom"><span>FIELD CARD</span><span>VOL. 01</span></div></div>`}
+    function printCards(entries){if(!entries.length){toast('目前沒有可列印的卡片');return}let pages=[];for(let i=0;i<entries.length;i+=4)pages.push(`<div class="print-page">${entries.slice(i,i+4).map(([k,it])=>printCard(k,it)).join('')}</div>`);el('printArea').innerHTML=pages.join('');document.title=`PHOTO QUEST · ${entries.length} 張卡片`;window.print();setTimeout(()=>document.title='PHOTO QUEST — An Exercise in Seeing',300)}
+    el('printQuest').addEventListener('click',()=>printCards(activeKeys().map(k=>[k,quest[k]])));
+    el('printCategory').addEventListener('click',()=>printCards(visibleItems().map(it=>[activeDeck,it])));
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&el('cardDialog').open)el('cardDialog').close()});
+    el('questDate').textContent=new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'long',day:'numeric'}).format(new Date());
+    renderQuest();renderLibrary();
+  </script>
+</body>
+</html>
