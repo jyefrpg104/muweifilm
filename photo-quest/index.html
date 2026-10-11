@@ -703,7 +703,7 @@
       renderFavoriteButton(el('saveFavorite'),taskSnapshot());
       renderShootingProgress();
       el('questGrid').closest('.quest-panel').classList.toggle('quest-confirmed',confirmed);
-      el('questDate').textContent=new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'long',day:'numeric'}).format(new Date(taskCreatedAt));
+      el('questDate').textContent=taskDateLabel(taskCreatedAt);
       const chooseLabel=confirmed?'請先返回調整任務':'放進今日任務 ↗';
       ['dialogChoose','questDetailChoose'].forEach(id=>{el(id).disabled=confirmed||busy;el(id).textContent=chooseLabel;});
     }
@@ -753,16 +753,16 @@
     async function undoTask(){
       if(drawMotion||progressChangeResolve||detailClosing||detailFlight||!previousTask)return false;
       closeQuestDetail(true);el('cardDialog').close();
-      const session={kind:'restore',label:'復原中…',keys:KEYS,value:previousTask,effect:previousEffect,message:'已復原上一個操作，恢復原本任務',controls:new Map(),cards:new Set(),animations:[],installed:false};
+      const session={kind:'restore',label:'復原中…',keys:KEYS,value:previousTask,effect:previousEffect,dateChanged:el('questDate').textContent!==taskDateLabel(previousTask.createdAt),message:'已復原上一個操作，恢復原本任務',controls:new Map(),cards:new Set(),animations:[],installed:false};
       session.finished=new Promise(resolve=>session.resolve=resolve);drawMotion=session;syncDrawControls(session);
       try{
         if(!reducedMotion.matches){
-          await fadeTaskContent(session,[...drawCards(KEYS),...questCopyNodes(true)],false);
+          await fadeTaskContent(session,[...questCardTextNodes(KEYS),...questCopyNodes(true,session.dateChanged)],false);
           if(drawMotion!==session)return false;
         }
         installTaskRestore(session);
         if(!reducedMotion.matches){
-          await fadeTaskContent(session,[...drawCards(KEYS),...questCopyNodes(true)],true);
+          await fadeTaskContent(session,[...questCardTextNodes(KEYS),...questCopyNodes(true,session.dateChanged)],true);
           if(drawMotion!==session)return false;
         }
         finishTaskRestore(session);return true;
@@ -1235,14 +1235,20 @@
       });
     }
     function drawSurface(card){return card.id==='questDetailFlip'||!mobileLayout.matches?card.querySelector('.flip-inner'):card.querySelector('.quest-thumb-turn')}
-    function questCopyNodes(includeStatus=false){
+    function questCardTextNodes(keys){
+      const selector='.card-topline > span,.card-title,.card-hint,.card-footer > span,.back-mark,.back-sub,.back-num,.covered-label,.quest-thumb-top > span,.quest-thumb-title,.quest-thumb-state';
+      return drawCards(keys).flatMap(card=>Array.from(drawSurface(card)?.querySelectorAll(selector)||[]));
+    }
+    function taskDateLabel(date){return new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'long',day:'numeric'}).format(new Date(date))}
+    function questCopyNodes(includeStatus=false,includeDate=false){
       const ids=['questSentence','pairingNote'];
-      if(includeStatus)ids.push('questCount','questDate','taskStatus','taskSaveStatus','progressCount','progressNote','questCompleteCopy');
+      if(includeStatus)ids.push('questCount','taskStatus','taskSaveStatus','progressCount','progressNote','questCompleteCopy');
+      if(includeDate)ids.push('questDate');
       return ids.map(el).filter(Boolean);
     }
     function fadeTaskContent(session,nodes,entering){
       const start=document.timeline.currentTime;
-      const animations=nodes.map(node=>drawAnimation(session,node,[{opacity:entering?0:1},{opacity:entering?1:0}],{duration:entering?240:160},start)).filter(Boolean);
+      const animations=nodes.map(node=>drawAnimation(session,node,[{opacity:entering?0:1},{opacity:entering?1:0}],{duration:entering?320:220},start)).filter(Boolean);
       return Promise.all(animations.map(animation=>animation.finished.catch(()=>{})));
     }
     function installTaskRestore(session){
