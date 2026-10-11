@@ -89,7 +89,7 @@
     .progress-label {font-size:12px; font-weight:650; color:var(--sage-deep)}
     .progress-count {margin-left:10px; color:var(--ink); font-variant-numeric:tabular-nums}
     .progress-controls {display:flex; gap:8px; align-items:center}
-    .progress-controls .btn {min-height:44px; padding:9px 14px; font-size:12px}
+    .progress-controls .btn {min-height:44px; padding:9px 14px; font-size:12px; white-space:nowrap}
     .progress-controls .progress-minus {width:44px; padding:0; font-size:20px}
     .progress-track {height:5px; overflow:hidden; border-radius:5px; background:#DCE2D6; margin-top:13px}
     .progress-fill {height:100%; width:0; border-radius:inherit; background:#82987D; transition:width .32s var(--motion-ease)}
@@ -478,7 +478,7 @@
           <p class="mobile-card-note">點卡片放大 · 查看提示、翻面與調整任務</p>
           <p id="questCompleteCopy" class="quest-complete-copy" hidden>這次散步完成了，任務已存入紀錄。</p>
           <div id="shootingProgress" class="shooting-progress" hidden>
-            <div class="progress-top"><div class="progress-label"><span id="progressTitle">拍攝進度</span><span id="progressCount" class="progress-count" role="status" aria-live="polite" aria-atomic="true">0／1 張</span></div><div id="progressControls" class="progress-controls"><button id="progressMinus" class="btn btn-outline progress-minus" type="button" aria-label="減少一張" disabled>−</button><button id="progressPlus" class="btn btn-primary" type="button">＋ 拍了一張</button></div></div>
+            <div class="progress-top"><div class="progress-label"><span id="progressTitle">拍攝進度</span><span id="progressCount" class="progress-count" role="status" aria-live="polite" aria-atomic="true">0／1 張</span></div><div id="progressControls" class="progress-controls"><button id="progressMinus" class="btn btn-outline progress-minus" type="button" aria-label="減少一張" disabled>−</button><button id="progressPlus" class="btn btn-primary" type="button">＋ 拍了一張</button><button id="progressComplete" class="btn btn-outline" type="button" hidden>補滿張數</button></div></div>
             <div id="progressTrack" class="progress-track" role="progressbar" aria-label="拍攝進度" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0"><div id="progressFill" class="progress-fill"></div></div>
             <div class="progress-bottom"><p id="progressNote" class="progress-note">記下符合這組任務、值得留下的照片。</p><button id="finishQuest" class="btn btn-primary" type="button" hidden>完成任務</button><button id="startNextQuest" class="btn btn-primary" type="button" hidden>開始新任務</button></div>
           </div>
@@ -487,7 +487,7 @@
             <div class="btn-row"><button id="undoQuest" class="btn btn-outline" type="button" aria-label="復原上一個操作" disabled><svg class="task-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 1 1 9 9"></path><path d="M3 4v7h7"></path></svg><span>復原</span></button><button id="confirmQuest" class="btn btn-primary" type="button">確認這組任務</button><button id="editQuest" class="btn btn-outline" type="button" hidden>返回調整任務</button></div>
           </div>
         </div>
-        <div class="quest-summary"><p id="questSentence" aria-live="polite"></p><div class="btn-row"><button class="btn btn-outline" id="shareQuest" type="button"><svg class="task-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M5 11v9h14v-9"></path></svg>分享任務卡</button><button class="btn btn-outline" id="saveFavorite" type="button">☆ 收藏組合</button><button class="btn btn-outline" id="openRecords" type="button">任務紀錄</button><button class="btn btn-outline" id="copyQuest" type="button">複製任務摘要</button><button class="btn btn-outline" id="printQuest" type="button">列印這六張卡 ↗</button></div></div>
+        <div class="quest-summary"><p id="questSentence" aria-live="polite"></p><div class="btn-row"><button class="btn btn-outline" id="shareQuest" type="button"><svg class="task-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M5 11v9h14v-9"></path></svg>分享任務卡</button><button class="btn btn-outline" id="saveFavorite" type="button">☆ 收藏組合</button></div></div>
       </div>
     </section>
     <div class="container"><div class="closing"><div><h3>不是要拍得更像別人，<br>而是練習看見自己眼中的世界。</h3><p>The world doesn't change. The way you see it does.</p></div><a href="#play" class="btn btn-primary">再抽一次 ↗</a></div></div>
@@ -782,6 +782,7 @@
       el('progressControls').hidden=completed;
       el('progressMinus').disabled=busy||!taskShotCount;el('progressPlus').disabled=busy||taskShotCount===Number.MAX_SAFE_INTEGER||(target!==null&&taskShotCount>=target);
       el('progressPlus').hidden=target!==null&&taskShotCount>=target;
+      el('progressComplete').hidden=!taskConfirmedAt||completed||target===null||taskShotCount>=target;el('progressComplete').disabled=busy;
       const track=el('progressTrack');track.hidden=target===null;
       track.setAttribute('aria-valuemax',String(target||1));track.setAttribute('aria-valuenow',String(Math.min(taskShotCount,target||1)));
       track.setAttribute('aria-valuetext',el('progressCount').textContent);
@@ -789,12 +790,18 @@
       el('finishQuest').hidden=completed||taskShotCount<(target||1);el('finishQuest').disabled=busy;
       el('finishQuest').classList.toggle('unlimited-finish',target===null);
       el('startNextQuest').hidden=!completed;el('startNextQuest').disabled=busy;
-      el('progressNote').textContent=completed?`完成於 ${new Intl.DateTimeFormat('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(taskCompletedAt))}`:target===null?'張數不設限，拍好後由你確認完成。':taskShotCount>=target?'已達目標，確認完成後會存入任務紀錄。':'記下符合這組任務、值得留下的照片。';
+      el('progressNote').textContent=completed?`完成於 ${new Intl.DateTimeFormat('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(taskCompletedAt))}`:target===null?'張數不設限，拍好後由你確認完成。':taskShotCount>=target?'已達目標，確認完成後會存入任務紀錄。':'可逐張記錄，或拍完後一次補滿張數。';
     }
     function changeShotCount(delta){
       if(!taskConfirmedAt||taskCompletedAt||drawMotion||progressChangeResolve||detailClosing||detailFlight||(delta!==1&&delta!==-1))return false;
       const next=taskShotCount+delta;if(!Number.isSafeInteger(next)||next<0||(delta>0&&shootingTarget()!==null&&next>shootingTarget()))return false;
       const before=taskSnapshot();taskShotCount=next;commitTask(before,delta>0?'記錄一張照片':'減少一張照片');return true;
+    }
+    function fillShotCount(){
+      if(!taskConfirmedAt||taskCompletedAt||drawMotion||progressChangeResolve||detailClosing||detailFlight)return false;
+      const target=shootingTarget();if(target===null||taskShotCount>=target)return false;
+      const before=taskSnapshot();taskShotCount=target;commitTask(before,'補滿張數');
+      toast(`已補滿至 ${target} 張；確認完成後會存入紀錄`);return true;
     }
     function finishShooting(){
       if(!taskConfirmedAt||taskCompletedAt||drawMotion||progressChangeResolve||detailClosing||detailFlight||taskShotCount<(shootingTarget()||1))return false;
@@ -853,6 +860,7 @@
     el('progressChangeDialog').addEventListener('click',event=>{if(event.target===el('progressChangeDialog')){const rect=event.target.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)resolveProgressChange(false)}});
     el('progressMinus').addEventListener('click',()=>changeShotCount(-1));
     el('progressPlus').addEventListener('click',()=>changeShotCount(1));
+    el('progressComplete').addEventListener('click',fillShotCount);
     el('finishQuest').addEventListener('click',finishShooting);
     el('startNextQuest').addEventListener('click',()=>beginTask());
     el('undoQuest').addEventListener('click',undoTask);
@@ -926,7 +934,6 @@
         el('questCount').textContent=`${count} CARDS · 1 WALK`;
         el('drawAll').textContent=count===6?'↻　重新抽取六張':count?`↻　重新抽取 ${count} 張`:'↻　重新抽取任務';
         el('mobileDrawAll').textContent=el('drawAll').textContent;
-        el('printQuest').textContent=count?`列印這 ${count} 張卡 ↗`:'列印任務卡 ↗';
         const parts=[];
         if(!covered.camera)parts.push(`帶著 ${quest.camera.title}`);
         if(!covered.frame)parts.push(`${smartPairingActive()&&!quest.camera.interchangeable?'使用':covered.camera?'使用':'搭配'} ${quest.frame.title}`);
@@ -1223,7 +1230,7 @@
     }
     function drawSurface(card){return card.id==='questDetailFlip'||!mobileLayout.matches?card.querySelector('.flip-inner'):card.querySelector('.quest-thumb-turn')}
     function syncDrawControls(session){
-      const controls=document.querySelectorAll('#questGrid button,#drawAll,#mobileDrawAll,#unlockAll,#pairingMode,#copyQuest,#printQuest,#undoQuest,#confirmQuest,#editQuest,#shareQuest,#saveFavorite,#startNextQuest,#progressPlus,#progressMinus,#finishQuest,#dialogChoose,#questDetailChoose,#questDetailCommands button,#questDetailFlip');
+      const controls=document.querySelectorAll('#questGrid button,#drawAll,#mobileDrawAll,#unlockAll,#pairingMode,#undoQuest,#confirmQuest,#editQuest,#shareQuest,#saveFavorite,#startNextQuest,#progressPlus,#progressMinus,#progressComplete,#finishQuest,#dialogChoose,#questDetailChoose,#questDetailCommands button,#questDetailFlip');
       controls.forEach(node=>{if(!session.controls.has(node))session.controls.set(node,node.disabled);node.disabled=true;});
       el('drawAll').textContent=el('mobileDrawAll').textContent='抽取中…';
       el('questGrid').setAttribute('aria-busy','true');
@@ -1539,7 +1546,6 @@
       persistTask();el('recordsStatus').textContent=taskStorageState==='ready'?`已復原 ${count} 筆${deletion.tab==='favorites'?'收藏':'紀錄'}。`:'已復原，但此瀏覽器無法保存；請先匯出備份。';return true;
     }
     el('saveFavorite').addEventListener('click',()=>toggleFavorite(taskSnapshot()));
-    el('openRecords').addEventListener('click',()=>{renderRecords();switchPage('records',{section:'records',focusContent:true})});
     el('recordClose').addEventListener('click',()=>el('recordDialog').close());
     el('recordsCompleted').addEventListener('click',()=>{recordTab='completed';recordsShown=20;cancelRecordSelection()});
     el('recordsFavorites').addEventListener('click',()=>{recordTab='favorites';recordsShown=20;cancelRecordSelection()});
@@ -1666,11 +1672,8 @@
     // user-facing utilities and A4 printing: fronts only, 4 cards/page at physical A7 dimensions.
     let toastTimer;
     function toast(s){let t=el('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2500)}
-    function questText(){return `PHOTO QUEST — AN EXERCISE IN SEEING\n${activeKeys().map(k=>`${DECK_META[k].cn}｜${quest[k].title}${(k==='frame'?frameHint(quest[k]):quest[k].hint)?' — '+(k==='frame'?frameHint(quest[k]):quest[k].hint):''}`).join('\n')}\n\n${el('questSentence').textContent}`}
-    el('copyQuest').addEventListener('click',async()=>{let value=questText();try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(value)}else{let t=document.createElement('textarea');t.value=value;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();if(!document.execCommand('copy'))throw Error('failed');t.remove()}toast('任務摘要已複製')}catch(e){let blob=new Blob([value],{type:'text/plain;charset=utf-8'});let u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='photo-quest.txt';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);toast('已改為下載文字摘要')}});
     function printCard(key,item){let m=DECK_META[key];return `<div class="print-card" style="--card-accent:${m.accent}"><div class="print-card-header"><span>PHOTO QUEST / ${m.en}</span><span>${escapeHTML(item.id)}</span></div><div class="print-card-main"><div class="print-card-title${titleClass(displayTitle(key,item).main)}">${titleMarkup(key,item)}</div><div class="print-card-hint">${escapeHTML(item.hint||'')}</div></div><div class="print-card-bottom"><span>FIELD CARD</span><span>VOL. 01</span></div></div>`}
     function printCards(entries){if(!entries.length){toast('目前沒有可列印的卡片');return}let pages=[];for(let i=0;i<entries.length;i+=4)pages.push(`<div class="print-page">${entries.slice(i,i+4).map(([k,it])=>printCard(k,it)).join('')}</div>`);el('printArea').innerHTML=pages.join('');document.title=`PHOTO QUEST · ${entries.length} 張卡片`;window.print();setTimeout(()=>document.title='PHOTO QUEST — An Exercise in Seeing',300)}
-    el('printQuest').addEventListener('click',()=>printCards(activeKeys().map(k=>[k,quest[k]])));
     el('printCategory').addEventListener('click',()=>printCards(visibleItems().map(it=>[activeDeck,it])));
     document.addEventListener('keydown',e=>{if(e.key==='Escape'&&el('cardDialog').open)el('cardDialog').close()});
     // Keep panel DOM mounted: switching never resets cards, filters or loaded results.
