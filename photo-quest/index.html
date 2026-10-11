@@ -83,6 +83,7 @@
     .task-session-meta p {margin:2px 0 0}
     .task-session .btn-row {gap:8px; flex-wrap:nowrap}
     .task-session .btn {min-height:44px; padding:9px 13px; font-size:12px; white-space:nowrap}
+    .task-action-icon {width:17px; height:17px; flex:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; fill:none}
     .quest-panel.quest-confirmed .quest-grid .card-commands {display:none}
     .quest-confirmed-state {display:none; margin:10px 0 0; min-height:16px; font-size:11px; line-height:1.5; color:#AB705B; text-align:center}
     .quest-panel.quest-confirmed .quest-confirmed-state {display:block}
@@ -411,7 +412,7 @@
           <p class="mobile-card-note">點卡片放大 · 查看提示、翻面與調整任務</p>
           <div class="task-session">
             <div class="task-session-meta" aria-live="polite"><strong id="taskStatus">探索組合中</strong><p id="taskSaveStatus">目前任務會自動保存在此裝置</p></div>
-            <div class="btn-row"><button id="undoQuest" class="btn btn-outline" type="button" disabled>↶ 撤銷上一步</button><button id="confirmQuest" class="btn btn-primary" type="button">確認這組任務</button><button id="editQuest" class="btn btn-outline" type="button" hidden>返回調整任務</button></div>
+            <div class="btn-row"><button id="undoQuest" class="btn btn-outline" type="button" aria-label="復原上一個操作" disabled><svg class="task-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 1 1 9 9"></path><path d="M3 4v7h7"></path></svg><span>復原</span></button><button id="confirmQuest" class="btn btn-primary" type="button">確認這組任務</button><button id="editQuest" class="btn btn-outline" type="button" hidden>返回調整任務</button></div>
           </div>
         </div>
         <div class="quest-summary"><p id="questSentence" aria-live="polite"></p><div class="btn-row"><button class="btn btn-outline" id="copyQuest" type="button">複製任務摘要</button><button class="btn btn-outline" id="printQuest" type="button">列印這六張卡 ↗</button></div></div>
@@ -601,7 +602,7 @@
       el('taskStatus').textContent=confirmed?'✓ 任務已確認 · 可以出發了':'探索組合中';
       el('taskSaveStatus').textContent=taskStorageState==='unavailable'?'此瀏覽器無法保存，關閉後任務可能遺失':taskStorageState==='unsupported'?'保存資料來自較新版本，目前暫不覆寫':'已自動保存在此裝置';
       el('undoQuest').disabled=busy||!previousTask;
-      el('undoQuest').title=previousTask?`撤銷：${previousAction}`:'目前沒有可撤銷的操作';
+      el('undoQuest').title=previousTask?`復原上一個操作：${previousAction}`:'目前沒有可復原的操作';
       el('confirmQuest').hidden=confirmed;el('confirmQuest').disabled=busy||!activeKeys().length;
       el('confirmQuest').title=activeKeys().length?'保留這組條件，開始拍攝':'請先翻開至少一個牌組';
       el('editQuest').hidden=!confirmed;el('editQuest').disabled=busy;
@@ -643,10 +644,10 @@
     }
     function undoTask(){
       if(drawMotion||detailClosing||detailFlight||!previousTask)return false;
-      const value=previousTask,label=previousAction;
+      const value=previousTask;
       closeQuestDetail(true);el('cardDialog').close();applyTaskSnapshot(value);
       previousTask=null;previousAction='';persistTask();renderQuest();
-      toast(`已撤銷${label?`「${label}」`:'上一步'}，恢復原本任務`);return true;
+      toast('已復原上一個操作，恢復原本任務');return true;
     }
     function confirmTask(){
       if(drawMotion||detailClosing||detailFlight||taskConfirmedAt)return false;
