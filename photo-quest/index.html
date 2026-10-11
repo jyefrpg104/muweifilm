@@ -1236,7 +1236,7 @@
     }
     function drawSurface(card){return card.id==='questDetailFlip'||!mobileLayout.matches?card.querySelector('.flip-inner'):card.querySelector('.quest-thumb-turn')}
     function questCardTextNodes(keys){
-      const selector='.card-topline > span,.card-title,.card-hint,.card-footer > span,.back-mark,.back-sub,.back-num,.covered-label,.quest-thumb-top > span,.quest-thumb-title,.quest-thumb-state';
+      const selector='.card-title,.card-hint,.quest-thumb:not(.quest-thumb-back) .quest-thumb-title';
       return drawCards(keys).flatMap(card=>Array.from(drawSurface(card)?.querySelectorAll(selector)||[]));
     }
     function taskDateLabel(date){return new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'long',day:'numeric'}).format(new Date(date))}
