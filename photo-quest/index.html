@@ -83,6 +83,24 @@
     .task-session-meta p {margin:2px 0 0}
     .task-session .btn-row {gap:8px; flex-wrap:nowrap}
     .task-session .btn {min-height:44px; padding:9px 13px; font-size:12px; white-space:nowrap}
+    .shooting-progress {margin-top:18px; padding-top:16px; border-top:1px solid #DFE5D8}
+    .shooting-progress[hidden],.progress-controls[hidden] {display:none!important}
+    .progress-top {display:flex; align-items:center; justify-content:space-between; gap:14px}
+    .progress-label {font-size:12px; font-weight:650; color:var(--sage-deep)}
+    .progress-count {margin-left:10px; color:var(--ink); font-variant-numeric:tabular-nums}
+    .progress-controls {display:flex; gap:8px; align-items:center}
+    .progress-controls .btn {min-height:44px; padding:9px 14px; font-size:12px}
+    .progress-controls .progress-minus {width:44px; padding:0; font-size:20px}
+    .progress-track {height:5px; overflow:hidden; border-radius:5px; background:#DCE2D6; margin-top:13px}
+    .progress-fill {height:100%; width:0; border-radius:inherit; background:#82987D; transition:width .32s var(--motion-ease)}
+    .progress-bottom {display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px}
+    .progress-note {font-size:11px; line-height:1.7; color:var(--sub); margin:0}
+    .progress-bottom .btn {min-height:44px; font-size:12px; white-space:nowrap}
+    dialog.progress-change {width:min(390px,calc(100vw - 40px)); padding:25px; border:1px solid #E2E0D6; border-radius:18px; background:var(--paper); color:var(--ink)}
+    .progress-change h3 {font-size:19px; margin:0 0 12px}
+    .progress-change p {font-size:13px; line-height:1.9; color:var(--sub); margin:0 0 20px}
+    .progress-change .btn-row {justify-content:flex-end; gap:8px}
+    .progress-change .btn {min-height:44px; font-size:12px}
     .task-action-icon {width:17px; height:17px; flex:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; fill:none}
     .quest-panel.quest-confirmed .quest-grid .card-commands {display:none}
     .quest-confirmed-state {display:none; margin:10px 0 0; min-height:16px; font-size:11px; line-height:1.5; color:#AB705B; text-align:center}
@@ -295,6 +313,13 @@
       .task-session-meta p {display:inline; margin-left:8px}
       .task-session .btn-row {width:100%}
       .task-session .btn {flex:1; min-width:0; font-size:12px}
+      .shooting-progress {margin-top:12px; padding-top:13px}
+      .progress-top {flex-wrap:wrap; gap:10px}
+      .progress-label {font-size:12px}
+      .progress-controls {width:100%}
+      .progress-controls #progressPlus {flex:1}
+      .progress-bottom {align-items:flex-start; flex-wrap:wrap}
+      .progress-bottom .btn {width:100%}
       .gear-control {gap:8px; margin-bottom:12px; padding:10px 12px}
       .gear-control p {display:none}
       .quest-grid {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
@@ -347,7 +372,8 @@
       .gear-control {order:0; margin-bottom:10px}
       .quest-grid {order:1}
       .mobile-card-note {order:2}
-      .task-session {order:4}
+      .shooting-progress {order:4}
+      .task-session {order:5}
     }
     @media(max-width:750px) and (max-height:620px){
       #play .section-head {position:absolute; width:1px; height:1px; clip-path:inset(50%); overflow:hidden; margin:0}
@@ -410,6 +436,11 @@
           <div class="quest-grid" id="questGrid" aria-live="polite"></div>
           <p class="card-note">輕點卡片翻面 · 固定會保留該卡 · 蓋牌會略過整個類別，翻開後恢復</p>
           <p class="mobile-card-note">點卡片放大 · 查看提示、翻面與調整任務</p>
+          <div id="shootingProgress" class="shooting-progress" hidden>
+            <div class="progress-top"><div class="progress-label"><span id="progressTitle">拍攝進度</span><span id="progressCount" class="progress-count" role="status" aria-live="polite" aria-atomic="true">0／1 張</span></div><div id="progressControls" class="progress-controls"><button id="progressMinus" class="btn btn-outline progress-minus" type="button" aria-label="減少一張" disabled>−</button><button id="progressPlus" class="btn btn-primary" type="button">＋ 拍了一張</button></div></div>
+            <div id="progressTrack" class="progress-track" role="progressbar" aria-label="拍攝進度" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0"><div id="progressFill" class="progress-fill"></div></div>
+            <div class="progress-bottom"><p id="progressNote" class="progress-note">記下符合這組任務、值得留下的照片。</p><button id="finishQuest" class="btn btn-primary" type="button" hidden>完成任務</button><button id="resumeQuest" class="btn btn-outline" type="button" hidden>繼續拍攝</button></div>
+          </div>
           <div class="task-session">
             <div class="task-session-meta" aria-live="polite"><strong id="taskStatus">探索組合中</strong><p id="taskSaveStatus">目前任務會自動保存在此裝置</p></div>
             <div class="btn-row"><button id="undoQuest" class="btn btn-outline" type="button" aria-label="復原上一個操作" disabled><svg class="task-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 1 1 9 9"></path><path d="M3 4v7h7"></path></svg><span>復原</span></button><button id="confirmQuest" class="btn btn-primary" type="button">確認這組任務</button><button id="editQuest" class="btn btn-outline" type="button" hidden>返回調整任務</button></div>
@@ -460,6 +491,7 @@
     </div>
   </dialog>
   <dialog id="cardDialog" aria-labelledby="dialogTitle"><button id="dialogClose" class="dialog-close" type="button" aria-label="關閉卡片">×</button><div class="dialog-content"><button class="flip-button dialog-card" id="dialogFlip" type="button" aria-label="翻轉卡片"></button><div class="dialog-side"><div class="eyebrow" id="dialogGroup"></div><h3 id="dialogTitle"></h3><p id="dialogDescription"></p><div class="dialog-actions"><button id="dialogChoose" class="btn btn-primary" type="button">放進今日任務 ↗</button><button id="dialogTurn" class="btn btn-outline" type="button">翻轉看看</button></div></div></div></dialog>
+  <dialog id="progressChangeDialog" class="progress-change" aria-labelledby="progressChangeTitle" aria-describedby="progressChangeNote"><h3 id="progressChangeTitle">開始新的任務？</h3><p id="progressChangeNote"></p><div class="btn-row"><button id="cancelProgressChange" class="btn btn-outline" type="button" autofocus>保留原任務</button><button id="acceptProgressChange" class="btn btn-primary" type="button">開始新任務</button></div></dialog>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="printArea" aria-hidden="true"></div>
   <script>
@@ -575,10 +607,11 @@
     // Only stable task data is persisted; dialogs, card turns and animation state stay transient.
     const TASK_STORAGE_KEY='photo-quest:current-task:v1';
     let taskId=window.crypto?.randomUUID?.()||`pq-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    let taskCreatedAt=new Date().toISOString(),taskConfirmedAt=null;
+    let taskCreatedAt=new Date().toISOString(),taskConfirmedAt=null,taskShotCount=0,taskCompletedAt=null;
+    let progressChangeResolve=null;
     let previousTask=null,previousAction='',taskStorageState='ready';
     function taskSnapshot(){
-      return {id:taskId,createdAt:taskCreatedAt,confirmedAt:taskConfirmedAt,pairingEnabled,cards:Object.fromEntries(KEYS.map(key=>[key,quest[key].id])),locked:{...locked},covered:{...covered}};
+      return {id:taskId,createdAt:taskCreatedAt,confirmedAt:taskConfirmedAt,shotCount:taskShotCount,completedAt:taskCompletedAt,pairingEnabled,cards:Object.fromEntries(KEYS.map(key=>[key,quest[key].id])),locked:{...locked},covered:{...covered}};
     }
     function taskCard(key,id){return DECKS[key].find(item=>item.id===id)||(key==='frame'?Object.values(FIXED_FRAMES).find(item=>item.id===id):null)}
     function validTaskSnapshot(value){
@@ -587,19 +620,23 @@
       if(!validDate(value.createdAt)||(value.confirmedAt!==null&&!validDate(value.confirmedAt)))return null;
       if(!KEYS.every(key=>taskCard(key,value.cards?.[key])&&typeof value.locked?.[key]==='boolean'&&typeof value.covered?.[key]==='boolean'))return null;
       if(value.confirmedAt&&KEYS.every(key=>value.covered[key]))return null;
+      const shotCount=value.shotCount===undefined?0:value.shotCount,completedAt=value.completedAt===undefined?null:value.completedAt;
+      if(!Number.isSafeInteger(shotCount)||shotCount<0||(completedAt!==null&&!validDate(completedAt)))return null;
+      const target=value.covered.output?null:parseInt(taskCard('output',value.cards.output).title,10);
+      if(completedAt&&(shotCount<1||(target!==null&&shotCount<target)))return null;
       const camera=taskCard('camera',value.cards.camera),frame=taskCard('frame',value.cards.frame);
       if(value.pairingEnabled&&!value.covered.camera&&!value.covered.frame){
         if(camera.interchangeable?frame.id.startsWith('B'):frame.id!==FIXED_FRAMES[camera.id]?.id)return null;
       }else if(!value.covered.frame&&frame.id.startsWith('B'))return null;
-      return {id:value.id,createdAt:value.createdAt,confirmedAt:value.confirmedAt,pairingEnabled:value.pairingEnabled,cards:Object.fromEntries(KEYS.map(key=>[key,value.cards[key]])),locked:Object.fromEntries(KEYS.map(key=>[key,value.locked[key]])),covered:Object.fromEntries(KEYS.map(key=>[key,value.covered[key]]))};
+      return {id:value.id,createdAt:value.createdAt,confirmedAt:value.confirmedAt,shotCount,completedAt,pairingEnabled:value.pairingEnabled,cards:Object.fromEntries(KEYS.map(key=>[key,value.cards[key]])),locked:Object.fromEntries(KEYS.map(key=>[key,value.locked[key]])),covered:Object.fromEntries(KEYS.map(key=>[key,value.covered[key]]))};
     }
     function applyTaskSnapshot(value){
-      taskId=value.id;taskCreatedAt=value.createdAt;taskConfirmedAt=value.confirmedAt;pairingEnabled=value.pairingEnabled;
+      taskId=value.id;taskCreatedAt=value.createdAt;taskConfirmedAt=value.confirmedAt;taskShotCount=value.shotCount;taskCompletedAt=value.completedAt;pairingEnabled=value.pairingEnabled;
       KEYS.forEach(key=>{quest[key]=taskCard(key,value.cards[key]);locked[key]=value.locked[key];covered[key]=value.covered[key];flipStates[key]=false;});
     }
     function renderTaskSession(){
-      const confirmed=!!taskConfirmedAt,busy=!!drawMotion;
-      el('taskStatus').textContent=confirmed?'✓ 任務已確認 · 可以出發了':'探索組合中';
+      const confirmed=!!taskConfirmedAt,busy=!!drawMotion||!!progressChangeResolve;
+      el('taskStatus').textContent=taskCompletedAt?'✓ 任務已完成':confirmed?taskShotCount?'拍攝進行中':'✓ 任務已確認 · 可以出發了':taskShotCount?`調整任務中 · 已拍 ${taskShotCount} 張`:'探索組合中';
       el('taskSaveStatus').textContent=taskStorageState==='unavailable'?'此瀏覽器無法保存，關閉後任務可能遺失':taskStorageState==='unsupported'?'保存資料來自較新版本，目前暫不覆寫':'已自動保存在此裝置';
       el('undoQuest').disabled=busy||!previousTask;
       el('undoQuest').title=previousTask?`復原上一個操作：${previousAction}`:'目前沒有可復原的操作';
@@ -608,7 +645,9 @@
       el('editQuest').hidden=!confirmed;el('editQuest').disabled=busy;
       el('drawAll').hidden=confirmed;el('unlockAll').hidden=confirmed;
       el('pairingMode').checked=pairingEnabled;el('pairingMode').closest('.gear-control').hidden=confirmed;
-      el('mobileDrawAll').textContent=confirmed?'返回調整任務':el('drawAll').textContent;
+      el('mobileDrawAll').textContent=confirmed?taskCompletedAt?'查看完成任務':'＋ 拍了一張':el('drawAll').textContent;
+      el('mobileDrawAll').disabled=busy||(confirmed&&!taskCompletedAt&&taskShotCount===Number.MAX_SAFE_INTEGER);
+      renderShootingProgress();
       el('questGrid').closest('.quest-panel').classList.toggle('quest-confirmed',confirmed);
       el('questDate').textContent=new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'long',day:'numeric'}).format(new Date(taskCreatedAt));
       const chooseLabel=confirmed?'請先返回調整任務':'放進今日任務 ↗';
@@ -616,7 +655,7 @@
     }
     function persistTask(){
       if(taskStorageState!=='unsupported'){
-        try{localStorage.setItem(TASK_STORAGE_KEY,JSON.stringify({version:1,current:taskSnapshot(),previous:previousTask,previousAction,savedAt:new Date().toISOString()}));taskStorageState='ready';}
+        try{localStorage.setItem(TASK_STORAGE_KEY,JSON.stringify({version:2,current:taskSnapshot(),previous:previousTask,previousAction,savedAt:new Date().toISOString()}));taskStorageState='ready';}
         catch(error){taskStorageState='unavailable';}
       }
       renderTaskSession();
@@ -630,36 +669,96 @@
       try{raw=localStorage.getItem(TASK_STORAGE_KEY);}
       catch(error){taskStorageState='unavailable';renderTaskSession();return;}
       try{record=raw?JSON.parse(raw):null;}catch(error){record=null;}
-      if(record&&Number.isInteger(record.version)&&record.version>1){taskStorageState='unsupported';renderTaskSession();return;}
-      const current=record?.version===1?validTaskSnapshot(record.current):null;
+      if(record&&Number.isInteger(record.version)&&record.version>2){taskStorageState='unsupported';renderTaskSession();return;}
+      const current=(record?.version===1||record?.version===2)?validTaskSnapshot(record.current):null;
       if(current){
         applyTaskSnapshot(current);previousTask=validTaskSnapshot(record.previous);
         previousAction=previousTask&&typeof record.previousAction==='string'?record.previousAction.slice(0,100):'';
-        renderTaskSession();
+        if(record.version===1)persistTask();else renderTaskSession();
       }else{persistTask();if(raw)toast('原本的保存資料無法讀取，已建立新任務');}
     }
     function taskEditable(){
+      if(progressChangeResolve)return false;
       if(!taskConfirmedAt)return true;
       toast('任務已確認；請先返回調整任務');return false;
     }
     function undoTask(){
-      if(drawMotion||detailClosing||detailFlight||!previousTask)return false;
+      if(drawMotion||progressChangeResolve||detailClosing||detailFlight||!previousTask)return false;
       const value=previousTask;
       closeQuestDetail(true);el('cardDialog').close();applyTaskSnapshot(value);
       previousTask=null;previousAction='';persistTask();renderQuest();
       toast('已復原上一個操作，恢復原本任務');return true;
     }
     function confirmTask(){
-      if(drawMotion||detailClosing||detailFlight||taskConfirmedAt)return false;
+      if(drawMotion||progressChangeResolve||detailClosing||detailFlight||taskConfirmedAt)return false;
       if(!activeKeys().length){toast('請先翻開至少一個牌組，再確認任務');return false;}
       const before=taskSnapshot();taskConfirmedAt=new Date().toISOString();
-      commitTask(before,'確認任務');renderQuest();toast('這組任務已確認，帶著相機出發吧');return true;
+      commitTask(before,'確認任務');renderQuest();toast(taskCompletedAt?'已保留完成的任務':taskShotCount?'繼續這組任務，原本進度已保留':'這組任務已確認，帶著相機出發吧');return true;
     }
     function editTask(){
-      if(drawMotion||detailClosing||detailFlight||!taskConfirmedAt)return false;
+      if(drawMotion||progressChangeResolve||detailClosing||detailFlight||!taskConfirmedAt)return false;
       const before=taskSnapshot();taskConfirmedAt=null;
       commitTask(before,'返回調整');renderQuest();toast('已返回調整，原本卡片維持不變');return true;
     }
+    function shootingTarget(){return covered.output?null:parseInt(quest.output.title,10)}
+    function renderShootingProgress(){
+      const target=shootingTarget(),completed=!!taskCompletedAt,busy=!!drawMotion||!!progressChangeResolve;
+      el('shootingProgress').hidden=!taskConfirmedAt;
+      el('progressTitle').textContent=completed?'✓ 任務完成':'拍攝進度';
+      el('progressCount').textContent=target===null?`已拍 ${taskShotCount} 張`:`${taskShotCount}／${target} 張`;
+      el('progressControls').hidden=completed;
+      el('progressMinus').disabled=busy||!taskShotCount;el('progressPlus').disabled=busy||taskShotCount===Number.MAX_SAFE_INTEGER;
+      const track=el('progressTrack');track.hidden=target===null;
+      track.setAttribute('aria-valuemax',String(target||1));track.setAttribute('aria-valuenow',String(Math.min(taskShotCount,target||1)));
+      track.setAttribute('aria-valuetext',el('progressCount').textContent);
+      el('progressFill').style.width=target===null?'0%':`${Math.min(100,taskShotCount/target*100)}%`;
+      el('finishQuest').hidden=completed||taskShotCount<(target||1);el('finishQuest').disabled=busy;
+      el('resumeQuest').hidden=!completed;el('resumeQuest').disabled=busy;
+      el('progressNote').textContent=completed?`完成於 ${new Intl.DateTimeFormat('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(taskCompletedAt))}`:target===null?'張數不設限，拍好後由你確認完成。':taskShotCount>=target?'已達目標；可以繼續拍，也可以確認完成。':'記下符合這組任務、值得留下的照片。';
+    }
+    function changeShotCount(delta){
+      if(!taskConfirmedAt||taskCompletedAt||drawMotion||progressChangeResolve||detailClosing||detailFlight||(delta!==1&&delta!==-1))return false;
+      const next=taskShotCount+delta;if(!Number.isSafeInteger(next)||next<0)return false;
+      const before=taskSnapshot();taskShotCount=next;commitTask(before,delta>0?'記錄一張照片':'減少一張照片');return true;
+    }
+    function finishShooting(){
+      if(!taskConfirmedAt||taskCompletedAt||drawMotion||progressChangeResolve||detailClosing||detailFlight||taskShotCount<(shootingTarget()||1))return false;
+      const before=taskSnapshot();taskCompletedAt=new Date().toISOString();commitTask(before,'完成任務');toast('任務完成，這次散步留下了新的作品');return true;
+    }
+    function resumeShooting(){
+      if(!taskConfirmedAt||!taskCompletedAt||drawMotion||progressChangeResolve||detailClosing||detailFlight)return false;
+      const before=taskSnapshot();taskCompletedAt=null;commitTask(before,'繼續拍攝');toast('已恢復拍攝，可以補拍或調整張數');return true;
+    }
+    // Stage a proposed card change, then restore the current task while asking.
+    // The accepted change and progress reset share one snapshot for atomic undo.
+    function approveTaskChange(before){
+      const after=taskSnapshot();
+      const changed=JSON.stringify(before.cards)!==JSON.stringify(after.cards)||JSON.stringify(before.covered)!==JSON.stringify(after.covered);
+      if(!changed||(!before.shotCount&&!before.completedAt))return true;
+      applyTaskSnapshot(before);
+      const decision=new Promise(resolve=>progressChangeResolve=resolve);
+      renderQuest({preserveDetail:true});
+      el('progressChangeNote').textContent=`目前任務已拍 ${before.shotCount} 張${before.completedAt?'，並已完成':''}。改變卡片或蓋牌條件會開始新任務，拍攝進度將從 0 張開始。`;
+      el('progressChangeDialog').showModal();el('cancelProgressChange').focus();
+      return decision.then(accepted=>{
+        if(!accepted){renderQuest({preserveDetail:true});return false;}
+        applyTaskSnapshot(after);taskShotCount=0;taskCompletedAt=null;taskConfirmedAt=null;
+        taskId=window.crypto?.randomUUID?.()||`pq-${Date.now()}-${Math.random().toString(36).slice(2)}`;taskCreatedAt=new Date().toISOString();
+        return true;
+      });
+    }
+    function resolveProgressChange(accepted){
+      const resolve=progressChangeResolve;if(!resolve)return;
+      progressChangeResolve=null;el('progressChangeDialog').close();resolve(accepted);
+    }
+    el('cancelProgressChange').addEventListener('click',()=>resolveProgressChange(false));
+    el('acceptProgressChange').addEventListener('click',()=>resolveProgressChange(true));
+    el('progressChangeDialog').addEventListener('cancel',event=>{event.preventDefault();resolveProgressChange(false)});
+    el('progressChangeDialog').addEventListener('click',event=>{if(event.target===el('progressChangeDialog')){const rect=event.target.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)resolveProgressChange(false)}});
+    el('progressMinus').addEventListener('click',()=>changeShotCount(-1));
+    el('progressPlus').addEventListener('click',()=>changeShotCount(1));
+    el('finishQuest').addEventListener('click',finishShooting);
+    el('resumeQuest').addEventListener('click',resumeShooting);
     el('undoQuest').addEventListener('click',undoTask);
     el('confirmQuest').addEventListener('click',confirmTask);
     el('editQuest').addEventListener('click',editTask);
@@ -1061,6 +1160,7 @@
       if(update()===false)return false;
       const keys=KEYS.filter(key=>!covered[key]&&before[key]!==faceMarkup(key,quest[key]));
       if(!keys.length){toast('目前沒有可重抽的卡片；請先解除固定或調整器材搭配');return false;}
+      const approval=approveTaskChange(previous);if(approval!==true&&!await approval)return false;
       commitTask(previous,message);
       const session={keys,message,summary:el('questSentence').textContent,controls:new Map(),cards:new Set(),animations:[],installed:false};
       session.finished=new Promise(resolve=>session.resolve=resolve);drawMotion=session;
@@ -1105,7 +1205,7 @@
       const target=360*Math.round(from/360);
       return Math.abs(target-from)===180?360*Math.trunc(from/360):target;
     }
-    function toggleCover(key){
+    async function toggleCover(key){
       if(drawMotion||detailClosing||detailFlight||!taskEditable())return;
       const before=taskSnapshot();
       const inDetail=detailKey===key&&!detailLibrary;
@@ -1118,6 +1218,7 @@
       }
       covered[key]=!covered[key];flipStates[key]=false;
       if(key==='camera'||key==='frame')syncActiveFrame();
+      const approval=approveTaskChange(before);if(approval!==true&&!await approval)return false;
       commitTask(before,`${covered[key]?'蓋牌':'翻開'}${DECK_META[key].cn}`);
       renderQuest();
       const target=coverTurnTarget(from,covered[key]);
@@ -1172,19 +1273,20 @@
       },'新的攝影任務已抽出');
     }
     el('drawAll').addEventListener('click',drawQuest);
-    el('mobileDrawAll').addEventListener('click',()=>taskConfirmedAt?editTask():drawQuest());
+    el('mobileDrawAll').addEventListener('click',()=>{if(!taskConfirmedAt){drawQuest();return;}if(!taskCompletedAt)changeShotCount(1);else el('shootingProgress').scrollIntoView({behavior:reducedMotion.matches?'instant':'smooth',block:'center'});});
     el('unlockAll').addEventListener('click',()=>{
       if(drawMotion||detailClosing||detailFlight||!taskEditable())return;
       const before=taskSnapshot();KEYS.forEach(key=>locked[key]=false);
       if(!commitTask(before,'解除所有固定')){toast('目前沒有固定的卡片');return;}
       renderQuest();toast('所有卡片已解除固定');
     });
-    el('pairingMode').addEventListener('change',e=>{
+    el('pairingMode').addEventListener('change',async e=>{
       if(drawMotion||detailClosing||detailFlight||!taskEditable()){e.target.checked=pairingEnabled;return;}
       const before=taskSnapshot();
       pairingEnabled=e.target.checked;
       syncActiveFrame(pairingEnabled);
       if(pairingEnabled&&!covered.frame){locked.frame=false;flipStates.frame=false;}
+      const approval=approveTaskChange(before);if(approval!==true&&!await approval)return;
       commitTask(before,'切換器材搭配模式');
       renderQuest();toast(pairingEnabled?'已開啟智慧器材搭配':'已切換自由組合模式');
     });
@@ -1210,7 +1312,7 @@
     el('dialogFlip').addEventListener('click',toggleModalFlip);el('dialogTurn').addEventListener('click',toggleModalFlip);
     el('dialogClose').addEventListener('click',()=>el('cardDialog').close());
     el('cardDialog').addEventListener('click',e=>{if(e.target===el('cardDialog'))el('cardDialog').close()});
-    function chooseLibraryCard(){
+    async function chooseLibraryCard(){
       if(!activeModal||drawMotion||detailClosing||detailFlight||!taskEditable())return;
       const before=taskSnapshot();
       const {key,item}=activeModal;
@@ -1226,6 +1328,7 @@
         message='已切換至可換鏡 α6700 並選用此鏡頭';
       } else {quest[key]=item;}
       flipStates[key]=false;locked[key]=true;
+      const approval=approveTaskChange(before);if(approval!==true&&!await approval)return;
       commitTask(before,`從圖鑑選擇${DECK_META[key].cn}`);
       renderQuest();closeQuestDetail(true);el('cardDialog').close();switchPage('play',{section:'play',focusContent:true});toast(message);
     }
