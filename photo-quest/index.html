@@ -128,6 +128,19 @@
     .share-preview[hidden] {display:none!important}
     .tools-status {font-size:12px; color:var(--sub); margin:12px 0 0; min-height:20px}
     @media(max-width:750px){#progressPlus,#startNextQuest {display:none!important}#finishQuest:not(.unlimited-finish) {display:none!important}.quest-summary .btn-row {width:100%}.quest-summary .btn {flex:1; white-space:nowrap}.task-tools .btn-row {gap:8px}.task-tools .btn-row .btn {flex:1}.record-row {gap:8px}.record-open strong {font-size:13px}}
+    .records-panel {padding:24px; border:1px solid var(--line); border-radius:18px; background:var(--paper)}
+    .records-toolbar {display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px}
+    .records-toolbar .tools-tabs {margin:0}.records-toolbar .btn {min-height:44px; padding:9px 13px; font-size:12px}
+    .record-open {display:flex; align-items:center; gap:12px; touch-action:pan-y; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none}
+    .record-text {min-width:0}.record-checkbox {width:23px; height:23px; border:1px solid #A8B5A3; border-radius:50%; color:white; display:flex; align-items:center; justify-content:center; flex:none; font-size:15px}
+    .record-selected {background:var(--soft); border-radius:10px}.record-selected .record-checkbox {background:var(--sage-deep)}
+    .record-row {padding:15px 10px}.records-empty {margin:0; padding:42px 12px; text-align:center; color:var(--sub); font-size:13px; line-height:1.9}
+    .records-selection-actions {position:sticky; bottom:16px; z-index:3; display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 16px; margin-top:16px; border:1px solid var(--line); border-radius:12px; background:var(--bg); box-shadow:0 5px 22px rgba(48,54,45,.08); font-size:13px}
+    .records-selection-actions[hidden],.records-undo[hidden] {display:none!important}
+    .btn-danger {background:#A76752; color:#fff; border-color:#A76752}.btn-danger:hover {background:#935B49}
+    .records-undo {display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 14px; border:1px solid #C9D4C3; border-radius:10px; background:var(--soft); font-size:13px; margin-bottom:16px}
+    .records-undo .btn {font-size:12px; padding:8px 12px}
+    @media(max-width:750px){.records-panel {padding:16px}.records-toolbar {gap:14px}.records-toolbar > .btn-row {gap:8px}.records-selection-actions {position:fixed; bottom:calc(var(--mobile-nav-height) + env(safe-area-inset-bottom)); left:0; right:0; margin:0; border-radius:0; min-height:var(--mobile-draw-height); padding:10px 16px; background:rgba(247,245,238,.97); backdrop-filter:blur(12px)}body.records-selecting {padding-bottom:calc(var(--mobile-nav-height) + var(--mobile-draw-height) + env(safe-area-inset-bottom))}body.records-selecting #toast {bottom:calc(var(--mobile-nav-height) + var(--mobile-draw-height) + 12px + env(safe-area-inset-bottom))}}
     .task-action-icon {width:17px; height:17px; flex:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; fill:none}
     .quest-panel.quest-confirmed .quest-grid .card-commands {display:none}
     .quest-confirmed-state {display:none; margin:10px 0 0; min-height:16px; font-size:11px; line-height:1.5; color:#AB705B; text-align:center}
@@ -433,7 +446,7 @@
   <header class="topbar">
     <nav class="nav container" aria-label="主要導覽">
       <a class="brand" href="#top">PHOTO QUEST<small>AN EXERCISE IN SEEING</small></a>
-      <div class="navlinks" id="pageTabs" role="tablist" aria-label="主要功能"><button class="page-tab" id="nav-play" type="button" role="tab" aria-selected="true" aria-controls="page-play" data-page="play">抽取任務</button><button class="page-tab" id="nav-library" type="button" role="tab" aria-selected="false" aria-controls="page-library" tabindex="-1" data-page="library">卡片圖鑑</button><button class="page-tab" id="nav-design" type="button" role="tab" aria-selected="false" aria-controls="page-design" tabindex="-1" data-page="design">實體設計</button></div>
+      <div class="navlinks" id="pageTabs" role="tablist" aria-label="主要功能"><button class="page-tab" id="nav-play" type="button" role="tab" aria-selected="true" aria-controls="page-play" data-page="play">抽取任務</button><button class="page-tab" id="nav-library" type="button" role="tab" aria-selected="false" aria-controls="page-library" tabindex="-1" data-page="library">卡片圖鑑</button><button class="page-tab" id="nav-records" type="button" role="tab" aria-selected="false" aria-controls="page-records" tabindex="-1" data-page="records">任務紀錄</button></div>
       <span class="version">FIELD DECK / VOL. 01</span>
     </nav>
   </header>
@@ -490,17 +503,17 @@
       </div>
     </section>
     </div>
-    <div class="page-panel" id="page-design" role="tabpanel" aria-labelledby="nav-design" hidden>
-    <section class="section" id="design" aria-labelledby="designTitle">
-      <div class="container design-grid">
-        <div class="template-showcase" aria-label="卡片正面及背面設計參考">
-          <div class="sample-card" style="--card-accent:#BB7F68"><div class="card-topline"><span>PHOTO QUEST<br>STORY</span><span>T02 / 64</span></div><div class="card-main"><div class="card-title">剛剛離開</div><div class="card-hint">「這裡還留著誰的痕跡？」</div></div><div class="card-footer"><span>FIELD CARD</span><span>VOL. 01</span></div></div>
-          <div class="sample-card alt"><div class="back-mark">PHOTO<br>QUEST</div><div class="back-emblem"></div><div class="back-sub">An Exercise in Seeing.</div><div style="margin-top:30px;font-size:9px;letter-spacing:.19em;opacity:.6">FIELD DECK / 01</div></div>
-        </div>
-        <div class="design-copy"><div class="eyebrow">03 / MADE TO BE HELD</div><h2 id="designTitle">給手的質感，<br>給眼睛的留白。</h2><p>以自然白紙張作為底色，用明亮、低飽和的大地色系區分卡組。像是攝影檔案館的索引卡，而不是喧鬧的桌遊道具。</p>
-          <dl class="specs"><div class="spec"><dt>卡片尺寸</dt><dd>A7 · 74 × 105 mm</dd></div><div class="spec"><dt>推薦紙材</dt><dd>300–350g 自然白象牙卡／細紋美術卡</dd></div><div class="spec"><dt>加工方式</dt><dd>不覆膜、R3–R4 圓角、細色條區分卡組</dd></div><div class="spec"><dt>製作建議</dt><dd>基本資訊印刷，主題可手寫；單面 A4 列印後裁切</dd></div></dl>
-          <p>本頁的「列印」使用 <strong>74 × 105 mm</strong> 實際尺寸排版，每張 A4 排 4 張正面卡。列印時請選擇 <strong>100%／實際大小</strong>，避免瀏覽器自動縮放。</p>
-          <div class="swatches" aria-label="配色範例"><span class="swatch"><span class="swatch-dot" style="background:#F7F5EE"></span>Ivory</span><span class="swatch"><span class="swatch-dot" style="background:#82987D"></span>Sage</span><span class="swatch"><span class="swatch-dot" style="background:#BB7F68"></span>Clay</span><span class="swatch"><span class="swatch-dot" style="background:#D4BE98"></span>Oat</span><span class="swatch"><span class="swatch-dot" style="background:#74796F"></span>Stone</span></div>
+    <div class="page-panel" id="page-records" role="tabpanel" aria-labelledby="nav-records" hidden>
+    <section class="section" id="records" aria-labelledby="recordsTitle">
+      <div class="container">
+        <div class="section-head"><div><div class="eyebrow">03 / YOUR PHOTO WALKS</div><h2 id="recordsTitle">任務紀錄</h2><p class="section-desc">留住完成的攝影散步，收藏想再挑戰的組合。點開查看，長按或按「選取」可整理多筆紀錄。</p></div></div>
+        <div class="records-panel">
+          <div class="records-toolbar"><div class="tools-tabs"><button class="btn btn-outline" id="recordsCompleted" type="button" aria-pressed="true">已完成</button><button class="btn btn-outline" id="recordsFavorites" type="button" aria-pressed="false">收藏</button></div><div class="btn-row"><button id="recordsSelect" class="btn btn-outline" type="button">選取</button><button id="recordsSelectAll" class="btn btn-outline" type="button" hidden>全選</button><button id="recordsCancel" class="btn btn-outline" type="button" hidden>取消</button></div></div>
+          <p id="recordsSelectionNote" class="tools-note" hidden></p>
+          <div id="recordsUndoNotice" class="records-undo" role="status" aria-live="polite" hidden><span id="recordsUndoText"></span><button id="recordsRestoreDeleted" class="btn btn-outline" type="button">復原</button></div>
+          <div id="recordsList"></div><div class="load-wrap"><button id="recordsMore" class="btn btn-outline" type="button" hidden>顯示更多紀錄</button></div>
+          <div id="recordsSelectionActions" class="records-selection-actions" hidden><span id="recordsSelectedCount" role="status" aria-live="polite">已選 0 筆</span><button id="recordsDelete" class="btn btn-danger" type="button" disabled>刪除 0 筆</button></div>
+          <div class="tools-footer"><p class="tools-note">紀錄與收藏保存在此瀏覽器。匯出備份可留存或帶到其他裝置。</p><div class="btn-row"><button id="exportTasks" class="btn btn-outline" type="button">匯出備份</button><button id="importTasks" class="btn btn-outline" type="button">匯入備份</button></div><input id="backupFile" type="file" accept="application/json,.json" hidden><p id="recordsStatus" class="tools-status" role="status" aria-live="polite"></p></div>
         </div>
       </div>
     </section>
@@ -520,9 +533,9 @@
   </dialog>
   <dialog id="cardDialog" aria-labelledby="dialogTitle"><button id="dialogClose" class="dialog-close" type="button" aria-label="關閉卡片">×</button><div class="dialog-content"><button class="flip-button dialog-card" id="dialogFlip" type="button" aria-label="翻轉卡片"></button><div class="dialog-side"><div class="eyebrow" id="dialogGroup"></div><h3 id="dialogTitle"></h3><p id="dialogDescription"></p><div class="dialog-actions"><button id="dialogChoose" class="btn btn-primary" type="button">放進今日任務 ↗</button><button id="dialogTurn" class="btn btn-outline" type="button">翻轉看看</button></div></div></div></dialog>
   <dialog id="progressChangeDialog" class="progress-change" aria-labelledby="progressChangeTitle" aria-describedby="progressChangeNote"><h3 id="progressChangeTitle">開始新的任務？</h3><p id="progressChangeNote"></p><div class="btn-row"><button id="cancelProgressChange" class="btn btn-outline" type="button" autofocus>保留原任務</button><button id="acceptProgressChange" class="btn btn-primary" type="button">開始新任務</button></div></dialog>
-  <dialog id="recordsDialog" class="task-tools" aria-labelledby="recordsTitle"><div class="tools-head"><h3 id="recordsTitle">我的任務</h3><button class="tools-close" id="recordsClose" type="button" aria-label="關閉任務紀錄">×</button></div><div class="tools-tabs"><button class="btn btn-outline" id="recordsCompleted" type="button" aria-pressed="true">已完成</button><button class="btn btn-outline" id="recordsFavorites" type="button" aria-pressed="false">收藏</button></div><div id="recordsList"></div><button id="recordsMore" class="btn btn-outline" type="button" hidden>顯示更多紀錄</button><div class="tools-footer"><p class="tools-note">紀錄與收藏保存在此瀏覽器。匯出備份可留存或帶到其他裝置。</p><div class="btn-row"><button id="exportTasks" class="btn btn-outline" type="button">匯出備份</button><button id="importTasks" class="btn btn-outline" type="button">匯入備份</button></div><input id="backupFile" type="file" accept="application/json,.json" hidden><p id="recordsStatus" class="tools-status" role="status" aria-live="polite"></p></div></dialog>
+  <dialog id="deleteRecordsDialog" class="progress-change" aria-labelledby="deleteRecordsTitle" aria-describedby="deleteRecordsNote"><h3 id="deleteRecordsTitle">刪除這些紀錄？</h3><p id="deleteRecordsNote"></p><div class="btn-row"><button id="cancelRecordsDelete" class="btn btn-outline" type="button" autofocus>保留</button><button id="acceptRecordsDelete" class="btn btn-danger" type="button">刪除</button></div></dialog>
   <dialog id="recordDialog" class="task-tools" aria-labelledby="recordTitle"><div class="tools-head"><h3 id="recordTitle">任務紀錄</h3><button id="recordClose" class="tools-close" type="button" aria-label="關閉紀錄內容">×</button></div><p id="recordMeta" class="tools-note"></p><div id="recordFields" class="record-fields"></div><div class="btn-row"><button id="recordReplay" class="btn btn-primary" type="button">再次挑戰</button><button id="recordShare" class="btn btn-outline" type="button">分享任務卡</button><button id="recordFavorite" class="btn btn-outline" type="button">☆ 收藏組合</button></div></dialog>
-  <dialog id="shareDialog" class="task-tools" aria-labelledby="shareTitle"><div class="tools-head"><h3 id="shareTitle">分享任務卡</h3><button id="shareClose" class="tools-close" type="button" aria-label="關閉分享任務卡">×</button></div><p class="tools-note">保存這一刻的任務，傳給朋友或留作今天的拍攝小抄。</p><img id="sharePreview" class="share-preview" alt="本次任務的六張攝影卡片與拍攝狀態" hidden><div class="btn-row"><button id="nativeShare" class="btn btn-primary" type="button" hidden>分享圖片</button><a id="downloadShare" class="btn btn-outline" hidden>儲存圖片</a></div><p id="shareStatus" class="tools-status" role="status" aria-live="polite">正在準備圖片…</p></dialog>
+  <dialog id="shareDialog" class="task-tools" aria-labelledby="shareTitle"><div class="tools-head"><h3 id="shareTitle">分享任務卡</h3><button id="shareClose" class="tools-close" type="button" aria-label="關閉分享任務卡">×</button></div><p class="tools-note">保存這一刻的任務，傳給朋友或留作今天的拍攝小抄。</p><img id="sharePreview" class="share-preview" alt="本次任務的六張攝影卡片與拍攝狀態" hidden><p id="shareSaveHint" class="tools-note" hidden>存到 iPhone 相簿，請在下一步選擇「儲存影像」。</p><div class="btn-row"><button id="nativeShare" class="btn btn-primary" type="button" hidden>分享／儲存圖片</button><a id="downloadShare" class="btn btn-outline" hidden>下載檔案</a></div><p id="shareStatus" class="tools-status" role="status" aria-live="polite">正在準備圖片…</p></dialog>
   <dialog id="backupDialog" class="progress-change" aria-labelledby="backupTitle"><h3 id="backupTitle">匯入這份備份？</h3><p id="backupNote"></p><label class="tools-note" style="display:flex;gap:9px;align-items:flex-start;margin-bottom:20px"><input id="restoreBackupCurrent" type="checkbox">同時還原備份中的目前任務，取代這台裝置的目前任務</label><div class="btn-row"><button id="cancelBackup" class="btn btn-outline" type="button" autofocus>取消</button><button id="acceptBackup" class="btn btn-primary" type="button">合併紀錄</button></div></dialog>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="printArea" aria-hidden="true"></div>
@@ -643,6 +656,7 @@
     let progressChangeResolve=null;
     let previousTask=null,previousAction='',previousEffect=null,taskStorageState='ready';
     let archivedTasks=[],favoriteTasks=[],recordTab='completed',recordsShown=20,viewedRecord=null,pendingBackup=null;
+    let deletedArchiveIds=new Set();
     const newTaskId=()=>window.crypto?.randomUUID?.()||`pq-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     function taskSnapshot(){
       return {id:taskId,createdAt:taskCreatedAt,confirmedAt:taskConfirmedAt,shotCount:taskShotCount,completedAt:taskCompletedAt,pairingEnabled,cards:Object.fromEntries(KEYS.map(key=>[key,quest[key].id])),locked:{...locked},covered:{...covered}};
@@ -682,6 +696,7 @@
       el('mobileDrawAll').textContent=taskCompletedAt?'開始新任務':confirmed?shootingTarget()!==null&&taskShotCount>=shootingTarget()?'完成任務':'＋ 拍了一張':el('drawAll').textContent;
       el('mobileDrawAll').disabled=busy||(confirmed&&!taskCompletedAt&&taskShotCount===Number.MAX_SAFE_INTEGER);
       el('questCompleteCopy').hidden=!taskCompletedAt;
+      el('questCompleteCopy').textContent=deletedArchiveIds.has(taskId)?'這次散步完成了，可以分享或開始下一趟。':'這次散步完成了，任務已存入紀錄。';
       el('shareQuest').disabled=busy;el('saveFavorite').disabled=busy;
       renderFavoriteButton(el('saveFavorite'),taskSnapshot());
       renderShootingProgress();
@@ -692,7 +707,7 @@
     }
     function persistTask(){
       if(taskStorageState!=='unsupported'){
-        try{localStorage.setItem(TASK_STORAGE_KEY,JSON.stringify({version:3,current:taskSnapshot(),previous:previousTask,previousAction,previousEffect,archived:archivedTasks,favorites:favoriteTasks,savedAt:new Date().toISOString()}));taskStorageState='ready';}
+        try{localStorage.setItem(TASK_STORAGE_KEY,JSON.stringify({version:4,deletedArchives:[...deletedArchiveIds],current:taskSnapshot(),previous:previousTask,previousAction,previousEffect,archived:archivedTasks,favorites:favoriteTasks,savedAt:new Date().toISOString()}));taskStorageState='ready';}
         catch(error){taskStorageState='unavailable';}
       }
       renderTaskSession();renderRecords();
@@ -706,23 +721,25 @@
       try{raw=localStorage.getItem(TASK_STORAGE_KEY);}
       catch(error){taskStorageState='unavailable';renderTaskSession();return;}
       try{record=raw?JSON.parse(raw):null;}catch(error){record=null;}
-      if(record&&Number.isInteger(record.version)&&record.version>3){taskStorageState='unsupported';renderTaskSession();return;}
-      const current=(record?.version===1||record?.version===2||record?.version===3)?validTaskSnapshot(record.current):null;
-      if(record?.version===3&&!current){
+      if(record&&Number.isInteger(record.version)&&record.version>4){taskStorageState='unsupported';renderTaskSession();return;}
+      const current=(record?.version===1||record?.version===2||record?.version===3||record?.version===4)?validTaskSnapshot(record.current):null;
+      if((record?.version===3||record?.version===4)&&!current){
         archivedTasks=validArchives(record.archived);favoriteTasks=validFavorites(record.favorites);
+        deletedArchiveIds=new Set(validDeletedArchiveIds(record.deletedArchives));
         taskStorageState='unsupported';renderTaskSession();renderRecords();toast('目前任務無法讀取，已保留原始紀錄且暫不覆寫');return;
       }
       if(current){
         applyTaskSnapshot(current);previousTask=validTaskSnapshot(record.previous);
         previousAction=previousTask&&typeof record.previousAction==='string'?record.previousAction.slice(0,100):'';
         archivedTasks=validArchives(record.archived);favoriteTasks=validFavorites(record.favorites);
-        if(record.version===3&&(!Array.isArray(record.archived)||!Array.isArray(record.favorites)||archivedTasks.length!==record.archived.length||favoriteTasks.length!==record.favorites.length)){
+        deletedArchiveIds=new Set(validDeletedArchiveIds(record.deletedArchives));
+        if(record.version>=3&&(!Array.isArray(record.archived)||!Array.isArray(record.favorites)||archivedTasks.length!==record.archived.length||favoriteTasks.length!==record.favorites.length||(record.version===4&&(!Array.isArray(record.deletedArchives)||deletedArchiveIds.size!==record.deletedArchives.length)))){
           taskStorageState='unsupported';renderTaskSession();renderRecords();toast('部分紀錄無法讀取，暫不覆寫原始保存資料');return;
         }
-        const migrateCompletion=!!current.completedAt&&!archivedTasks.some(task=>task.id===current.id);
+        const migrateCompletion=!!current.completedAt&&!deletedArchiveIds.has(current.id)&&!archivedTasks.some(task=>task.id===current.id);
         previousEffect=previousTask&&previousTask.id===current.id&&current.completedAt&&!previousTask.completedAt&&(record.previousEffect?.archiveAdded===current.id||migrateCompletion)?{archiveAdded:current.id}:null;
         if(migrateCompletion)archivedTasks.unshift(current);
-        if(record.version<3||migrateCompletion)persistTask();else{renderTaskSession();renderRecords();}
+        if(record.version<4||migrateCompletion)persistTask();else{renderTaskSession();renderRecords();}
       }else{persistTask();if(raw)toast('原本的保存資料無法讀取，已建立新任務');}
     }
     function taskEditable(){
@@ -734,7 +751,13 @@
     function undoTask(){
       if(drawMotion||progressChangeResolve||detailClosing||detailFlight||!previousTask)return false;
       const value=previousTask;
-      if(previousEffect?.archiveAdded)archivedTasks=archivedTasks.filter(task=>task.id!==previousEffect.archiveAdded);
+      if(previousEffect?.archiveAdded){
+        archivedTasks=archivedTasks.filter(task=>task.id!==previousEffect.archiveAdded);
+        if(recordsDeletionUndo?.tab==='completed'){
+          recordsDeletionUndo.entries=recordsDeletionUndo.entries.filter(task=>task.id!==previousEffect.archiveAdded);
+          if(!recordsDeletionUndo.entries.length){recordsDeletionUndo=null;clearTimeout(recordsUndoTimer);}
+        }
+      }
       closeQuestDetail(true);el('cardDialog').close();applyTaskSnapshot(value);
       previousTask=null;previousAction='';previousEffect=null;persistTask();renderQuest();
       toast('已復原上一個操作，恢復原本任務');return true;
@@ -776,6 +799,7 @@
     function finishShooting(){
       if(!taskConfirmedAt||taskCompletedAt||drawMotion||progressChangeResolve||detailClosing||detailFlight||taskShotCount<(shootingTarget()||1))return false;
       const before=taskSnapshot();taskCompletedAt=new Date().toISOString();
+      deletedArchiveIds.delete(taskId);
       const added=!archivedTasks.some(task=>task.id===taskId);if(added)archivedTasks.unshift(taskSnapshot());
       previousTask=before;previousAction='完成並封存任務';previousEffect=added?{archiveAdded:taskId}:null;persistTask();
       toast(taskStorageState==='ready'?'任務已完成並存入紀錄；可以開始下一趟了':'任務已完成，但目前無法保存；請先匯出備份');return true;
@@ -798,7 +822,7 @@
       }
       taskId=newTaskId();taskCreatedAt=new Date().toISOString();
       commitTask(before,source?'再次挑戰這組任務':'開始新任務');
-      closeQuestDetail(true);el('recordDialog').close();el('recordsDialog').close();renderQuest();switchPage('play',{section:'play',focusContent:true});
+      closeQuestDetail(true);el('recordDialog').close();cancelRecordSelection();renderQuest();switchPage('play',{section:'play',focusContent:true});
       toast('新任務已準備好，可以調整後確認出發');return true;
     }
     // Stage a proposed card change, then restore the current task while asking.
@@ -1407,6 +1431,7 @@
     el('dialogChoose').addEventListener('click',chooseLibraryCard);
     el('questDetailChoose').addEventListener('click',chooseLibraryCard);
     // Completed tasks, favorites and undo effects live in one atomic storage envelope.
+    function validDeletedArchiveIds(values){return Array.isArray(values)?[...new Set(values.filter(id=>typeof id==='string'&&id.length>0&&id.length<=100))]:[]}
     function validArchives(values){
       if(!Array.isArray(values))return [];
       const seen=new Set();return values.map(validTaskSnapshot).filter(task=>task&&task.completedAt&&!seen.has(task.id)&&seen.add(task.id));
@@ -1433,15 +1458,45 @@
     }
     function recordDate(value){return new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value))}
     function recordSubject(task){return KEYS.filter(key=>!task.covered[key]&&(key==='subject'||key==='story')).map(key=>taskCard(key,task.cards[key]).title).join(' · ')||'自由攝影散步'}
+    let recordsSelecting=false,selectedRecordIds=new Set(),pendingRecordDeletion=null,recordsDeletionUndo=null,recordsUndoTimer=null;
+    let recordPress=null,suppressedRecordClick=null;
+    function recordEntries(){return recordTab==='favorites'?favoriteTasks:archivedTasks}
+    function clearRecordPress(){if(recordPress)clearTimeout(recordPress.timer);recordPress=null}
+    function cancelRecordSelection(){clearRecordPress();recordsSelecting=false;selectedRecordIds.clear();renderRecords()}
+    function enterRecordSelection(id=null){
+      if(taskStorageState==='unsupported'||drawMotion||progressChangeResolve)return false;
+      recordsSelecting=true;if(id&&recordEntries().some(entry=>entry.id===id))selectedRecordIds.add(id);renderRecords();return true;
+    }
+    function toggleRecordSelection(id){
+      if(!recordEntries().some(entry=>entry.id===id))return;
+      if(selectedRecordIds.has(id))selectedRecordIds.delete(id);else selectedRecordIds.add(id);renderRecords();
+      [...el('recordsList').querySelectorAll('[data-record-view]')].find(button=>button.dataset.recordView===id)?.focus({preventScroll:true});
+    }
     function renderRecords(){
-      const favorites=recordTab==='favorites',values=favorites?favoriteTasks:archivedTasks;
+      const favorites=recordTab==='favorites',values=recordEntries(),ids=new Set(values.map(entry=>entry.id));
+      selectedRecordIds=new Set([...selectedRecordIds].filter(id=>ids.has(id)));
       el('recordsCompleted').textContent=`已完成 ${archivedTasks.length}`;el('recordsFavorites').textContent=`收藏 ${favoriteTasks.length}`;
       el('recordsCompleted').setAttribute('aria-pressed',String(!favorites));el('recordsFavorites').setAttribute('aria-pressed',String(favorites));
+      el('recordsSelect').hidden=recordsSelecting;el('recordsSelect').disabled=!values.length||taskStorageState==='unsupported';
+      el('recordsCancel').hidden=!recordsSelecting;el('recordsSelectAll').hidden=!recordsSelecting;
+      const all=values.length>0&&selectedRecordIds.size===values.length;
+      el('recordsSelectAll').textContent=all?'取消全選':`全選${favorites?'收藏':'已完成'}，共 ${values.length} 筆`;
+      el('recordsSelectAll').setAttribute('aria-pressed',String(all));
+      el('recordsSelectionNote').hidden=!recordsSelecting;el('recordsSelectionNote').textContent=`已選 ${selectedRecordIds.size} 筆 · 全選包含尚未載入的紀錄`;
+      el('recordsSelectionActions').hidden=!recordsSelecting;
+      el('recordsSelectedCount').textContent=`已選 ${selectedRecordIds.size} 筆`;
+      el('recordsDelete').textContent=`${favorites?'取消收藏':'刪除'} ${selectedRecordIds.size} 筆`;
+      el('recordsDelete').disabled=!selectedRecordIds.size||taskStorageState==='unsupported';
+      document.body.classList.toggle('records-selecting',recordsSelecting&&activePage==='records');
       el('recordsList').innerHTML=values.length?values.slice(0,recordsShown).map(entry=>{
-        const task=favorites?entry.task:entry,id=entry.id;
-        return `<div class="record-row"><button class="record-open" type="button" data-record-view="${escapeHTML(id)}"><strong>${escapeHTML(recordSubject(task))}</strong><small>${escapeHTML(recordDate(favorites?entry.savedAt:task.completedAt))} · ${favorites?'收藏的組合':`${task.shotCount} 張作品`} · 查看任務 ↗</small></button>${favorites?`<button class="btn btn-outline" type="button" data-favorite-remove="${escapeHTML(id)}" aria-label="取消收藏：${escapeHTML(recordSubject(task))}">取消收藏</button>`:''}</div>`;
-      }).join(''):`<p class="tools-note">${favorites?'還沒有收藏。遇到喜歡的組合，按「收藏組合」留待下次。':'還沒有完成的任務。完成一趟攝影散步後，會保存在這裡。'}</p>`;
+        const task=favorites?entry.task:entry,id=entry.id,selected=selectedRecordIds.has(id);
+        const label=recordsSelecting?`${selected?'取消選取':'選取'}：${recordSubject(task)}`:`查看任務：${recordSubject(task)}`;
+        return `<div class="record-row${selected?' record-selected':''}"><button class="record-open" type="button" data-record-view="${escapeHTML(id)}" aria-label="${escapeHTML(label)}" ${recordsSelecting?`aria-pressed="${selected}"`:'aria-haspopup="dialog"'}>${recordsSelecting?`<span class="record-checkbox" aria-hidden="true">${selected?'✓':''}</span>`:''}<span class="record-text"><strong>${escapeHTML(recordSubject(task))}</strong><small>${escapeHTML(recordDate(favorites?entry.savedAt:task.completedAt))} · ${favorites?'收藏的組合':`${task.shotCount} 張作品`}${recordsSelecting?'':' · 查看任務 ↗'}</small></span></button>${favorites&&!recordsSelecting?`<button class="btn btn-outline" type="button" data-favorite-remove="${escapeHTML(id)}" aria-label="取消收藏：${escapeHTML(recordSubject(task))}">取消收藏</button>`:''}</div>`;
+      }).join(''):`<p class="records-empty">${favorites?'還沒有收藏。遇到喜歡的組合，按「收藏組合」留待下次。':'還沒有完成的任務。完成一趟攝影散步後，會保存在這裡。'}</p>`;
       el('recordsMore').hidden=values.length<=recordsShown;
+      if(recordsDeletionUndo&&Date.now()>=recordsDeletionUndo.expiresAt){recordsDeletionUndo=null;clearTimeout(recordsUndoTimer);el('recordsStatus').textContent=el('recordsStatus').textContent.replace(/，可在 10 秒內復原。$/,'。');}
+      el('recordsUndoNotice').hidden=!recordsDeletionUndo;
+      if(recordsDeletionUndo)el('recordsUndoText').textContent=`已${recordsDeletionUndo.tab==='favorites'?'取消收藏':'刪除'} ${recordsDeletionUndo.entries.length} 筆`;
     }
     function showRecord(task){
       viewedRecord=structuredClone(task);el('recordTitle').textContent=task.completedAt?'已完成的任務':'收藏的組合';
@@ -1449,32 +1504,86 @@
       el('recordFields').innerHTML=KEYS.map(key=>`<div class="record-field" style="--card-accent:${DECK_META[key].accent}"><small>${DECK_META[key].cn} · ${DECK_META[key].en}</small><strong>${escapeHTML(task.covered[key]?'不限':taskCard(key,task.cards[key]).title)}</strong></div>`).join('');
       renderFavoriteButton(el('recordFavorite'),task);el('recordDialog').showModal();
     }
+    function requestRecordDeletion(){
+      if(!recordsSelecting||!selectedRecordIds.size||taskStorageState==='unsupported')return false;
+      const ids=recordEntries().filter(entry=>selectedRecordIds.has(entry.id)).map(entry=>entry.id);if(!ids.length)return false;
+      pendingRecordDeletion={tab:recordTab,ids};const favorites=recordTab==='favorites';
+      el('deleteRecordsTitle').textContent=favorites?'取消這些收藏？':'刪除這些紀錄？';
+      el('deleteRecordsNote').textContent=favorites?`將取消 ${ids.length} 組收藏。目前任務與已完成紀錄會保留。`:`將刪除 ${ids.length} 筆已完成紀錄。目前任務與收藏會保留。`;
+      el('acceptRecordsDelete').textContent=`${favorites?'取消收藏':'刪除'} ${ids.length} 筆`;el('deleteRecordsDialog').showModal();el('cancelRecordsDelete').focus();return true;
+    }
+    function deleteSelectedRecords(){
+      const deletion=pendingRecordDeletion;pendingRecordDeletion=null;el('deleteRecordsDialog').close();
+      if(!deletion||taskStorageState==='unsupported')return false;
+      const ids=new Set(deletion.ids),values=deletion.tab==='favorites'?favoriteTasks:archivedTasks,entries=values.filter(entry=>ids.has(entry.id));if(!entries.length)return false;
+      clearTimeout(recordsUndoTimer);
+      recordsDeletionUndo={tab:deletion.tab,entries:structuredClone(entries),expiresAt:Date.now()+10000};
+      if(deletion.tab==='favorites')favoriteTasks=favoriteTasks.filter(entry=>!ids.has(entry.id));
+      else{archivedTasks=archivedTasks.filter(entry=>!ids.has(entry.id));entries.forEach(entry=>deletedArchiveIds.add(entry.id));}
+      recordsSelecting=false;selectedRecordIds.clear();persistTask();
+      recordsUndoTimer=setTimeout(()=>{recordsDeletionUndo=null;el('recordsStatus').textContent=el('recordsStatus').textContent.replace(/，可在 10 秒內復原。$/,'。');renderRecords()},10000);
+      el('recordsStatus').textContent=taskStorageState==='ready'?`已${deletion.tab==='favorites'?'取消收藏':'刪除'} ${entries.length} 筆，可在 10 秒內復原。`:'紀錄已更新，但此瀏覽器無法保存；請先匯出備份。';return true;
+    }
+    function undoRecordsDeletion(){
+      const deletion=recordsDeletionUndo;if(!deletion||Date.now()>=deletion.expiresAt||taskStorageState==='unsupported'){recordsDeletionUndo=null;renderRecords();return false;}
+      clearTimeout(recordsUndoTimer);recordsDeletionUndo=null;let count=0;
+      if(deletion.tab==='favorites'){
+        const fingerprints=new Set(favoriteTasks.map(entry=>taskFingerprint(entry.task)));
+        deletion.entries.forEach(entry=>{const fingerprint=taskFingerprint(entry.task);if(!fingerprints.has(fingerprint)){favoriteTasks.push(entry);fingerprints.add(fingerprint);count++;}});
+        favoriteTasks.sort((a,b)=>Date.parse(b.savedAt)-Date.parse(a.savedAt));
+      }else{
+        const ids=new Set(archivedTasks.map(entry=>entry.id));
+        deletion.entries.forEach(entry=>{if(!ids.has(entry.id)&&(entry.id!==taskId||taskCompletedAt)){archivedTasks.push(entry);ids.add(entry.id);deletedArchiveIds.delete(entry.id);count++;}});
+        archivedTasks.sort((a,b)=>Date.parse(b.completedAt)-Date.parse(a.completedAt));
+      }
+      persistTask();el('recordsStatus').textContent=taskStorageState==='ready'?`已復原 ${count} 筆${deletion.tab==='favorites'?'收藏':'紀錄'}。`:'已復原，但此瀏覽器無法保存；請先匯出備份。';return true;
+    }
     el('saveFavorite').addEventListener('click',()=>toggleFavorite(taskSnapshot()));
-    el('openRecords').addEventListener('click',()=>{recordsShown=20;renderRecords();el('recordsStatus').textContent='';el('recordsDialog').showModal()});
-    el('recordsClose').addEventListener('click',()=>el('recordsDialog').close());el('recordClose').addEventListener('click',()=>el('recordDialog').close());
-    el('recordsCompleted').addEventListener('click',()=>{recordTab='completed';recordsShown=20;renderRecords()});
-    el('recordsFavorites').addEventListener('click',()=>{recordTab='favorites';recordsShown=20;renderRecords()});
+    el('openRecords').addEventListener('click',()=>{renderRecords();switchPage('records',{section:'records',focusContent:true})});
+    el('recordClose').addEventListener('click',()=>el('recordDialog').close());
+    el('recordsCompleted').addEventListener('click',()=>{recordTab='completed';recordsShown=20;cancelRecordSelection()});
+    el('recordsFavorites').addEventListener('click',()=>{recordTab='favorites';recordsShown=20;cancelRecordSelection()});
+    el('recordsSelect').addEventListener('click',()=>enterRecordSelection());el('recordsCancel').addEventListener('click',cancelRecordSelection);
+    el('recordsSelectAll').addEventListener('click',()=>{const entries=recordEntries();selectedRecordIds=selectedRecordIds.size===entries.length?new Set():new Set(entries.map(entry=>entry.id));renderRecords()});
+    el('recordsDelete').addEventListener('click',requestRecordDeletion);el('recordsRestoreDeleted').addEventListener('click',undoRecordsDeletion);
+    el('cancelRecordsDelete').addEventListener('click',()=>{pendingRecordDeletion=null;el('deleteRecordsDialog').close()});
+    el('acceptRecordsDelete').addEventListener('click',deleteSelectedRecords);el('deleteRecordsDialog').addEventListener('cancel',()=>pendingRecordDeletion=null);
+    el('deleteRecordsDialog').addEventListener('close',()=>pendingRecordDeletion=null);
     el('recordsMore').addEventListener('click',()=>{recordsShown+=20;renderRecords()});
     el('recordsList').addEventListener('click',event=>{
       const view=event.target.closest('[data-record-view]'),remove=event.target.closest('[data-favorite-remove]');
-      if(view){const entry=(recordTab==='favorites'?favoriteTasks:archivedTasks).find(task=>task.id===view.dataset.recordView);if(entry)showRecord(recordTab==='favorites'?entry.task:entry);}
-      if(remove){const entry=favoriteTasks.find(task=>task.id===remove.dataset.favoriteRemove);if(entry)toggleFavorite(entry.task);}
+      if(view){const id=view.dataset.recordView;if(suppressedRecordClick&&suppressedRecordClick.id===id&&performance.now()<suppressedRecordClick.until&&event.detail!==0){suppressedRecordClick=null;event.preventDefault();return;}
+        if(recordsSelecting){toggleRecordSelection(id);return;}const entry=recordEntries().find(task=>task.id===id);if(entry)showRecord(recordTab==='favorites'?entry.task:entry);}
+      if(remove&&!recordsSelecting){const entry=favoriteTasks.find(task=>task.id===remove.dataset.favoriteRemove);if(entry)toggleFavorite(entry.task);}
     });
+    el('recordsList').addEventListener('pointerdown',event=>{
+      clearRecordPress();suppressedRecordClick=null;const button=event.target.closest('[data-record-view]');if(!button||recordsSelecting||event.isPrimary===false||(event.button!==undefined&&event.button!==0))return;
+      const press={id:button.dataset.recordView,pointerId:event.pointerId,x:event.clientX,y:event.clientY,timer:null};recordPress=press;
+      press.timer=setTimeout(()=>{if(recordPress!==press)return;if(enterRecordSelection(press.id)){suppressedRecordClick={id:press.id,pointerId:press.pointerId,until:Infinity};try{el('recordsList').setPointerCapture(press.pointerId)}catch(error){}}},500);
+    });
+    el('recordsList').addEventListener('pointermove',event=>{if(recordPress&&(event.pointerId!==recordPress.pointerId||Math.hypot(event.clientX-recordPress.x,event.clientY-recordPress.y)>10))clearRecordPress()});
+    ['pointerup','pointercancel','lostpointercapture','pointerleave'].forEach(type=>el('recordsList').addEventListener(type,clearRecordPress));
+    ['pointerup','pointercancel'].forEach(type=>document.addEventListener(type,event=>{if(suppressedRecordClick?.pointerId===event.pointerId)suppressedRecordClick.until=performance.now()+700;clearRecordPress()}));
+    el('recordsList').addEventListener('contextmenu',event=>{if(event.target.closest('[data-record-view]'))event.preventDefault()});
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&recordsSelecting&&!el('deleteRecordsDialog').open){cancelRecordSelection();el('recordsSelect').focus()}});
     el('recordFavorite').addEventListener('click',()=>viewedRecord&&toggleFavorite(viewedRecord));
     el('recordReplay').addEventListener('click',()=>viewedRecord&&beginTask(viewedRecord));
     function downloadBlob(blob,name){const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-    function backupPayload(){return {format:'photo-quest-backup',version:1,exportedAt:new Date().toISOString(),current:taskSnapshot(),archived:archivedTasks,favorites:favoriteTasks}}
+    function backupPayload(){return {format:'photo-quest-backup',version:2,deletedArchives:[...deletedArchiveIds],exportedAt:new Date().toISOString(),current:taskSnapshot(),archived:archivedTasks,favorites:favoriteTasks}}
     function parseBackup(value){
-      if(!value||value.format!=='photo-quest-backup'||value.version!==1||!Array.isArray(value.archived)||!Array.isArray(value.favorites)||value.archived.length>10000||value.favorites.length>10000)throw Error('這份檔案不是支援的 PHOTO QUEST 備份。');
+      if(!value||value.format!=='photo-quest-backup'||(value.version!==1&&value.version!==2)||!Array.isArray(value.archived)||!Array.isArray(value.favorites)||value.archived.length>10000||value.favorites.length>10000)throw Error('這份檔案不是支援的 PHOTO QUEST 備份。');
       const current=value.current===null?null:validTaskSnapshot(value.current),archived=validArchives(value.archived),favorites=validFavorites(value.favorites);
       if((value.current!==null&&!current)||archived.length!==value.archived.length||favorites.length!==value.favorites.length)throw Error('備份內容有無法辨識的任務，尚未匯入任何資料。');
-      return {current,archived,favorites};
+      const deletedArchives=validDeletedArchiveIds(value.deletedArchives);
+      if(value.version===2&&(!Array.isArray(value.deletedArchives)||deletedArchives.length!==value.deletedArchives.length))throw Error('備份中的刪除紀錄無法辨識，尚未匯入任何資料。');
+      return {current,archived,favorites,deletedArchives};
     }
     function mergeBackup(value,restoreCurrent=false){
       if(taskStorageState==='unsupported')return false;
       const archiveIds=new Set(archivedTasks.map(task=>task.id));
-      value.archived.forEach(task=>{if(!archiveIds.has(task.id)){archivedTasks.push(task);archiveIds.add(task.id);}});
-      if(value.current?.completedAt&&!archiveIds.has(value.current.id)){archivedTasks.push(value.current);archiveIds.add(value.current.id);}
+      value.archived.forEach(task=>{if(!archiveIds.has(task.id)){archivedTasks.push(task);archiveIds.add(task.id);deletedArchiveIds.delete(task.id);}});
+      if(value.current?.completedAt&&!value.deletedArchives?.includes(value.current.id)&&!archiveIds.has(value.current.id)){archivedTasks.push(value.current);archiveIds.add(value.current.id);deletedArchiveIds.delete(value.current.id);}
+      (value.deletedArchives||[]).forEach(id=>{if(!archiveIds.has(id))deletedArchiveIds.add(id)});
       const fingerprints=new Set(favoriteTasks.map(entry=>taskFingerprint(entry.task)));
       const candidates=[...value.favorites];
       if(value.current&&!value.current.completedAt&&!restoreCurrent)candidates.push({id:newTaskId(),savedAt:new Date().toISOString(),task:{...value.current,shotCount:0,confirmedAt:null,completedAt:null}});
@@ -1536,20 +1645,23 @@
       if(drawMotion||progressChangeResolve)return false;
       const task=structuredClone(source),request=++shareRequest;
       shareFile=null;if(shareUrl){URL.revokeObjectURL(shareUrl);shareUrl=null;}
-      el('sharePreview').hidden=true;el('nativeShare').hidden=true;el('downloadShare').hidden=true;el('shareStatus').textContent='正在準備圖片…';
+      el('sharePreview').hidden=true;el('shareSaveHint').hidden=true;el('nativeShare').hidden=true;el('downloadShare').hidden=true;el('shareStatus').textContent='正在準備圖片…';
       el('shareDialog').showModal();
       try{const blob=await makeTaskImage(task);if(request!==shareRequest||!el('shareDialog').open)return false;
         shareFile=new File([blob],`photo-quest-${task.createdAt.slice(0,10)}.png`,{type:'image/png'});shareUrl=URL.createObjectURL(blob);
         el('sharePreview').src=shareUrl;el('sharePreview').hidden=false;el('downloadShare').href=shareUrl;el('downloadShare').download=shareFile.name;el('downloadShare').hidden=false;
         let native=false;try{native=!!navigator.share&&!!navigator.canShare?.({files:[shareFile]})}catch(error){}
-        el('nativeShare').hidden=!native;el('shareStatus').textContent=native?'可分享或儲存圖片；任務狀態不會改變。':'可儲存圖片；手機也可以長按圖片儲存。';return true;
+        el('nativeShare').hidden=!native;
+        const ios=/iPhone|iPad|iPod/.test(navigator.userAgent||'')||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+        el('shareSaveHint').hidden=!ios;el('shareSaveHint').textContent=native?'存到 iPhone 相簿，請在下一步選擇「儲存影像」。':'可長按上方圖片，選擇「儲存影像」或「加入照片」。';
+        el('shareStatus').textContent=native?'按「分享／儲存圖片」開啟系統選單；下載檔案會存到裝置的下載位置。':'可下載圖片檔案；手機若支援長按圖片儲存，也可加入相簿。';return true;
       }catch(error){if(request===shareRequest)el('shareStatus').textContent=`無法產生圖片：${error.message}`;return false;}
     }
     el('shareQuest').addEventListener('click',()=>openTaskShare());el('recordShare').addEventListener('click',()=>viewedRecord&&openTaskShare(viewedRecord));
     el('shareClose').addEventListener('click',()=>el('shareDialog').close());
     el('shareDialog').addEventListener('close',()=>{shareRequest++;shareFile=null;if(shareUrl){URL.revokeObjectURL(shareUrl);shareUrl=null;}});
-    el('nativeShare').addEventListener('click',async()=>{if(!shareFile)return;try{await navigator.share({files:[shareFile],title:'PHOTO QUEST 任務卡'});el('shareStatus').textContent='已開啟分享，任務狀態維持不變。';}catch(error){if(error.name!=='AbortError')el('shareStatus').textContent='目前無法分享，請改用儲存圖片。';}});
-    ['recordsDialog','recordDialog','shareDialog'].forEach(id=>el(id).addEventListener('click',event=>{if(event.target!==el(id))return;const rect=event.target.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)el(id).close()}));
+    el('nativeShare').addEventListener('click',async()=>{if(!shareFile)return;const file=shareFile,request=shareRequest;try{await navigator.share({files:[file]});if(request===shareRequest&&el('shareDialog').open)el('shareStatus').textContent='系統分享流程已結束，任務狀態維持不變。';}catch(error){if(request===shareRequest&&el('shareDialog').open&&error.name!=='AbortError')el('shareStatus').textContent='目前無法開啟系統選單，可長按圖片儲存或下載檔案。';}});
+    ['recordDialog','shareDialog','deleteRecordsDialog'].forEach(id=>el(id).addEventListener('click',event=>{if(event.target!==el(id))return;const rect=event.target.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)el(id).close()}));
 
     // user-facing utilities and A4 printing: fronts only, 4 cards/page at physical A7 dimensions.
     let toastTimer;
@@ -1562,7 +1674,7 @@
     el('printCategory').addEventListener('click',()=>printCards(visibleItems().map(it=>[activeDeck,it])));
     document.addEventListener('keydown',e=>{if(e.key==='Escape'&&el('cardDialog').open)el('cardDialog').close()});
     // Keep panel DOM mounted: switching never resets cards, filters or loaded results.
-    const PAGES=['play','library','design'];
+    const PAGES=['play','library','records'];
     const pageScroll=Object.fromEntries(PAGES.map(key=>[key,0]));
     let activePage='play', pageAnimation=null;
     const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -1572,7 +1684,8 @@
       const previous=activePage,changed=key!==previous;
       pageScroll[previous]=window.scrollY;
       if(pageAnimation){pageAnimation.cancel();pageAnimation=null;}
-      activePage=key;
+      if(previous==='records'&&changed){cancelRecordSelection();el('deleteRecordsDialog').close();pendingRecordDeletion=null;}
+      activePage=key;if(key==='records')renderRecords();
       document.body.dataset.page=key;
       PAGES.forEach(page=>{
         el('page-'+page).hidden=page!==key;
@@ -1602,7 +1715,7 @@
       const target=link.getAttribute('href').slice(1);if(target!=='top'&&!PAGES.includes(target))return;
       e.preventDefault();switchPage(target==='top'?'play':target,{section:target,focusContent:target!=='top'});
     });
-    function restorePage({initial=false}={}){const target=location.hash.slice(1);switchPage(PAGES.includes(target)?target:'play',{section:target==='top'?'top':initial&&target==='play'?'play':null,writeHistory:false,animate:false})}
+    function restorePage({initial=false}={}){let target=location.hash.slice(1);if(target==='design'){target='records';history.replaceState(null,'','#records');}switchPage(PAGES.includes(target)?target:'play',{section:target==='top'?'top':initial&&target==='play'?'play':null,writeHistory:false,animate:false})}
     window.addEventListener('popstate',restorePage);
     window.addEventListener('hashchange',restorePage);
     restoreTask();renderQuest();renderLibrary();
