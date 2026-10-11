@@ -1,0 +1,15 @@
+# Cloudflare Pages internal proxy rewrites; keep public URLs stable.
+# Do not redirect /photo-quest/ — it stays as a separate project.
+/ /muwei-website/index.html 200
+/index.html /muwei-website/index.html 200
+/about /muwei-website/about.html 200
+/about.html /muwei-website/about.html 200
+/works /muwei-website/works.html 200
+/works.html /muwei-website/works.html 200
+/services /muwei-website/services.html 200
+/services.html /muwei-website/services.html 200
+/contact /muwei-website/contact.html 200
+/contact.html /muwei-website/contact.html 200
+/site.css /muwei-website/site.css 200
+/portrait.jpg /muwei-website/portrait.jpg 200
+/images/* /muwei-website/images/:splat 200
