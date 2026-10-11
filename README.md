@@ -1,82 +1,62 @@
-# muweifilm.com
+# MUWEI FILM — 網站與互動作品
 
-單檔靜態網站。樣式內嵌，無 build、無框架、無第三方服務。
-在本機雙擊 `index.html` 就能看到完整結果。
+這個儲存庫包含兩個**獨立網站專案**，從此不再把木尉網站原始檔散落在最上層。
 
-**沒有圖片也能直接上線**——圖框會顯示成標了檔名的佔位塊，之後一張一張換。
-
+```text
+muweifilm/
+├── muwei-website/               # 木尉影像網站（HTML、CSS、圖片）
+│   ├── index.html
+│   ├── about.html
+│   ├── works.html
+│   ├── services.html
+│   ├── contact.html
+│   ├── 404.html
+│   ├── site.css
+│   ├── portrait.jpg
+│   └── images/
+│       └── about/
+├── photo-quest/                 # 攝影抽卡遊戲（獨立專案）
+│   ├── index.html
+│   └── apple-touch-icon-v1.png
+├── _redirects                  # Cloudflare Pages URL 相容規則
+├── 404.html                    # 根目錄 404（部署相容）
+├── CNAME                       # 自訂網域設定（GitHub Pages 相容）
+├── .nojekyll                   # GitHub Pages 相容
+└── README.md
 ```
-index.html    整個網站（含樣式）
-404.html      找不到頁面
-images/
-  works/         hero.jpg + 作品劇照
-  photography/   p1–p6.jpg
-  about/         portrait.jpg
-```
 
----
+## 對外網址（不變）
 
-## 上線（約 30 分鐘）
-
-1. GitHub → New repository → 命名 `muweifilm` → **Public** → Create
-2. Add file → Upload files → 拖入 `index.html`、`404.html` → Commit
-3. Cloudflare Pages → Create a project → Connect to Git → 選這個 repo
-4. Build command **留空**、Output directory 填 `/` → Save and Deploy
-5. 用它給的 `xxx.pages.dev` 網址確認
-6. 網域轉移完成後 → Custom domains → 加入 `muweifilm.com`
-
----
-
-## 補圖
-
-丟進對應資料夾，檔名對上就會自動顯示。佔位塊上寫的就是它要的檔名。
-
-| 路徑 | 尺寸 |
+| 用途 | 網址 |
 |---|---|
-| `images/works/hero.jpg` | 1600×900 |
-| `images/works/*.jpg` | 1200×675（每支作品） |
-| `images/photography/p1–p6.jpg` | 1000×1250（直式） |
-| `images/about/portrait.jpg` | 1000×1250 |
-| `images/og.jpg` | 1200×630（社群分享縮圖） |
+| 木尉網站首頁 | https://www.muweifilm.com/ |
+| 木尉網站作品 | https://www.muweifilm.com/works.html |
+| 木尉網站關於 | https://www.muweifilm.com/about.html |
+| 木尉網站服務 | https://www.muweifilm.com/services.html |
+| 木尉網站聯絡 | https://www.muweifilm.com/contact.html |
+| 攝影抽卡遊戲 | https://www.muweifilm.com/photo-quest/ |
 
-單張壓到 300KB 以內。
+木尉網站的原始檔移到 `muwei-website/`，透過根目錄的 `_redirects` 使用 Cloudflare Pages **200 internal proxy** 將原有路徑映射到新位置（保留使用者瀏覽器的網址）。CSS 和圖片亦有對應規則。遊戲完全維持在 `photo-quest/`，不受到這些規則影響。子網頁的無副檔名網址（例如 `/works`）也保留了對應。
 
----
+## 部署設定：不要將 Build Output 改成 muwei-website
 
-## 新增一支作品
+此 Repository 原本以 **Cloudflare Pages** 從 `main` 部署根目錄的靜態資源。保留目前設定：
 
-在 `index.html` 搜尋 `shotlist__rows`，複製下面這塊貼進去。
-順序就是清單顯示的順序。
+- Build command：留空（無框架、無額外 build）
+- Build output directory：Repository 根目錄（`/`）
+- Production branch：`main`
+- Custom domain：原本 Cloudflare Pages 上已設定的網域
 
-```html
-<li class="row">
-  <a href="YOUTUBE_網址" target="_blank" rel="noopener"
-     data-still="images/works/檔名.jpg">
-    <span class="row__year">年份</span>
-    <span class="row__client">客戶</span>
-    <span class="row__kind">片型</span>
-    <span class="row__title">片名</span>
-    <span class="row__go" aria-hidden="true">觀看</span>
-  </a>
-</li>
-```
+**不能直接改成以 `muwei-website/` 作為唯一 Output 目錄**，否則 `photo-quest/` 將無法隨同部署。Cloudflare Pages 的 `_redirects` 僅適用於 Cloudflare Pages；如果日後改用 GitHub Pages 或其他平台，需改用相容的 rewrite 規則或建置輸出設定。
 
-`row__kind` 建議只用四種：形象片／紀錄片／知識型／短影音。
-分類越少，清單越好讀。
+部署後建議檢查首頁、各分頁、CSS/圖片、404 和 Photo Quest；如果日後設定了 Cloudflare Pages Functions，注意 Functions 可能優先接手路由，導致 `_redirects` 不生效。
 
-作品超過 12 支時再拆成獨立的 `works.html`。
+## 日常維護
 
----
+- 木尉網站：只編輯 `muwei-website/`。本機直接開啟 `muwei-website/index.html` 可以預覽。
+- 攝影抽卡遊戲：只編輯 `photo-quest/`。
+- 加入新子專案：在根目錄建立另一個專案資料夾。
+- 新增或變更木尉網站資源路徑：必要時調整根目錄的 `_redirects`。
+- 修改 404：同步更新 `muwei-website/404.html` 及部署用的根目錄 `404.html`。
 
-## 待核對
-
-- 作品的年份是推測的
-- 兩支寫「待填」的客戶名稱
-- 主標「把難講的事，講得有人想看」是定位提案
-
----
-
-## 之後要改東西
-
-GitHub repo → 點 `index.html` → 鉛筆圖示 → 改 → Commit changes。
-約 30 秒後線上更新。
+> 備註：改名僅涉及 Git 內的檔案位置；原 HTML、CSS、Photo Quest 內容保持不變。
