@@ -194,8 +194,8 @@
     .quest-detail.motion-closing .quest-detail-content {pointer-events:none}
     .quest-motion-flight {position:fixed; z-index:2; overflow:hidden; border-radius:9px; background:var(--paper); pointer-events:none; will-change:transform,width,height}
     .quest-flight-detail {position:absolute; top:0; left:0; margin:0; transform-origin:top left; pointer-events:none}
-    .quest-flight-mini {position:absolute; inset:0; width:100%; margin:0}
-    .quest-grid .quest-origin {visibility:hidden}
+    .quest-flight-mini {position:absolute; inset:0; width:100%; height:100%; margin:0}
+    .quest-grid .quest-origin,.library-grid .quest-origin {visibility:hidden}
     @keyframes quest-backdrop-in {from{background:rgba(48,54,45,0);backdrop-filter:blur(0)} to{background:rgba(48,54,45,.40);backdrop-filter:blur(4px)}}
     @keyframes quest-backdrop-out {from{background:var(--quest-backdrop-start,rgba(48,54,45,.40));backdrop-filter:var(--quest-backdrop-blur,blur(4px))} to{background:rgba(48,54,45,0);backdrop-filter:blur(0)}}
     .quest-detail-content {padding:18px 22px 20px; display:flex; flex-direction:column; align-items:center; gap:12px}
@@ -212,6 +212,8 @@
     .quest-detail-card .back-mark {font-size:18px}
     .quest-detail-card .back-sub {font-size:12px}
     .quest-detail-commands {width:100%; margin:0}
+    .quest-detail-choose {width:100%; min-height:44px}
+    .quest-detail-commands[hidden],.quest-detail-choose[hidden] {display:none!important}
     .quest-detail-commands button {flex:1; min-height:44px; font-size:12px; border:1px solid #DDE1D6; border-radius:7px; background:var(--paper); padding:9px 4px}
     .quest-detail-note {margin:0; font-size:11px; color:var(--sub); text-align:center}
     #toast {position:fixed; bottom:25px; left:50%; transform:translate(-50%,18px); background:#394A3A; color:white; font-size:12px; border-radius:7px; padding:10px 17px; box-shadow:0 8px 28px #343c3030; opacity:0; pointer-events:none; transition:opacity .24s,transform .24s; z-index:20}
@@ -417,7 +419,8 @@
     <div class="quest-detail-content">
       <div class="quest-detail-head"><h3 id="questDetailTitle"></h3><button id="questDetailClose" class="quest-detail-close" type="button" aria-label="關閉任務卡片" autofocus>×</button></div>
       <button id="questDetailFlip" class="flip-button dialog-card quest-detail-card" type="button" aria-label="翻轉任務卡片" aria-describedby="questDetailNote"></button>
-      <div class="card-commands quest-detail-commands"><button id="questDetailRedraw" type="button">↻ 重抽</button><button id="questDetailLock" type="button">○ 固定</button><button id="questDetailCover" type="button">▱ 蓋牌</button></div>
+      <div id="questDetailCommands" class="card-commands quest-detail-commands"><button id="questDetailRedraw" type="button">↻ 重抽</button><button id="questDetailLock" type="button">○ 固定</button><button id="questDetailCover" type="button">▱ 蓋牌</button></div>
+      <button id="questDetailChoose" class="btn btn-primary quest-detail-choose" type="button" hidden>放進今日任務 ↗</button>
       <p id="questDetailNote" class="quest-detail-note">左右拖動或點卡片翻面</p>
     </div>
   </dialog>
@@ -528,7 +531,7 @@
     const activeKeys = () => KEYS.filter(key=>!covered[key]);
     const smartPairingActive = () => pairingEnabled && !covered.camera && !covered.frame;
     const mobileLayout=window.matchMedia('(max-width:750px)');
-    let detailKey=null,detailPointer=null,detailSwipeAt=0;
+    let detailKey=null,detailLibrary=null,detailPointer=null,detailSwipeAt=0;
     let detailTurnAngle=0,detailTurnMotion=null;
     let detailAnimations=[],detailMotionId=0,detailClosing=false,detailFlight=null;
     const el=id=>document.getElementById(id);
@@ -586,12 +589,17 @@
       el('pairingNote').textContent=pairingEnabled
         ? covered.camera||covered.frame?'相機與鏡頭皆啟用時會智慧搭配；蓋牌的類別不參與抽取。':'可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。鏡頭接環仍請依實物確認。'
         : '自由組合模式：機身與鏡頭各自隨機。部分組合無法實際安裝，請把它當作視角創作練習。';
-      if(detailKey){renderQuestDetail();questDetailOrigin()?.classList.add('quest-origin')}
+      if(detailKey&&!detailLibrary){renderQuestDetail();questDetailOrigin()?.classList.add('quest-origin')}
     }
+    function questDetailItem(){return detailLibrary?.item||quest[detailKey]}
+    function questDetailCovered(){return !detailLibrary&&covered[detailKey]}
+    function questDetailBack(){return detailLibrary?detailLibrary.back:flipStates[detailKey]}
     function renderQuestDetail(){
       if(!detailKey)return;
       stopQuestDetailTurn();releaseQuestDetailPointer();
-      const key=detailKey,m=DECK_META[key],item=quest[key],isCovered=covered[key],back=!isCovered&&flipStates[key],card=el('questDetailFlip');
+      const key=detailKey,m=DECK_META[key],item=questDetailItem(),isCovered=questDetailCovered(),back=!isCovered&&questDetailBack(),card=el('questDetailFlip');
+      el('questDetailCommands').hidden=!!detailLibrary;el('questDetailChoose').hidden=!detailLibrary;
+      el('questDetailClose').setAttribute('aria-label',detailLibrary?'關閉圖鑑卡片':'關閉任務卡片');
       el('questDetailTitle').textContent=`${m.cn} · ${isCovered?'已蓋牌':item.id}`;
       card.style.setProperty('--card-accent',m.accent);card.style.setProperty('--card-back',m.back);
       card.classList.toggle('flipped',back);card.setAttribute('aria-pressed',String(back));
@@ -609,17 +617,21 @@
       el('questDetailNote').textContent=isCovered?'已略過這個牌組，翻開後恢復抽取':'左右拖動或點卡片翻面';
     }
     function openQuestDetail(key){
+      openCardDetail(key);
+    }
+    function openCardDetail(key,libraryItem=null,libraryOrigin=null){
       if(!KEYS.includes(key)||!mobileLayout.matches||el('questDialog').open)return;
-      const origin=el('questGrid').querySelector(`[data-flip="${key}"]`),from=origin?.getBoundingClientRect();
+      const origin=libraryItem?libraryOrigin:el('questGrid').querySelector(`[data-flip="${key}"]`),from=origin?.getBoundingClientRect();
+      detailLibrary=libraryItem?{item:libraryItem,origin,back:false}:null;
       detailKey=key;detailPointer=null;detailSwipeAt=0;
-      if(!covered[key])flipStates[key]=false;
+      if(!detailLibrary&&!covered[key])flipStates[key]=false;
       renderQuestDetail();document.body.classList.add('quest-detail-open');el('questDialog').showModal();
       if(canAnimateQuestDetail(from)){
         origin.classList.add('quest-origin');
         animateQuestDetail(from,false);
       }
     }
-    function questDetailOrigin(){return detailKey?el('questGrid').querySelector(`[data-flip="${detailKey}"]`):null}
+    function questDetailOrigin(){return detailLibrary?detailLibrary.origin:detailKey?el('questGrid').querySelector(`[data-flip="${detailKey}"]`):null}
     function canAnimateQuestDetail(rect){
       return !reducedMotion.matches&&mobileLayout.matches&&!!el('questDetailFlip').animate&&rect?.width>0&&rect?.height>0;
     }
@@ -642,7 +654,7 @@
     }
     function animateQuestDetail(rect,closing,startRect,surfaceState){
       const dialog=el('questDialog'),card=el('questDetailFlip'),surface=el('questDetailSurface');
-      const chrome=['questDetailTitle','questDetailClose'].map(el).concat(Array.from(dialog.querySelectorAll('.quest-detail-commands,.quest-detail-note')));
+      const chrome=['questDetailTitle','questDetailClose'].map(el).concat(Array.from(dialog.querySelectorAll('.quest-detail-commands,.quest-detail-choose,.quest-detail-note'))).filter(node=>!node.hidden);
       const chromeOpacity=closing?chrome.map(node=>Number(getComputedStyle(node).opacity)):[];
       cancelQuestDetailMotion();
       const base=card.getBoundingClientRect(),panel=dialog.getBoundingClientRect(),id=detailMotionId;
@@ -650,7 +662,9 @@
       const duration=closing?260:300,easing='cubic-bezier(.4,0,.2,1)';
       dialog.classList.add(closing?'motion-closing':'motion-opening');
       if(closing){dialog.style.setProperty('--quest-backdrop-start',surfaceState?.backdropColor||'rgba(48,54,45,.40)');dialog.style.setProperty('--quest-backdrop-blur',surfaceState?.backdropBlur||'blur(4px)')}
-      const flight=document.createElement('div'),full=document.createElement('div'),mini=questDetailOrigin().querySelector('.quest-thumb').cloneNode(true);
+      const flight=document.createElement('div'),full=document.createElement('div'),origin=questDetailOrigin();
+      const mini=detailLibrary?document.createElement('div'):origin.querySelector('.quest-thumb').cloneNode(true);
+      if(detailLibrary){mini.className=origin.className;mini.classList.remove('quest-origin');mini.innerHTML=origin.innerHTML}
       flight.className='quest-motion-flight';flight.setAttribute('aria-hidden','true');
       flight.style.cssText=`left:${base.left}px;top:${base.top}px;width:${base.width}px;height:${base.height}px;--card-accent:${DECK_META[detailKey].accent};--card-back:${DECK_META[detailKey].back}`;
       full.className=card.className+' quest-flight-detail';full.innerHTML=card.innerHTML;
@@ -684,10 +698,10 @@
       if(inner)inner.style.transform=`rotateY(${detailTurnAngle}deg)`;
     }
     function syncQuestDetailFace(back){
-      if(!detailKey||covered[detailKey])return;
+      if(!detailKey||questDetailCovered())return;
       const card=el('questDetailFlip'),m=DECK_META[detailKey];
       card.classList.toggle('flipped',back);card.setAttribute('aria-pressed',String(back));
-      card.setAttribute('aria-label',`翻轉${m.cn}卡：${quest[detailKey].title}，目前${back?'背面':'正面'}`);
+      card.setAttribute('aria-label',`翻轉${m.cn}卡：${questDetailItem().title}，目前${back?'背面':'正面'}`);
     }
     function stopQuestDetailTurn(){
       const motion=detailTurnMotion;
@@ -705,7 +719,10 @@
     function settleQuestDetailTurn(target){
       stopQuestDetailTurn();
       const from=detailTurnAngle,inner=el('questDetailFlip').querySelector('.flip-inner');
-      detailTurnAngle=target;flipStates[detailKey]=questDetailTurnBack(target);syncQuestDetailFace(flipStates[detailKey]);writeQuestDetailTurn();
+      detailTurnAngle=target;
+      const back=questDetailTurnBack(target);
+      if(detailLibrary)detailLibrary.back=back;else flipStates[detailKey]=back;
+      syncQuestDetailFace(back);writeQuestDetailTurn();
       if(!inner?.animate||reducedMotion.matches||Math.abs(target-from)<0.1)return;
       const animation=inner.animate([{transform:`rotateY(${from}deg)`},{transform:`rotateY(${target}deg)`}],{
         duration:Math.max(140,400*Math.min(1,Math.abs(target-from)/180)),easing:'cubic-bezier(.4,0,.2,1)',fill:'both'
@@ -718,7 +735,7 @@
       }).catch(()=>{});
     }
     function setQuestDetailFace(back,direction=0){
-      if(!detailKey||covered[detailKey]||detailClosing||detailFlight)return;
+      if(!detailKey||questDetailCovered()||detailClosing||detailFlight)return;
       releaseQuestDetailPointer();stopQuestDetailTurn();
       const anchor=Math.round(detailTurnAngle/180)*180;
       let target=questDetailTurnBack(anchor)===back?anchor:anchor+(detailTurnAngle<anchor?-180:180);
@@ -776,20 +793,20 @@
     el('questDialog').addEventListener('click',e=>{if(e.target===el('questDialog'))closeQuestDetail()});
     el('questDialog').addEventListener('cancel',e=>{e.preventDefault();closeQuestDetail()});
     el('questDialog').addEventListener('close',()=>{
-      const key=detailKey;cancelQuestDetailMotion();questDetailOrigin()?.classList.remove('quest-origin');
+      const origin=questDetailOrigin();cancelQuestDetailMotion();origin?.classList.remove('quest-origin');
       stopQuestDetailTurn();releaseQuestDetailPointer();
-      detailKey=null;detailPointer=null;detailClosing=false;document.body.classList.remove('quest-detail-open');
-      if(key&&mobileLayout.matches)el('questGrid').querySelector(`[data-flip="${key}"]`)?.focus({preventScroll:true});
+      detailKey=null;detailLibrary=null;detailPointer=null;detailClosing=false;document.body.classList.remove('quest-detail-open');
+      if(mobileLayout.matches)origin?.focus({preventScroll:true});
     });
     el('questDetailFlip').addEventListener('click',e=>{
       // A swipe can generate a click afterwards; it must only flip once.
       if(e.detail!==0&&Date.now()-detailSwipeAt<500)return;
       const rect=el('questDetailFlip').getBoundingClientRect();
       const direction=e.detail!==0&&Number.isFinite(e.clientX)&&e.clientX<rect.left+rect.width/2?-1:1;
-      if(detailKey)setQuestDetailFace(!flipStates[detailKey],direction);
+      if(detailKey)setQuestDetailFace(!questDetailBack(),direction);
     });
     el('questDetailFlip').addEventListener('pointerdown',e=>{
-      if(!e.isPrimary||e.button!==0||!detailKey||covered[detailKey]||detailClosing||detailFlight||detailPointer)return;
+      if(!e.isPrimary||e.button!==0||!detailKey||questDetailCovered()||detailClosing||detailFlight||detailPointer)return;
       detailSwipeAt=0;
       stopQuestDetailTurn();
       const anchor=Math.round(detailTurnAngle/180)*180;
@@ -800,10 +817,10 @@
     el('questDetailFlip').addEventListener('pointerup',e=>endQuestDetailPointer(e));
     el('questDetailFlip').addEventListener('pointercancel',e=>endQuestDetailPointer(e,true));
     el('questDetailFlip').addEventListener('lostpointercapture',e=>endQuestDetailPointer(e,true));
-    el('questDetailRedraw').addEventListener('click',()=>{if(detailKey){reroll(detailKey);renderQuest()}});
-    el('questDetailLock').addEventListener('click',()=>{if(detailKey&&!covered[detailKey]){locked[detailKey]=!locked[detailKey];renderQuest()}});
-    el('questDetailCover').addEventListener('click',()=>{if(detailKey)toggleCover(detailKey)});
-    mobileLayout.addEventListener('change',()=>{if(!mobileLayout.matches)closeQuestDetail(true);renderQuest()});
+    el('questDetailRedraw').addEventListener('click',()=>{if(detailKey&&!detailLibrary){reroll(detailKey);renderQuest()}});
+    el('questDetailLock').addEventListener('click',()=>{if(detailKey&&!detailLibrary&&!covered[detailKey]){locked[detailKey]=!locked[detailKey];renderQuest()}});
+    el('questDetailCover').addEventListener('click',()=>{if(detailKey&&!detailLibrary)toggleCover(detailKey)});
+    mobileLayout.addEventListener('change',()=>{if(!mobileLayout.matches)closeQuestDetail(true);else el('cardDialog').close();renderQuest();renderLibrary()});
     window.addEventListener('resize',()=>{if(el('questDialog').open){cancelQuestDetailMotion();stopQuestDetailTurn();releaseQuestDetailPointer();if(detailClosing)closeQuestDetail(true);else renderQuestDetail()}});
     function syncActiveFrame(rerollLens=false){
       if(covered.frame)return;
@@ -872,7 +889,7 @@
     function renderFilters(){let groups=getGroups(); el('subFilters').innerHTML=groups.length?`<button type="button" class="filter" aria-pressed="${activeGroup==='all'}" data-group="all">全部類別</button>`+groups.map(([code,name])=>`<button type="button" class="filter" aria-pressed="${activeGroup===code}" data-group="${code}">${name}</button>`).join(''):'';el('subFilters').style.display=groups.length?'flex':'none'}
     function visibleItems(){return DECKS[activeDeck].filter(item=>(activeGroup==='all'||item.code===activeGroup)&&(!activeQuery||[item.title,item.hint,item.group,item.id].join(' ').toLocaleLowerCase().includes(activeQuery.toLocaleLowerCase())))}
     function renderLibrary(){renderTabs();renderFilters();let items=visibleItems(),m=DECK_META[activeDeck]; el('libraryCount').textContent=`${m.en} / ${items.length} 張符合條件 · 點選卡片可查看正反面`;el('totalCount').textContent=`${KEYS.length} DECKS / ${KEYS.reduce((sum,k)=>sum+DECKS[k].length,0)} CARDS`;
-      el('libraryGrid').innerHTML=items.slice(0,shownCount).map(item=>`<button type="button" class="library-card" style="--card-accent:${m.accent}" data-card="${item.id}" aria-label="查看${escapeHTML(item.title)}卡片"><div class="mini-top"><span>${m.en}</span><span>${item.id}</span></div><div class="mini-title${[...displayTitle(activeDeck,item).main].length>9?' long':''}">${titleMarkup(activeDeck,item)}</div><div class="mini-hint">${escapeHTML(item.hint||'')}</div><div class="mini-footer">${escapeHTML(item.group||'FIELD CARD')} · VOL.01</div></button>`).join('');
+      el('libraryGrid').innerHTML=items.slice(0,shownCount).map(item=>`<button type="button" class="library-card" style="--card-accent:${m.accent}" data-card="${item.id}" aria-haspopup="dialog" aria-controls="${mobileLayout.matches?'questDialog':'cardDialog'}" aria-label="查看${escapeHTML(item.title)}卡片"><div class="mini-top"><span>${m.en}</span><span>${item.id}</span></div><div class="mini-title${[...displayTitle(activeDeck,item).main].length>9?' long':''}">${titleMarkup(activeDeck,item)}</div><div class="mini-hint">${escapeHTML(item.hint||'')}</div><div class="mini-footer">${escapeHTML(item.group||'FIELD CARD')} · VOL.01</div></button>`).join('');
       const empty=el('libraryGrid').querySelector('.empty'); if(!items.length)el('libraryGrid').innerHTML='<p class="empty" style="grid-column:1/-1">沒有符合條件的卡片，試試其他關鍵字。</p>';
       el('loadMore').hidden=shownCount>=items.length;el('loadMore').textContent=`顯示更多卡片（尚有 ${Math.max(0,items.length-shownCount)} 張） ↓`;
     }
@@ -880,13 +897,13 @@
     el('subFilters').addEventListener('click',e=>{let b=e.target.closest('[data-group]');if(!b)return;activeGroup=b.dataset.group;shownCount=12;renderLibrary()});
     el('cardSearch').addEventListener('input',e=>{activeQuery=e.target.value.trim();shownCount=12;renderLibrary()});
     el('loadMore').addEventListener('click',()=>{shownCount+=12;renderLibrary()});
-    el('libraryGrid').addEventListener('click',e=>{let card=e.target.closest('[data-card]');if(!card)return;let item=DECKS[activeDeck].find(x=>x.id===card.dataset.card);if(item)showModal(activeDeck,item)});
-    function showModal(key,item){activeModal={key,item};let m=DECK_META[key],d=el('cardDialog');const card=el('dialogFlip');card.style.setProperty('--card-accent',m.accent);card.style.setProperty('--card-back',m.back);card.classList.remove('flipped');card.setAttribute('aria-pressed','false');card.innerHTML=`<div class="flip-inner">${faceMarkup(key,item)}</div>`;el('dialogGroup').textContent=`${m.en} / ${item.id}${item.group?' · '+item.group:''}`;el('dialogTitle').textContent=item.title;el('dialogDescription').textContent=item.hint||'一張卡，一次新的觀察。';d.showModal()}
+    el('libraryGrid').addEventListener('click',e=>{let card=e.target.closest('[data-card]');if(!card)return;let item=DECKS[activeDeck].find(x=>x.id===card.dataset.card);if(item)showModal(activeDeck,item,card)});
+    function showModal(key,item,origin){activeModal={key,item};if(mobileLayout.matches){openCardDetail(key,item,origin);return}let m=DECK_META[key],d=el('cardDialog');const card=el('dialogFlip');card.style.setProperty('--card-accent',m.accent);card.style.setProperty('--card-back',m.back);card.classList.remove('flipped');card.setAttribute('aria-pressed','false');card.innerHTML=`<div class="flip-inner">${faceMarkup(key,item)}</div>`;el('dialogGroup').textContent=`${m.en} / ${item.id}${item.group?' · '+item.group:''}`;el('dialogTitle').textContent=item.title;el('dialogDescription').textContent=item.hint||'一張卡，一次新的觀察。';d.showModal()}
     function toggleModalFlip(){const c=el('dialogFlip');let next=!c.classList.contains('flipped');c.classList.toggle('flipped',next);c.setAttribute('aria-pressed',String(next))}
     el('dialogFlip').addEventListener('click',toggleModalFlip);el('dialogTurn').addEventListener('click',toggleModalFlip);
     el('dialogClose').addEventListener('click',()=>el('cardDialog').close());
     el('cardDialog').addEventListener('click',e=>{if(e.target===el('cardDialog'))el('cardDialog').close()});
-    el('dialogChoose').addEventListener('click',()=>{
+    function chooseLibraryCard(){
       if(!activeModal)return;
       const {key,item}=activeModal;
       covered[key]=false;
@@ -901,8 +918,10 @@
         message='已切換至可換鏡 α6700 並選用此鏡頭';
       } else {quest[key]=item;}
       flipStates[key]=false;locked[key]=true;
-      renderQuest();el('cardDialog').close();switchPage('play',{section:'play',focusContent:true});toast(message);
-    });
+      renderQuest();closeQuestDetail(true);el('cardDialog').close();switchPage('play',{section:'play',focusContent:true});toast(message);
+    }
+    el('dialogChoose').addEventListener('click',chooseLibraryCard);
+    el('questDetailChoose').addEventListener('click',chooseLibraryCard);
     // user-facing utilities and A4 printing: fronts only, 4 cards/page at physical A7 dimensions.
     let toastTimer;
     function toast(s){let t=el('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2500)}
