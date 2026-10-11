@@ -473,7 +473,7 @@
       <div class="container">
         <div class="section-head"><div><div class="eyebrow">01 / DRAW YOUR QUEST</div><h2 id="playTitle">今天，拍什麼？</h2><p class="section-desc">每個啟用的類別各抽一張。點擊卡片可以翻面，也能重抽、固定或蓋牌略過該類別。</p></div><div class="section-meta" id="questCount">6 CARDS · 1 WALK</div></div>
         <div class="quest-panel">
-          <div class="quest-toolbar"><div class="toolbar-caption"><strong>今日任務</strong>　<span id="questDate"></span></div><div class="toolbar-actions"><button id="drawAll" class="btn btn-primary" type="button">↻　重新抽取六張</button><button id="unlockAll" class="btn btn-outline" type="button">解除所有鎖定</button></div></div>
+          <div class="quest-toolbar"><div class="toolbar-caption"><strong>今日任務</strong>　<span id="questDate"></span></div><div class="toolbar-actions"><button id="drawAll" class="btn btn-primary" type="button">↻　重新抽卡</button><button id="unlockAll" class="btn btn-outline" type="button">解除所有鎖定</button></div></div>
           <div class="gear-control"><label class="switch-control" for="pairingMode"><input id="pairingMode" type="checkbox" checked><span class="switch-track" aria-hidden="true"></span><span>智慧器材搭配</span></label><p id="pairingNote">開啟時，可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。</p></div>
           <div class="quest-grid" id="questGrid" aria-live="polite"></div>
           <p class="card-note">輕點卡片翻面 · 固定會保留該卡 · 蓋牌會略過整個類別，翻開後恢復</p>
@@ -521,7 +521,7 @@
     </section>
     </div>
   </main>
-  <div class="mobile-draw-dock"><button id="mobileDrawAll" class="btn btn-primary" type="button">↻　重新抽取六張</button></div>
+  <div class="mobile-draw-dock"><button id="mobileDrawAll" class="btn btn-primary" type="button">↻　重新抽卡</button></div>
   <footer class="container"><span>PHOTO QUEST · AN EXERCISE IN SEEING</span><span>PERSONAL FIELD DECK · VOL. 01</span></footer>
   <dialog id="questDialog" class="quest-detail" aria-labelledby="questDetailTitle">
     <div id="questDetailSurface" class="quest-detail-surface" aria-hidden="true"></div>
@@ -750,19 +750,23 @@
       if(!taskConfirmedAt)return true;
       toast('任務已確認；請先返回調整任務');return false;
     }
-    function undoTask(){
+    async function undoTask(){
       if(drawMotion||progressChangeResolve||detailClosing||detailFlight||!previousTask)return false;
-      const value=previousTask;
-      if(previousEffect?.archiveAdded){
-        archivedTasks=archivedTasks.filter(task=>task.id!==previousEffect.archiveAdded);
-        if(recordsDeletionUndo?.tab==='completed'){
-          recordsDeletionUndo.entries=recordsDeletionUndo.entries.filter(task=>task.id!==previousEffect.archiveAdded);
-          if(!recordsDeletionUndo.entries.length){recordsDeletionUndo=null;clearTimeout(recordsUndoTimer);}
+      closeQuestDetail(true);el('cardDialog').close();
+      const session={kind:'restore',label:'復原中…',keys:KEYS,value:previousTask,effect:previousEffect,message:'已復原上一個操作，恢復原本任務',controls:new Map(),cards:new Set(),animations:[],installed:false};
+      session.finished=new Promise(resolve=>session.resolve=resolve);drawMotion=session;syncDrawControls(session);
+      try{
+        if(!reducedMotion.matches){
+          await fadeTaskContent(session,[...drawCards(KEYS),...questCopyNodes(true)],false);
+          if(drawMotion!==session)return false;
         }
-      }
-      closeQuestDetail(true);el('cardDialog').close();applyTaskSnapshot(value);
-      previousTask=null;previousAction='';previousEffect=null;persistTask();renderQuest();
-      toast('已復原上一個操作，恢復原本任務');return true;
+        installTaskRestore(session);
+        if(!reducedMotion.matches){
+          await fadeTaskContent(session,[...drawCards(KEYS),...questCopyNodes(true)],true);
+          if(drawMotion!==session)return false;
+        }
+        finishTaskRestore(session);return true;
+      }catch(error){finishTaskRestore(session);return false;}
     }
     function confirmTask(){
       if(drawMotion||progressChangeResolve||detailClosing||detailFlight||taskConfirmedAt)return false;
@@ -934,7 +938,7 @@
       if(!deferSummary){
         const count=activeKeys().length;
         el('questCount').textContent=`${count} CARDS · 1 WALK`;
-        el('drawAll').textContent=count===6?'↻　重新抽取六張':count?`↻　重新抽取 ${count} 張`:'↻　重新抽取任務';
+        el('drawAll').textContent='↻　重新抽卡';
         el('mobileDrawAll').textContent=el('drawAll').textContent;
         const parts=[];
         if(!covered.camera)parts.push(`帶著 ${quest.camera.title}`);
@@ -1231,10 +1235,41 @@
       });
     }
     function drawSurface(card){return card.id==='questDetailFlip'||!mobileLayout.matches?card.querySelector('.flip-inner'):card.querySelector('.quest-thumb-turn')}
+    function questCopyNodes(includeStatus=false){
+      const ids=['questSentence','pairingNote'];
+      if(includeStatus)ids.push('questCount','questDate','taskStatus','taskSaveStatus','progressCount','progressNote','questCompleteCopy');
+      return ids.map(el).filter(Boolean);
+    }
+    function fadeTaskContent(session,nodes,entering){
+      const start=document.timeline.currentTime;
+      const animations=nodes.map(node=>drawAnimation(session,node,[{opacity:entering?0:1},{opacity:entering?1:0}],{duration:entering?240:160},start)).filter(Boolean);
+      return Promise.all(animations.map(animation=>animation.finished.catch(()=>{})));
+    }
+    function installTaskRestore(session){
+      if(session.installed)return;
+      if(session.effect?.archiveAdded){
+        archivedTasks=archivedTasks.filter(task=>task.id!==session.effect.archiveAdded);
+        if(recordsDeletionUndo?.tab==='completed'){
+          recordsDeletionUndo.entries=recordsDeletionUndo.entries.filter(task=>task.id!==session.effect.archiveAdded);
+          if(!recordsDeletionUndo.entries.length){recordsDeletionUndo=null;clearTimeout(recordsUndoTimer);}
+        }
+      }
+      applyTaskSnapshot(session.value);previousTask=null;previousAction='';previousEffect=null;
+      session.installed=true;persistTask();renderQuest();
+    }
+    function finishTaskRestore(session){
+      if(drawMotion!==session)return;
+      drawMotion=null;session.animations.forEach(animation=>animation.cancel());
+      installTaskRestore(session);
+      session.cards.forEach(card=>card.classList.remove('quest-drawing'));
+      session.controls.forEach((disabled,node)=>{node.disabled=disabled;});
+      renderQuest({updatedKeys:[],preserveDetail:true});el('questGrid').setAttribute('aria-busy','false');
+      toast(session.message);session.resolve();
+    }
     function syncDrawControls(session){
       const controls=document.querySelectorAll('#questGrid button,#drawAll,#mobileDrawAll,#unlockAll,#pairingMode,#undoQuest,#confirmQuest,#editQuest,#shareQuest,#saveFavorite,#startNextQuest,#progressPlus,#progressMinus,#progressComplete,#finishQuest,#dialogChoose,#questDetailChoose,#questDetailCommands button,#questDetailFlip');
       controls.forEach(node=>{if(!session.controls.has(node))session.controls.set(node,node.disabled);node.disabled=true;});
-      el('drawAll').textContent=el('mobileDrawAll').textContent='抽取中…';
+      el('drawAll').textContent=el('mobileDrawAll').textContent=session.label||'抽取中…';
       el('questGrid').setAttribute('aria-busy','true');
       drawCards(session.keys).forEach(card=>{card.classList.add('quest-drawing');session.cards.add(card);});
     }
@@ -1246,6 +1281,7 @@
     }
     function finishQuestDraw(session=drawMotion){
       if(!session||drawMotion!==session)return;
+      if(session.kind==='restore'){finishTaskRestore(session);return;}
       drawMotion=null;
       session.animations.forEach(animation=>animation.cancel());
       session.cards.forEach(card=>{card.classList.remove('quest-drawing');const surface=drawSurface(card);if(surface)surface.style.transform='';});
@@ -1254,8 +1290,6 @@
       renderQuest({updatedKeys:session.installed?[]:session.keys,preserveDetail:session.installed||!session.keys.includes(detailKey)});
       if(detailKey&&!detailLibrary&&session.keys.includes(detailKey)){detailTurnAngle=0;writeQuestDetailTurn();syncQuestDetailFace(false);}
       el('questGrid').setAttribute('aria-busy','false');
-      const summary=el('questSentence');
-      if(summary.textContent!==session.summary&&summary.animate)summary.animate([{opacity:.45},{opacity:1}],{duration:180,easing:'cubic-bezier(.4,0,.2,1)'});
       toast(session.message);session.resolve();
     }
     async function runQuestDraw(update,message,{allowCompleted=false,forceAll=false}={}){
@@ -1267,7 +1301,7 @@
       if(!keys.length){toast('目前沒有可重抽的卡片；請先解除固定或調整器材搭配');return false;}
       const approval=approveTaskChange(previous);if(approval!==true&&!await approval)return false;
       commitTask(previous,message);
-      const session={keys,message,summary:el('questSentence').textContent,controls:new Map(),cards:new Set(),animations:[],installed:false};
+      const session={keys,message,controls:new Map(),cards:new Set(),animations:[],installed:false};
       session.finished=new Promise(resolve=>session.resolve=resolve);drawMotion=session;
       stopQuestDetailTurn();releaseQuestDetailPointer();syncDrawControls(session);
       try{
@@ -1281,21 +1315,25 @@
             if(Math.abs(target-from)<.1)return null;
             return drawAnimation(session,surface,[{transform:`rotateY(${from}deg)`},{transform:`rotateY(${target}deg)`}],{duration:240},start);
           }).filter(Boolean);
-          await Promise.all(hiding.map(animation=>animation.finished.catch(()=>{})));
+          await Promise.all([fadeTaskContent(session,questCopyNodes(),false),...hiding.map(animation=>animation.finished.catch(()=>{}))]);
           if(drawMotion!==session)return false;
         }
         renderQuest({updatedKeys:keys,deferSummary:true,preserveDetail:!keys.includes(detailKey)});session.installed=true;
         const start=document.timeline.currentTime,revealing=[];
         keys.forEach((key,index)=>drawCards([key]).forEach(card=>{
           const surface=drawSurface(card);
-          if(reducedMotion.matches)revealing.push(drawAnimation(session,surface,[{opacity:.6},{opacity:1}],{duration:160},start));
-          else{
+          if(!reducedMotion.matches){
             surface.style.transform='rotateY(0deg)';
             revealing.push(drawAnimation(session,surface,[{transform:'rotateY(180deg)'},{transform:'rotateY(0deg)'}],{duration:400,delay:index*120},start));
           }
         }));
         await Promise.all(revealing.filter(Boolean).map(animation=>animation.finished.catch(()=>{})));
         if(drawMotion!==session)return false;
+        if(!reducedMotion.matches){
+          renderQuest({updatedKeys:[],preserveDetail:true});
+          await fadeTaskContent(session,questCopyNodes(),true);
+          if(drawMotion!==session)return false;
+        }
         finishQuestDraw(session);return true;
       }catch(error){finishQuestDraw(session);return false;}
     }
