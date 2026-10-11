@@ -101,6 +101,33 @@
     .progress-change p {font-size:13px; line-height:1.9; color:var(--sub); margin:0 0 20px}
     .progress-change .btn-row {justify-content:flex-end; gap:8px}
     .progress-change .btn {min-height:44px; font-size:12px}
+    .quest-complete-copy {margin:0 0 10px; color:var(--sage-deep); font-size:15px; font-weight:650}
+    .quest-complete-copy[hidden] {display:none!important}
+    .quest-summary .btn-row {gap:8px}
+    .quest-summary .btn {font-size:12px; padding:10px 13px}
+    dialog.task-tools {width:min(720px,calc(100vw - 32px)); max-height:calc(100svh - 40px); overflow:auto; padding:24px; border:1px solid var(--line); border-radius:18px; background:var(--paper); color:var(--ink)}
+    .tools-head {display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:16px}
+    .tools-head h3 {margin:0; font-size:20px}
+    .tools-close {appearance:none; background:transparent; border:0; font-size:25px; width:44px; height:44px; color:var(--ink)}
+    .tools-note {font-size:12px; line-height:1.8; color:var(--sub); margin:0 0 14px}
+    .tools-tabs {display:flex; gap:8px; margin-bottom:16px}
+    .tools-tabs .btn {min-height:44px; padding:9px 14px; font-size:12px}
+    .tools-tabs [aria-pressed="true"] {background:var(--soft); border-color:#BFCABD}
+    .record-row {display:flex; justify-content:space-between; align-items:center; gap:12px; border-top:1px solid var(--line); padding:15px 0}
+    .record-open {border:0; background:none; text-align:left; padding:4px 0; flex:1; min-width:0; color:var(--ink)}
+    .record-open strong {display:block; font-size:14px; line-height:1.7}
+    .record-open small {display:block; color:var(--sub); font-size:11px; line-height:1.8}
+    .record-row .btn {font-size:11px; padding:8px 11px; min-height:44px; flex:none}
+    .record-fields {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-bottom:20px}
+    .record-field {border:1px solid var(--line); border-top:3px solid var(--card-accent); border-radius:9px; padding:13px; background:var(--bg); min-width:0}
+    .record-field small {display:block; color:var(--sub); font-size:10px; margin-bottom:7px}
+    .record-field strong {font-size:15px; font-weight:500; line-height:1.7; overflow-wrap:anywhere}
+    .tools-footer {border-top:1px solid var(--line); padding-top:16px; margin-top:10px}
+    .tools-footer .btn,.task-tools > .btn-row .btn {font-size:12px; padding:10px 13px}
+    .share-preview {display:block; width:min(100%,360px); height:auto; border-radius:12px; border:1px solid var(--line); margin:0 auto 16px}
+    .share-preview[hidden] {display:none!important}
+    .tools-status {font-size:12px; color:var(--sub); margin:12px 0 0; min-height:20px}
+    @media(max-width:750px){#progressPlus,#startNextQuest {display:none!important}#finishQuest:not(.unlimited-finish) {display:none!important}.quest-summary .btn-row {width:100%}.quest-summary .btn {flex:1; white-space:nowrap}.task-tools .btn-row {gap:8px}.task-tools .btn-row .btn {flex:1}.record-row {gap:8px}.record-open strong {font-size:13px}}
     .task-action-icon {width:17px; height:17px; flex:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; fill:none}
     .quest-panel.quest-confirmed .quest-grid .card-commands {display:none}
     .quest-confirmed-state {display:none; margin:10px 0 0; min-height:16px; font-size:11px; line-height:1.5; color:#AB705B; text-align:center}
@@ -316,7 +343,7 @@
       .shooting-progress {margin-top:12px; padding-top:13px}
       .progress-top {flex-wrap:wrap; gap:10px}
       .progress-label {font-size:12px}
-      .progress-controls {width:100%}
+      .progress-controls {width:auto}
       .progress-controls #progressPlus {flex:1}
       .progress-bottom {align-items:flex-start; flex-wrap:wrap}
       .progress-bottom .btn {width:100%}
@@ -436,17 +463,18 @@
           <div class="quest-grid" id="questGrid" aria-live="polite"></div>
           <p class="card-note">輕點卡片翻面 · 固定會保留該卡 · 蓋牌會略過整個類別，翻開後恢復</p>
           <p class="mobile-card-note">點卡片放大 · 查看提示、翻面與調整任務</p>
+          <p id="questCompleteCopy" class="quest-complete-copy" hidden>這次散步完成了，任務已存入紀錄。</p>
           <div id="shootingProgress" class="shooting-progress" hidden>
             <div class="progress-top"><div class="progress-label"><span id="progressTitle">拍攝進度</span><span id="progressCount" class="progress-count" role="status" aria-live="polite" aria-atomic="true">0／1 張</span></div><div id="progressControls" class="progress-controls"><button id="progressMinus" class="btn btn-outline progress-minus" type="button" aria-label="減少一張" disabled>−</button><button id="progressPlus" class="btn btn-primary" type="button">＋ 拍了一張</button></div></div>
             <div id="progressTrack" class="progress-track" role="progressbar" aria-label="拍攝進度" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0"><div id="progressFill" class="progress-fill"></div></div>
-            <div class="progress-bottom"><p id="progressNote" class="progress-note">記下符合這組任務、值得留下的照片。</p><button id="finishQuest" class="btn btn-primary" type="button" hidden>完成任務</button><button id="resumeQuest" class="btn btn-outline" type="button" hidden>繼續拍攝</button></div>
+            <div class="progress-bottom"><p id="progressNote" class="progress-note">記下符合這組任務、值得留下的照片。</p><button id="finishQuest" class="btn btn-primary" type="button" hidden>完成任務</button><button id="startNextQuest" class="btn btn-primary" type="button" hidden>開始新任務</button></div>
           </div>
           <div class="task-session">
             <div class="task-session-meta" aria-live="polite"><strong id="taskStatus">探索組合中</strong><p id="taskSaveStatus">目前任務會自動保存在此裝置</p></div>
             <div class="btn-row"><button id="undoQuest" class="btn btn-outline" type="button" aria-label="復原上一個操作" disabled><svg class="task-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 1 1 9 9"></path><path d="M3 4v7h7"></path></svg><span>復原</span></button><button id="confirmQuest" class="btn btn-primary" type="button">確認這組任務</button><button id="editQuest" class="btn btn-outline" type="button" hidden>返回調整任務</button></div>
           </div>
         </div>
-        <div class="quest-summary"><p id="questSentence" aria-live="polite"></p><div class="btn-row"><button class="btn btn-outline" id="copyQuest" type="button">複製任務摘要</button><button class="btn btn-outline" id="printQuest" type="button">列印這六張卡 ↗</button></div></div>
+        <div class="quest-summary"><p id="questSentence" aria-live="polite"></p><div class="btn-row"><button class="btn btn-outline" id="shareQuest" type="button"><svg class="task-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M5 11v9h14v-9"></path></svg>分享任務卡</button><button class="btn btn-outline" id="saveFavorite" type="button">☆ 收藏組合</button><button class="btn btn-outline" id="openRecords" type="button">任務紀錄</button><button class="btn btn-outline" id="copyQuest" type="button">複製任務摘要</button><button class="btn btn-outline" id="printQuest" type="button">列印這六張卡 ↗</button></div></div>
       </div>
     </section>
     <div class="container"><div class="closing"><div><h3>不是要拍得更像別人，<br>而是練習看見自己眼中的世界。</h3><p>The world doesn't change. The way you see it does.</p></div><a href="#play" class="btn btn-primary">再抽一次 ↗</a></div></div>
@@ -492,6 +520,10 @@
   </dialog>
   <dialog id="cardDialog" aria-labelledby="dialogTitle"><button id="dialogClose" class="dialog-close" type="button" aria-label="關閉卡片">×</button><div class="dialog-content"><button class="flip-button dialog-card" id="dialogFlip" type="button" aria-label="翻轉卡片"></button><div class="dialog-side"><div class="eyebrow" id="dialogGroup"></div><h3 id="dialogTitle"></h3><p id="dialogDescription"></p><div class="dialog-actions"><button id="dialogChoose" class="btn btn-primary" type="button">放進今日任務 ↗</button><button id="dialogTurn" class="btn btn-outline" type="button">翻轉看看</button></div></div></div></dialog>
   <dialog id="progressChangeDialog" class="progress-change" aria-labelledby="progressChangeTitle" aria-describedby="progressChangeNote"><h3 id="progressChangeTitle">開始新的任務？</h3><p id="progressChangeNote"></p><div class="btn-row"><button id="cancelProgressChange" class="btn btn-outline" type="button" autofocus>保留原任務</button><button id="acceptProgressChange" class="btn btn-primary" type="button">開始新任務</button></div></dialog>
+  <dialog id="recordsDialog" class="task-tools" aria-labelledby="recordsTitle"><div class="tools-head"><h3 id="recordsTitle">我的任務</h3><button class="tools-close" id="recordsClose" type="button" aria-label="關閉任務紀錄">×</button></div><div class="tools-tabs"><button class="btn btn-outline" id="recordsCompleted" type="button" aria-pressed="true">已完成</button><button class="btn btn-outline" id="recordsFavorites" type="button" aria-pressed="false">收藏</button></div><div id="recordsList"></div><button id="recordsMore" class="btn btn-outline" type="button" hidden>顯示更多紀錄</button><div class="tools-footer"><p class="tools-note">紀錄與收藏保存在此瀏覽器。匯出備份可留存或帶到其他裝置。</p><div class="btn-row"><button id="exportTasks" class="btn btn-outline" type="button">匯出備份</button><button id="importTasks" class="btn btn-outline" type="button">匯入備份</button></div><input id="backupFile" type="file" accept="application/json,.json" hidden><p id="recordsStatus" class="tools-status" role="status" aria-live="polite"></p></div></dialog>
+  <dialog id="recordDialog" class="task-tools" aria-labelledby="recordTitle"><div class="tools-head"><h3 id="recordTitle">任務紀錄</h3><button id="recordClose" class="tools-close" type="button" aria-label="關閉紀錄內容">×</button></div><p id="recordMeta" class="tools-note"></p><div id="recordFields" class="record-fields"></div><div class="btn-row"><button id="recordReplay" class="btn btn-primary" type="button">再次挑戰</button><button id="recordShare" class="btn btn-outline" type="button">分享任務卡</button><button id="recordFavorite" class="btn btn-outline" type="button">☆ 收藏組合</button></div></dialog>
+  <dialog id="shareDialog" class="task-tools" aria-labelledby="shareTitle"><div class="tools-head"><h3 id="shareTitle">分享任務卡</h3><button id="shareClose" class="tools-close" type="button" aria-label="關閉分享任務卡">×</button></div><p class="tools-note">保存這一刻的任務，傳給朋友或留作今天的拍攝小抄。</p><img id="sharePreview" class="share-preview" alt="本次任務的六張攝影卡片與拍攝狀態" hidden><div class="btn-row"><button id="nativeShare" class="btn btn-primary" type="button" hidden>分享圖片</button><a id="downloadShare" class="btn btn-outline" hidden>儲存圖片</a></div><p id="shareStatus" class="tools-status" role="status" aria-live="polite">正在準備圖片…</p></dialog>
+  <dialog id="backupDialog" class="progress-change" aria-labelledby="backupTitle"><h3 id="backupTitle">匯入這份備份？</h3><p id="backupNote"></p><label class="tools-note" style="display:flex;gap:9px;align-items:flex-start;margin-bottom:20px"><input id="restoreBackupCurrent" type="checkbox">同時還原備份中的目前任務，取代這台裝置的目前任務</label><div class="btn-row"><button id="cancelBackup" class="btn btn-outline" type="button" autofocus>取消</button><button id="acceptBackup" class="btn btn-primary" type="button">合併紀錄</button></div></dialog>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="printArea" aria-hidden="true"></div>
   <script>
@@ -609,7 +641,9 @@
     let taskId=window.crypto?.randomUUID?.()||`pq-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     let taskCreatedAt=new Date().toISOString(),taskConfirmedAt=null,taskShotCount=0,taskCompletedAt=null;
     let progressChangeResolve=null;
-    let previousTask=null,previousAction='',taskStorageState='ready';
+    let previousTask=null,previousAction='',previousEffect=null,taskStorageState='ready';
+    let archivedTasks=[],favoriteTasks=[],recordTab='completed',recordsShown=20,viewedRecord=null,pendingBackup=null;
+    const newTaskId=()=>window.crypto?.randomUUID?.()||`pq-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     function taskSnapshot(){
       return {id:taskId,createdAt:taskCreatedAt,confirmedAt:taskConfirmedAt,shotCount:taskShotCount,completedAt:taskCompletedAt,pairingEnabled,cards:Object.fromEntries(KEYS.map(key=>[key,quest[key].id])),locked:{...locked},covered:{...covered}};
     }
@@ -635,18 +669,21 @@
       KEYS.forEach(key=>{quest[key]=taskCard(key,value.cards[key]);locked[key]=value.locked[key];covered[key]=value.covered[key];flipStates[key]=false;});
     }
     function renderTaskSession(){
-      const confirmed=!!taskConfirmedAt,busy=!!drawMotion||!!progressChangeResolve;
+      const confirmed=!!taskConfirmedAt||!!taskCompletedAt,busy=!!drawMotion||!!progressChangeResolve;
       el('taskStatus').textContent=taskCompletedAt?'✓ 任務已完成':confirmed?taskShotCount?'拍攝進行中':'✓ 任務已確認 · 可以出發了':taskShotCount?`調整任務中 · 已拍 ${taskShotCount} 張`:'探索組合中';
-      el('taskSaveStatus').textContent=taskStorageState==='unavailable'?'此瀏覽器無法保存，關閉後任務可能遺失':taskStorageState==='unsupported'?'保存資料來自較新版本，目前暫不覆寫':'已自動保存在此裝置';
+      el('taskSaveStatus').textContent=taskStorageState==='unavailable'?'此瀏覽器無法保存，關閉後任務可能遺失':taskStorageState==='unsupported'?'保存資料目前無法完整讀取，暫不覆寫':'已自動保存在此裝置';
       el('undoQuest').disabled=busy||!previousTask;
       el('undoQuest').title=previousTask?`復原上一個操作：${previousAction}`:'目前沒有可復原的操作';
       el('confirmQuest').hidden=confirmed;el('confirmQuest').disabled=busy||!activeKeys().length;
       el('confirmQuest').title=activeKeys().length?'保留這組條件，開始拍攝':'請先翻開至少一個牌組';
-      el('editQuest').hidden=!confirmed;el('editQuest').disabled=busy;
+      el('editQuest').hidden=!confirmed||!!taskCompletedAt;el('editQuest').disabled=busy;
       el('drawAll').hidden=confirmed;el('unlockAll').hidden=confirmed;
       el('pairingMode').checked=pairingEnabled;el('pairingMode').closest('.gear-control').hidden=confirmed;
-      el('mobileDrawAll').textContent=confirmed?taskCompletedAt?'查看完成任務':'＋ 拍了一張':el('drawAll').textContent;
+      el('mobileDrawAll').textContent=taskCompletedAt?'開始新任務':confirmed?shootingTarget()!==null&&taskShotCount>=shootingTarget()?'完成任務':'＋ 拍了一張':el('drawAll').textContent;
       el('mobileDrawAll').disabled=busy||(confirmed&&!taskCompletedAt&&taskShotCount===Number.MAX_SAFE_INTEGER);
+      el('questCompleteCopy').hidden=!taskCompletedAt;
+      el('shareQuest').disabled=busy;el('saveFavorite').disabled=busy;
+      renderFavoriteButton(el('saveFavorite'),taskSnapshot());
       renderShootingProgress();
       el('questGrid').closest('.quest-panel').classList.toggle('quest-confirmed',confirmed);
       el('questDate').textContent=new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'long',day:'numeric'}).format(new Date(taskCreatedAt));
@@ -655,38 +692,51 @@
     }
     function persistTask(){
       if(taskStorageState!=='unsupported'){
-        try{localStorage.setItem(TASK_STORAGE_KEY,JSON.stringify({version:2,current:taskSnapshot(),previous:previousTask,previousAction,savedAt:new Date().toISOString()}));taskStorageState='ready';}
+        try{localStorage.setItem(TASK_STORAGE_KEY,JSON.stringify({version:3,current:taskSnapshot(),previous:previousTask,previousAction,previousEffect,archived:archivedTasks,favorites:favoriteTasks,savedAt:new Date().toISOString()}));taskStorageState='ready';}
         catch(error){taskStorageState='unavailable';}
       }
-      renderTaskSession();
+      renderTaskSession();renderRecords();
     }
     function commitTask(before,label){
       if(JSON.stringify(before)===JSON.stringify(taskSnapshot()))return false;
-      previousTask=before;previousAction=label;persistTask();return true;
+      previousTask=before;previousAction=label;previousEffect=null;persistTask();return true;
     }
     function restoreTask(){
       let record=null,raw;
       try{raw=localStorage.getItem(TASK_STORAGE_KEY);}
       catch(error){taskStorageState='unavailable';renderTaskSession();return;}
       try{record=raw?JSON.parse(raw):null;}catch(error){record=null;}
-      if(record&&Number.isInteger(record.version)&&record.version>2){taskStorageState='unsupported';renderTaskSession();return;}
-      const current=(record?.version===1||record?.version===2)?validTaskSnapshot(record.current):null;
+      if(record&&Number.isInteger(record.version)&&record.version>3){taskStorageState='unsupported';renderTaskSession();return;}
+      const current=(record?.version===1||record?.version===2||record?.version===3)?validTaskSnapshot(record.current):null;
+      if(record?.version===3&&!current){
+        archivedTasks=validArchives(record.archived);favoriteTasks=validFavorites(record.favorites);
+        taskStorageState='unsupported';renderTaskSession();renderRecords();toast('目前任務無法讀取，已保留原始紀錄且暫不覆寫');return;
+      }
       if(current){
         applyTaskSnapshot(current);previousTask=validTaskSnapshot(record.previous);
         previousAction=previousTask&&typeof record.previousAction==='string'?record.previousAction.slice(0,100):'';
-        if(record.version===1)persistTask();else renderTaskSession();
+        archivedTasks=validArchives(record.archived);favoriteTasks=validFavorites(record.favorites);
+        if(record.version===3&&(!Array.isArray(record.archived)||!Array.isArray(record.favorites)||archivedTasks.length!==record.archived.length||favoriteTasks.length!==record.favorites.length)){
+          taskStorageState='unsupported';renderTaskSession();renderRecords();toast('部分紀錄無法讀取，暫不覆寫原始保存資料');return;
+        }
+        const migrateCompletion=!!current.completedAt&&!archivedTasks.some(task=>task.id===current.id);
+        previousEffect=previousTask&&previousTask.id===current.id&&current.completedAt&&!previousTask.completedAt&&(record.previousEffect?.archiveAdded===current.id||migrateCompletion)?{archiveAdded:current.id}:null;
+        if(migrateCompletion)archivedTasks.unshift(current);
+        if(record.version<3||migrateCompletion)persistTask();else{renderTaskSession();renderRecords();}
       }else{persistTask();if(raw)toast('原本的保存資料無法讀取，已建立新任務');}
     }
     function taskEditable(){
       if(progressChangeResolve)return false;
+      if(taskCompletedAt){toast('任務已封存；按開始新任務即可抽下一組');return false;}
       if(!taskConfirmedAt)return true;
       toast('任務已確認；請先返回調整任務');return false;
     }
     function undoTask(){
       if(drawMotion||progressChangeResolve||detailClosing||detailFlight||!previousTask)return false;
       const value=previousTask;
+      if(previousEffect?.archiveAdded)archivedTasks=archivedTasks.filter(task=>task.id!==previousEffect.archiveAdded);
       closeQuestDetail(true);el('cardDialog').close();applyTaskSnapshot(value);
-      previousTask=null;previousAction='';persistTask();renderQuest();
+      previousTask=null;previousAction='';previousEffect=null;persistTask();renderQuest();
       toast('已復原上一個操作，恢復原本任務');return true;
     }
     function confirmTask(){
@@ -696,45 +746,67 @@
       commitTask(before,'確認任務');renderQuest();toast(taskCompletedAt?'已保留完成的任務':taskShotCount?'繼續這組任務，原本進度已保留':'這組任務已確認，帶著相機出發吧');return true;
     }
     function editTask(){
-      if(drawMotion||progressChangeResolve||detailClosing||detailFlight||!taskConfirmedAt)return false;
+      if(drawMotion||progressChangeResolve||detailClosing||detailFlight||!taskConfirmedAt||taskCompletedAt)return false;
       const before=taskSnapshot();taskConfirmedAt=null;
       commitTask(before,'返回調整');renderQuest();toast('已返回調整，原本卡片維持不變');return true;
     }
     function shootingTarget(){return covered.output?null:parseInt(quest.output.title,10)}
     function renderShootingProgress(){
       const target=shootingTarget(),completed=!!taskCompletedAt,busy=!!drawMotion||!!progressChangeResolve;
-      el('shootingProgress').hidden=!taskConfirmedAt;
+      el('shootingProgress').hidden=!taskConfirmedAt&&!taskCompletedAt;
       el('progressTitle').textContent=completed?'✓ 任務完成':'拍攝進度';
       el('progressCount').textContent=target===null?`已拍 ${taskShotCount} 張`:`${taskShotCount}／${target} 張`;
       el('progressControls').hidden=completed;
-      el('progressMinus').disabled=busy||!taskShotCount;el('progressPlus').disabled=busy||taskShotCount===Number.MAX_SAFE_INTEGER;
+      el('progressMinus').disabled=busy||!taskShotCount;el('progressPlus').disabled=busy||taskShotCount===Number.MAX_SAFE_INTEGER||(target!==null&&taskShotCount>=target);
+      el('progressPlus').hidden=target!==null&&taskShotCount>=target;
       const track=el('progressTrack');track.hidden=target===null;
       track.setAttribute('aria-valuemax',String(target||1));track.setAttribute('aria-valuenow',String(Math.min(taskShotCount,target||1)));
       track.setAttribute('aria-valuetext',el('progressCount').textContent);
       el('progressFill').style.width=target===null?'0%':`${Math.min(100,taskShotCount/target*100)}%`;
       el('finishQuest').hidden=completed||taskShotCount<(target||1);el('finishQuest').disabled=busy;
-      el('resumeQuest').hidden=!completed;el('resumeQuest').disabled=busy;
-      el('progressNote').textContent=completed?`完成於 ${new Intl.DateTimeFormat('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(taskCompletedAt))}`:target===null?'張數不設限，拍好後由你確認完成。':taskShotCount>=target?'已達目標；可以繼續拍，也可以確認完成。':'記下符合這組任務、值得留下的照片。';
+      el('finishQuest').classList.toggle('unlimited-finish',target===null);
+      el('startNextQuest').hidden=!completed;el('startNextQuest').disabled=busy;
+      el('progressNote').textContent=completed?`完成於 ${new Intl.DateTimeFormat('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(taskCompletedAt))}`:target===null?'張數不設限，拍好後由你確認完成。':taskShotCount>=target?'已達目標，確認完成後會存入任務紀錄。':'記下符合這組任務、值得留下的照片。';
     }
     function changeShotCount(delta){
       if(!taskConfirmedAt||taskCompletedAt||drawMotion||progressChangeResolve||detailClosing||detailFlight||(delta!==1&&delta!==-1))return false;
-      const next=taskShotCount+delta;if(!Number.isSafeInteger(next)||next<0)return false;
+      const next=taskShotCount+delta;if(!Number.isSafeInteger(next)||next<0||(delta>0&&shootingTarget()!==null&&next>shootingTarget()))return false;
       const before=taskSnapshot();taskShotCount=next;commitTask(before,delta>0?'記錄一張照片':'減少一張照片');return true;
     }
     function finishShooting(){
       if(!taskConfirmedAt||taskCompletedAt||drawMotion||progressChangeResolve||detailClosing||detailFlight||taskShotCount<(shootingTarget()||1))return false;
-      const before=taskSnapshot();taskCompletedAt=new Date().toISOString();commitTask(before,'完成任務');toast('任務完成，這次散步留下了新的作品');return true;
+      const before=taskSnapshot();taskCompletedAt=new Date().toISOString();
+      const added=!archivedTasks.some(task=>task.id===taskId);if(added)archivedTasks.unshift(taskSnapshot());
+      previousTask=before;previousAction='完成並封存任務';previousEffect=added?{archiveAdded:taskId}:null;persistTask();
+      toast(taskStorageState==='ready'?'任務已完成並存入紀錄；可以開始下一趟了':'任務已完成，但目前無法保存；請先匯出備份');return true;
     }
-    function resumeShooting(){
-      if(!taskConfirmedAt||!taskCompletedAt||drawMotion||progressChangeResolve||detailClosing||detailFlight)return false;
-      const before=taskSnapshot();taskCompletedAt=null;commitTask(before,'繼續拍攝');toast('已恢復拍攝，可以補拍或調整張數');return true;
+    async function beginTask(source=null){
+      if(drawMotion||progressChangeResolve||detailClosing||detailFlight)return false;
+      const before=taskSnapshot();
+      if(source){
+        const value=validTaskSnapshot(source);if(!value)return false;
+        applyTaskSnapshot(value);taskShotCount=0;taskConfirmedAt=taskCompletedAt=null;
+        const approval=approveTaskChange(before,true);if(approval!==true&&!await approval)return false;
+      }else{
+        if(!taskCompletedAt)return false;
+        switchPage('play',{section:'play',focusContent:true});
+        return runQuestDraw(()=>{
+          KEYS.forEach(key=>{quest[key]=drawCard(key,quest[key].id);locked[key]=false;covered[key]=false;flipStates[key]=false;});
+          if(pairingEnabled)quest.frame=frameForCamera(quest.camera);
+          taskShotCount=0;taskConfirmedAt=taskCompletedAt=null;taskId=newTaskId();taskCreatedAt=new Date().toISOString();
+        },'新任務已抽出，可以調整後確認出發',{allowCompleted:true,forceAll:true});
+      }
+      taskId=newTaskId();taskCreatedAt=new Date().toISOString();
+      commitTask(before,source?'再次挑戰這組任務':'開始新任務');
+      closeQuestDetail(true);el('recordDialog').close();el('recordsDialog').close();renderQuest();switchPage('play',{section:'play',focusContent:true});
+      toast('新任務已準備好，可以調整後確認出發');return true;
     }
     // Stage a proposed card change, then restore the current task while asking.
     // The accepted change and progress reset share one snapshot for atomic undo.
-    function approveTaskChange(before){
+    function approveTaskChange(before,force=false){
       const after=taskSnapshot();
-      const changed=JSON.stringify(before.cards)!==JSON.stringify(after.cards)||JSON.stringify(before.covered)!==JSON.stringify(after.covered);
-      if(!changed||(!before.shotCount&&!before.completedAt))return true;
+      const changed=force||JSON.stringify(before.cards)!==JSON.stringify(after.cards)||JSON.stringify(before.covered)!==JSON.stringify(after.covered);
+      if(!changed||before.completedAt||!before.shotCount)return true;
       applyTaskSnapshot(before);
       const decision=new Promise(resolve=>progressChangeResolve=resolve);
       renderQuest({preserveDetail:true});
@@ -758,7 +830,7 @@
     el('progressMinus').addEventListener('click',()=>changeShotCount(-1));
     el('progressPlus').addEventListener('click',()=>changeShotCount(1));
     el('finishQuest').addEventListener('click',finishShooting);
-    el('resumeQuest').addEventListener('click',resumeShooting);
+    el('startNextQuest').addEventListener('click',()=>beginTask());
     el('undoQuest').addEventListener('click',undoTask);
     el('confirmQuest').addEventListener('click',confirmTask);
     el('editQuest').addEventListener('click',editTask);
@@ -777,11 +849,11 @@
       const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(1);
       return vals.map(n=>fmt(Number(n)*1.5)).join('–')+'mm';
     }
-    function frameHint(item){
-      if(!smartPairingActive() || !quest.camera.interchangeable || !DECKS.frame.some(l=>l.id===item.id))return item.hint||'';
-      if(quest.camera.cropFactor===1.5)return `α6700 等效約 ${focalEquivalent(item)} · 接環須相容`;
-      if(item.code==='AP'||item.code==='AZ')return `${quest.camera.title} · APS-C 裁切等效約 ${focalEquivalent(item)} · 接環須相容`;
-      return `${quest.camera.title} · 全片幅 ${item.title} · 接環須相容`;
+    function frameHint(item,camera=quest.camera,smart=smartPairingActive()){
+      if(!smart || !camera.interchangeable || !DECKS.frame.some(l=>l.id===item.id))return item.hint||'';
+      if(camera.cropFactor===1.5)return `α6700 等效約 ${focalEquivalent(item)} · 接環須相容`;
+      if(item.code==='AP'||item.code==='AZ')return `${camera.title} · APS-C 裁切等效約 ${focalEquivalent(item)} · 接環須相容`;
+      return `${camera.title} · 全片幅 ${item.title} · 接環須相容`;
     }
     function faceMarkup(key,item){
       const m=DECK_META[key], count=DECKS[key].length;
@@ -1127,7 +1199,7 @@
     }
     function drawSurface(card){return card.id==='questDetailFlip'||!mobileLayout.matches?card.querySelector('.flip-inner'):card.querySelector('.quest-thumb-turn')}
     function syncDrawControls(session){
-      const controls=document.querySelectorAll('#questGrid button,#drawAll,#mobileDrawAll,#unlockAll,#pairingMode,#copyQuest,#printQuest,#undoQuest,#confirmQuest,#editQuest,#dialogChoose,#questDetailChoose,#questDetailCommands button,#questDetailFlip');
+      const controls=document.querySelectorAll('#questGrid button,#drawAll,#mobileDrawAll,#unlockAll,#pairingMode,#copyQuest,#printQuest,#undoQuest,#confirmQuest,#editQuest,#shareQuest,#saveFavorite,#startNextQuest,#progressPlus,#progressMinus,#finishQuest,#dialogChoose,#questDetailChoose,#questDetailCommands button,#questDetailFlip');
       controls.forEach(node=>{if(!session.controls.has(node))session.controls.set(node,node.disabled);node.disabled=true;});
       el('drawAll').textContent=el('mobileDrawAll').textContent='抽取中…';
       el('questGrid').setAttribute('aria-busy','true');
@@ -1153,12 +1225,12 @@
       if(summary.textContent!==session.summary&&summary.animate)summary.animate([{opacity:.45},{opacity:1}],{duration:180,easing:'cubic-bezier(.4,0,.2,1)'});
       toast(session.message);session.resolve();
     }
-    async function runQuestDraw(update,message){
-      if(drawMotion||detailClosing||detailFlight||!taskEditable())return false;
+    async function runQuestDraw(update,message,{allowCompleted=false,forceAll=false}={}){
+      if(drawMotion||progressChangeResolve||detailClosing||detailFlight||(!allowCompleted&&!taskEditable()))return false;
       const previous=taskSnapshot();
       const before=Object.fromEntries(KEYS.map(key=>[key,faceMarkup(key,quest[key])]));
       if(update()===false)return false;
-      const keys=KEYS.filter(key=>!covered[key]&&before[key]!==faceMarkup(key,quest[key]));
+      const keys=forceAll?activeKeys():KEYS.filter(key=>!covered[key]&&before[key]!==faceMarkup(key,quest[key]));
       if(!keys.length){toast('目前沒有可重抽的卡片；請先解除固定或調整器材搭配');return false;}
       const approval=approveTaskChange(previous);if(approval!==true&&!await approval)return false;
       commitTask(previous,message);
@@ -1273,7 +1345,7 @@
       },'新的攝影任務已抽出');
     }
     el('drawAll').addEventListener('click',drawQuest);
-    el('mobileDrawAll').addEventListener('click',()=>{if(!taskConfirmedAt){drawQuest();return;}if(!taskCompletedAt)changeShotCount(1);else el('shootingProgress').scrollIntoView({behavior:reducedMotion.matches?'instant':'smooth',block:'center'});});
+    el('mobileDrawAll').addEventListener('click',()=>{if(taskCompletedAt){beginTask();return;}if(!taskConfirmedAt){drawQuest();return;}if(shootingTarget()!==null&&taskShotCount>=shootingTarget())finishShooting();else changeShotCount(1);});
     el('unlockAll').addEventListener('click',()=>{
       if(drawMotion||detailClosing||detailFlight||!taskEditable())return;
       const before=taskSnapshot();KEYS.forEach(key=>locked[key]=false);
@@ -1334,6 +1406,151 @@
     }
     el('dialogChoose').addEventListener('click',chooseLibraryCard);
     el('questDetailChoose').addEventListener('click',chooseLibraryCard);
+    // Completed tasks, favorites and undo effects live in one atomic storage envelope.
+    function validArchives(values){
+      if(!Array.isArray(values))return [];
+      const seen=new Set();return values.map(validTaskSnapshot).filter(task=>task&&task.completedAt&&!seen.has(task.id)&&seen.add(task.id));
+    }
+    function validFavorites(values){
+      if(!Array.isArray(values))return [];
+      const seen=new Set();return values.map(value=>{
+        const task=validTaskSnapshot(value?.task);
+        if(!task||typeof value.id!=='string'||!value.id||value.id.length>100||typeof value.savedAt!=='string'||!Number.isFinite(Date.parse(value.savedAt)))return null;
+        return {id:value.id,savedAt:value.savedAt,task};
+      }).filter(value=>value&&!seen.has(value.id)&&seen.add(value.id));
+    }
+    function taskFingerprint(task){return JSON.stringify([task.pairingEnabled,task.cards,task.covered])}
+    function findFavorite(task){const fingerprint=taskFingerprint(task);return favoriteTasks.find(value=>taskFingerprint(value.task)===fingerprint)}
+    function renderFavoriteButton(button,task){const saved=!!findFavorite(task);button.textContent=saved?'★ 已收藏':'☆ 收藏組合';button.setAttribute('aria-pressed',String(saved))}
+    function toggleFavorite(task){
+      if(drawMotion||progressChangeResolve)return false;
+      const value=validTaskSnapshot(task);if(!value)return false;
+      const existing=findFavorite(value);
+      if(existing)favoriteTasks=favoriteTasks.filter(item=>item.id!==existing.id);
+      else favoriteTasks.unshift({id:newTaskId(),savedAt:new Date().toISOString(),task:{...value,shotCount:0,confirmedAt:null,completedAt:null}});
+      persistTask();if(viewedRecord)renderFavoriteButton(el('recordFavorite'),viewedRecord);
+      toast(taskStorageState==='ready'?existing?'已取消收藏':'這組任務已收藏': '收藏已更新，但目前無法保存；可以先匯出備份');return true;
+    }
+    function recordDate(value){return new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value))}
+    function recordSubject(task){return KEYS.filter(key=>!task.covered[key]&&(key==='subject'||key==='story')).map(key=>taskCard(key,task.cards[key]).title).join(' · ')||'自由攝影散步'}
+    function renderRecords(){
+      const favorites=recordTab==='favorites',values=favorites?favoriteTasks:archivedTasks;
+      el('recordsCompleted').textContent=`已完成 ${archivedTasks.length}`;el('recordsFavorites').textContent=`收藏 ${favoriteTasks.length}`;
+      el('recordsCompleted').setAttribute('aria-pressed',String(!favorites));el('recordsFavorites').setAttribute('aria-pressed',String(favorites));
+      el('recordsList').innerHTML=values.length?values.slice(0,recordsShown).map(entry=>{
+        const task=favorites?entry.task:entry,id=entry.id;
+        return `<div class="record-row"><button class="record-open" type="button" data-record-view="${escapeHTML(id)}"><strong>${escapeHTML(recordSubject(task))}</strong><small>${escapeHTML(recordDate(favorites?entry.savedAt:task.completedAt))} · ${favorites?'收藏的組合':`${task.shotCount} 張作品`} · 查看任務 ↗</small></button>${favorites?`<button class="btn btn-outline" type="button" data-favorite-remove="${escapeHTML(id)}" aria-label="取消收藏：${escapeHTML(recordSubject(task))}">取消收藏</button>`:''}</div>`;
+      }).join(''):`<p class="tools-note">${favorites?'還沒有收藏。遇到喜歡的組合，按「收藏組合」留待下次。':'還沒有完成的任務。完成一趟攝影散步後，會保存在這裡。'}</p>`;
+      el('recordsMore').hidden=values.length<=recordsShown;
+    }
+    function showRecord(task){
+      viewedRecord=structuredClone(task);el('recordTitle').textContent=task.completedAt?'已完成的任務':'收藏的組合';
+      el('recordMeta').textContent=task.completedAt?`${task.shotCount} 張作品 · 完成於 ${recordDate(task.completedAt)}`:'再次挑戰會建立新任務，原本的收藏會保留。';
+      el('recordFields').innerHTML=KEYS.map(key=>`<div class="record-field" style="--card-accent:${DECK_META[key].accent}"><small>${DECK_META[key].cn} · ${DECK_META[key].en}</small><strong>${escapeHTML(task.covered[key]?'不限':taskCard(key,task.cards[key]).title)}</strong></div>`).join('');
+      renderFavoriteButton(el('recordFavorite'),task);el('recordDialog').showModal();
+    }
+    el('saveFavorite').addEventListener('click',()=>toggleFavorite(taskSnapshot()));
+    el('openRecords').addEventListener('click',()=>{recordsShown=20;renderRecords();el('recordsStatus').textContent='';el('recordsDialog').showModal()});
+    el('recordsClose').addEventListener('click',()=>el('recordsDialog').close());el('recordClose').addEventListener('click',()=>el('recordDialog').close());
+    el('recordsCompleted').addEventListener('click',()=>{recordTab='completed';recordsShown=20;renderRecords()});
+    el('recordsFavorites').addEventListener('click',()=>{recordTab='favorites';recordsShown=20;renderRecords()});
+    el('recordsMore').addEventListener('click',()=>{recordsShown+=20;renderRecords()});
+    el('recordsList').addEventListener('click',event=>{
+      const view=event.target.closest('[data-record-view]'),remove=event.target.closest('[data-favorite-remove]');
+      if(view){const entry=(recordTab==='favorites'?favoriteTasks:archivedTasks).find(task=>task.id===view.dataset.recordView);if(entry)showRecord(recordTab==='favorites'?entry.task:entry);}
+      if(remove){const entry=favoriteTasks.find(task=>task.id===remove.dataset.favoriteRemove);if(entry)toggleFavorite(entry.task);}
+    });
+    el('recordFavorite').addEventListener('click',()=>viewedRecord&&toggleFavorite(viewedRecord));
+    el('recordReplay').addEventListener('click',()=>viewedRecord&&beginTask(viewedRecord));
+    function downloadBlob(blob,name){const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+    function backupPayload(){return {format:'photo-quest-backup',version:1,exportedAt:new Date().toISOString(),current:taskSnapshot(),archived:archivedTasks,favorites:favoriteTasks}}
+    function parseBackup(value){
+      if(!value||value.format!=='photo-quest-backup'||value.version!==1||!Array.isArray(value.archived)||!Array.isArray(value.favorites)||value.archived.length>10000||value.favorites.length>10000)throw Error('這份檔案不是支援的 PHOTO QUEST 備份。');
+      const current=value.current===null?null:validTaskSnapshot(value.current),archived=validArchives(value.archived),favorites=validFavorites(value.favorites);
+      if((value.current!==null&&!current)||archived.length!==value.archived.length||favorites.length!==value.favorites.length)throw Error('備份內容有無法辨識的任務，尚未匯入任何資料。');
+      return {current,archived,favorites};
+    }
+    function mergeBackup(value,restoreCurrent=false){
+      if(taskStorageState==='unsupported')return false;
+      const archiveIds=new Set(archivedTasks.map(task=>task.id));
+      value.archived.forEach(task=>{if(!archiveIds.has(task.id)){archivedTasks.push(task);archiveIds.add(task.id);}});
+      if(value.current?.completedAt&&!archiveIds.has(value.current.id)){archivedTasks.push(value.current);archiveIds.add(value.current.id);}
+      const fingerprints=new Set(favoriteTasks.map(entry=>taskFingerprint(entry.task)));
+      const candidates=[...value.favorites];
+      if(value.current&&!value.current.completedAt&&!restoreCurrent)candidates.push({id:newTaskId(),savedAt:new Date().toISOString(),task:{...value.current,shotCount:0,confirmedAt:null,completedAt:null}});
+      candidates.forEach(entry=>{const fingerprint=taskFingerprint(entry.task);if(!fingerprints.has(fingerprint)){favoriteTasks.push({...entry,id:newTaskId()});fingerprints.add(fingerprint);}});
+      archivedTasks.sort((a,b)=>Date.parse(b.completedAt)-Date.parse(a.completedAt));favoriteTasks.sort((a,b)=>Date.parse(b.savedAt)-Date.parse(a.savedAt));
+      if(restoreCurrent&&value.current){
+        const before=taskSnapshot();const current=structuredClone(value.current);
+        if(!current.completedAt&&archivedTasks.some(task=>task.id===current.id))current.id=newTaskId();
+        applyTaskSnapshot(current);closeQuestDetail(true);renderQuest();commitTask(before,'還原備份目前任務');
+      }
+      persistTask();el('recordsStatus').textContent=taskStorageState==='ready'?restoreCurrent?'備份已合併，並還原備份中的目前任務。':'備份已合併，目前任務維持不變。':'已合併，但此瀏覽器無法保存；請保留原始備份檔。';return true;
+    }
+    el('exportTasks').addEventListener('click',()=>{downloadBlob(new Blob([JSON.stringify(backupPayload(),null,2)],{type:'application/json'}),`photo-quest-backup-${new Date().toISOString().slice(0,10)}.json`);el('recordsStatus').textContent='備份已匯出，包含目前任務、已完成紀錄與收藏。'});
+    el('importTasks').addEventListener('click',()=>{if(taskStorageState==='unsupported'){el('recordsStatus').textContent='目前資料版本無法寫入，請先保留備份。';return;}el('backupFile').value='';el('backupFile').click()});
+    el('backupFile').addEventListener('change',async event=>{
+      const file=event.target.files?.[0];if(!file)return;
+      try{if(file.size>10*1024*1024)throw Error('備份檔案超過 10 MB，請確認選擇的檔案。');pendingBackup=parseBackup(JSON.parse(await file.text()));
+        el('backupNote').textContent=`這份備份包含 ${pendingBackup.archived.length} 筆完成紀錄、${pendingBackup.favorites.length} 組收藏。合併後不取代目前任務；備份中的未完成任務會加入收藏，可從收藏再次挑戰。`;
+        el('restoreBackupCurrent').checked=false;el('restoreBackupCurrent').disabled=!pendingBackup.current;
+        el('backupDialog').showModal();el('cancelBackup').focus();
+      }catch(error){pendingBackup=null;el('recordsStatus').textContent=error instanceof SyntaxError?'檔案內容無法讀取，請選擇匯出的 JSON 備份。':error.message;}
+    });
+    el('cancelBackup').addEventListener('click',()=>{pendingBackup=null;el('backupDialog').close()});
+    el('backupDialog').addEventListener('cancel',()=>pendingBackup=null);
+    el('acceptBackup').addEventListener('click',()=>{const value=pendingBackup;pendingBackup=null;el('backupDialog').close();if(value)mergeBackup(value,el('restoreBackupCurrent').checked)});
+    let shareFile=null,shareUrl=null,shareRequest=0;
+    function roundedRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+    function canvasLines(ctx,text,maxWidth){const lines=[];let line='';for(const char of text){if(line&&ctx.measureText(line+char).width>maxWidth){lines.push(line);line=char}else line+=char}if(line)lines.push(line);return lines;}
+    async function makeTaskImage(source){
+      const task=validTaskSnapshot(source);if(!task)throw Error('任務內容無法讀取');
+      await document.fonts.ready;
+      const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;const ctx=canvas.getContext('2d');if(!ctx)throw Error('此瀏覽器無法產生圖片');
+      const sans=getComputedStyle(document.documentElement).getPropertyValue('--sans').trim(),serif=getComputedStyle(document.documentElement).getPropertyValue('--serif').trim();
+      ctx.fillStyle='#F7F5EE';ctx.fillRect(0,0,1080,1350);ctx.fillStyle='#323A33';ctx.font=`700 40px ${sans}`;ctx.fillText('PHOTO QUEST',64,100);
+      ctx.font=`20px ${sans}`;ctx.fillStyle='#70776D';ctx.fillText('AN EXERCISE IN SEEING',64,136);
+      ctx.fillStyle='#647760';ctx.font=`500 34px ${serif}`;ctx.fillText(task.completedAt?'這次散步完成了':'今天，拍什麼？',64,204);
+      ctx.textAlign='right';ctx.font=`24px ${sans}`;ctx.fillStyle='#70776D';ctx.fillText(new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(task.completedAt||task.createdAt)),1016,204);ctx.textAlign='left';
+      KEYS.forEach((key,index)=>{
+        const meta=DECK_META[key],item=taskCard(key,task.cards[key]),off=task.covered[key],x=64+(index%2)*492,y=250+Math.floor(index/2)*282,w=460,h=256;
+        ctx.fillStyle=off?meta.back:'#FFFEFA';roundedRect(ctx,x,y,w,h,18);ctx.fill();ctx.strokeStyle='#E5E3D8';ctx.lineWidth=1.5;ctx.stroke();
+        ctx.save();roundedRect(ctx,x,y,w,h,18);ctx.clip();ctx.fillStyle=meta.accent;ctx.fillRect(x,y,w,6);ctx.restore();
+        ctx.fillStyle='#70776D';ctx.font=`22px ${sans}`;ctx.fillText(meta.cn,x+25,y+44);ctx.textAlign='right';ctx.font=`18px ${sans}`;ctx.fillText(meta.en,x+w-25,y+44);ctx.textAlign='center';
+        const title=off?{main:'不限',note:'此類別已蓋牌'}:displayTitle(key,item);ctx.font=`500 38px ${serif}`;ctx.fillStyle=off?'#70776D':'#323A33';
+        const lines=canvasLines(ctx,title.main,w-50);if(lines.length>2)throw Error('卡片標題無法完整排入分享圖片');
+        lines.forEach((line,i)=>ctx.fillText(line,x+w/2,y+(lines.length===1?126:106+i*48)));
+        if(title.note){ctx.font=`22px ${sans}`;ctx.fillStyle='#8B9086';ctx.fillText(title.note,x+w/2,y+166);}
+        const hint=key==='frame'?frameHint(item,taskCard('camera',task.cards.camera),task.pairingEnabled&&!task.covered.camera&&!task.covered.frame):item.hint;
+        ctx.font=`22px ${sans}`;ctx.fillStyle='#70776D';const hints=off?['自由發揮，不限制這項條件']:canvasLines(ctx,hint||'',w-50);
+        if(hints.length>2)throw Error('卡片提示無法完整排入分享圖片');hints.forEach((line,i)=>ctx.fillText(line,x+w/2,y+203+i*29));ctx.textAlign='left';
+      });
+      const target=task.covered.output?null:parseInt(taskCard('output',task.cards.output).title,10);
+      const progress=task.completedAt?`已完成 · ${task.shotCount} 張作品`:task.confirmedAt||task.shotCount?`拍攝進度 · ${task.shotCount}${target===null?'':`／${target}`} 張`:'今日拍攝任務';
+      ctx.fillStyle='#647760';ctx.font=`500 28px ${sans}`;ctx.fillText(progress,64,1132);
+      ctx.fillStyle='#70776D';ctx.font=`22px ${sans}`;ctx.fillText(task.pairingEnabled?'帶著一點偶然，重新觀看世界。':'自由組合 · 器材相容請自行確認',64,1190);
+      ctx.strokeStyle='#E5E3D8';ctx.beginPath();ctx.moveTo(64,1236);ctx.lineTo(1016,1236);ctx.stroke();ctx.font=`20px ${sans}`;ctx.fillText('6 DECKS / ONE WAY OF SEEING',64,1285);ctx.textAlign='right';ctx.fillText('muweifilm.com/photo-quest',1016,1285);
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('圖片產生失敗');return blob;
+    }
+    async function openTaskShare(source=taskSnapshot()){
+      if(drawMotion||progressChangeResolve)return false;
+      const task=structuredClone(source),request=++shareRequest;
+      shareFile=null;if(shareUrl){URL.revokeObjectURL(shareUrl);shareUrl=null;}
+      el('sharePreview').hidden=true;el('nativeShare').hidden=true;el('downloadShare').hidden=true;el('shareStatus').textContent='正在準備圖片…';
+      el('shareDialog').showModal();
+      try{const blob=await makeTaskImage(task);if(request!==shareRequest||!el('shareDialog').open)return false;
+        shareFile=new File([blob],`photo-quest-${task.createdAt.slice(0,10)}.png`,{type:'image/png'});shareUrl=URL.createObjectURL(blob);
+        el('sharePreview').src=shareUrl;el('sharePreview').hidden=false;el('downloadShare').href=shareUrl;el('downloadShare').download=shareFile.name;el('downloadShare').hidden=false;
+        let native=false;try{native=!!navigator.share&&!!navigator.canShare?.({files:[shareFile]})}catch(error){}
+        el('nativeShare').hidden=!native;el('shareStatus').textContent=native?'可分享或儲存圖片；任務狀態不會改變。':'可儲存圖片；手機也可以長按圖片儲存。';return true;
+      }catch(error){if(request===shareRequest)el('shareStatus').textContent=`無法產生圖片：${error.message}`;return false;}
+    }
+    el('shareQuest').addEventListener('click',()=>openTaskShare());el('recordShare').addEventListener('click',()=>viewedRecord&&openTaskShare(viewedRecord));
+    el('shareClose').addEventListener('click',()=>el('shareDialog').close());
+    el('shareDialog').addEventListener('close',()=>{shareRequest++;shareFile=null;if(shareUrl){URL.revokeObjectURL(shareUrl);shareUrl=null;}});
+    el('nativeShare').addEventListener('click',async()=>{if(!shareFile)return;try{await navigator.share({files:[shareFile],title:'PHOTO QUEST 任務卡'});el('shareStatus').textContent='已開啟分享，任務狀態維持不變。';}catch(error){if(error.name!=='AbortError')el('shareStatus').textContent='目前無法分享，請改用儲存圖片。';}});
+    ['recordsDialog','recordDialog','shareDialog'].forEach(id=>el(id).addEventListener('click',event=>{if(event.target!==el(id))return;const rect=event.target.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)el(id).close()}));
+
     // user-facing utilities and A4 printing: fronts only, 4 cards/page at physical A7 dimensions.
     let toastTimer;
     function toast(s){let t=el('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2500)}
