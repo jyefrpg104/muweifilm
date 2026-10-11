@@ -75,10 +75,21 @@
     .section-meta {font-size:11px; color:#91948A; letter-spacing:.1em; white-space:nowrap}
     .quest-panel {background:#EEEFE7; border:1px solid #E4E7DE; border-radius:20px; padding:26px}
     .quest-toolbar {display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:25px; padding:0 1px}
-    .toolbar-caption {font-size:12px; color:var(--sub)}
+    .toolbar-caption {display:flex; align-items:center; flex-wrap:wrap; gap:4px 10px; min-width:0; font-size:12px; color:var(--sub)}
+    .toolbar-caption > * {white-space:nowrap}
     .toolbar-caption strong {color:var(--ink); font-weight:650}
-    .toolbar-actions {display:flex; align-items:center; gap:9px; flex-wrap:wrap}
+    .toolbar-actions {display:flex; align-items:center; gap:9px; flex-shrink:0}
     .toolbar-actions .btn {min-height:40px; padding:8px 13px}
+    .task-icon-actions {display:flex; align-items:center; gap:0}
+    .task-icon {display:inline-flex; align-items:center; justify-content:center; width:40px; height:44px; padding:9px; flex-shrink:0; border:0; border-radius:10px; color:var(--sub); background:transparent; transition:background .22s cubic-bezier(.4,0,.2,1),color .22s cubic-bezier(.4,0,.2,1)}
+    .task-icon[hidden] {display:none!important}
+    .task-icon svg {width:22px; height:22px; fill:transparent; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; pointer-events:none; transition:fill .22s cubic-bezier(.4,0,.2,1)}
+    .task-icon:focus-visible {outline:2px solid var(--sage-deep); outline-offset:2px}
+    .task-icon:not(:disabled):active {background:#E2E8DC}
+    .task-icon:disabled {color:#A5AAA0; cursor:default}
+    .task-icon[aria-pressed="true"] {color:var(--sage-deep)}
+    .task-icon[aria-pressed="true"] svg {fill:currentColor}
+    @media(hover:hover){.task-icon:not(:disabled):hover {background:#E2E8DC}}
     .task-session {display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:18px; padding-top:15px; border-top:1px solid #DFE5D8}
     .task-session-meta {min-width:0; font-size:11px; line-height:1.7; color:var(--sub)}
     .task-session-meta strong {color:var(--sage-deep); font-weight:650}
@@ -410,10 +421,10 @@
       #play {padding-top:12px}
       #play .section-head {margin-bottom:10px}
       .quest-panel {display:flex; flex-direction:column}
-      .quest-toolbar {order:3; margin:12px 0 0}
-      .gear-control {order:0; margin-bottom:10px}
-      .quest-grid {order:1}
-      .mobile-card-note {order:2}
+      .quest-toolbar {order:0; margin:0 0 10px}
+      .gear-control {order:1; margin-bottom:10px}
+      .quest-grid {order:2}
+      .mobile-card-note {order:3}
       .shooting-progress {order:4}
       .task-session {order:5}
     }
@@ -473,7 +484,7 @@
       <div class="container">
         <div class="section-head"><div><div class="eyebrow">01 / DRAW YOUR QUEST</div><h2 id="playTitle">今天，拍什麼？</h2><p class="section-desc">每個啟用的類別各抽一張。點擊卡片可以翻面，也能重抽、固定或蓋牌略過該類別。</p></div><div class="section-meta" id="questCount">6 CARDS · 1 WALK</div></div>
         <div class="quest-panel">
-          <div class="quest-toolbar"><div class="toolbar-caption"><strong>今日任務</strong>　<span id="questDate"></span></div><div class="toolbar-actions"><button id="drawAll" class="btn btn-primary" type="button">↻　重新抽卡</button><button id="unlockAll" class="btn btn-outline" type="button">解除所有鎖定</button></div></div>
+          <div class="quest-toolbar"><div class="toolbar-caption"><strong>今日任務</strong><span id="questDate"></span></div><div class="toolbar-actions"><button id="drawAll" class="btn btn-primary" type="button">↻　重新抽卡</button><div class="task-icon-actions" role="group" aria-label="任務操作"><button id="unlockAll" class="task-icon" type="button" aria-label="解除所有固定" title="解除所有固定" disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 7.5-2M12 15v2"></path></svg></button><button id="saveFavorite" class="task-icon" type="button" aria-label="收藏組合" title="收藏組合" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m12 3 2.8 5.7 6.3.9-4.55 4.45 1.08 6.28L12 17.35l-5.63 2.98 1.08-6.28L2.9 9.6l6.3-.9Z"></path></svg></button><button id="shareQuest" class="task-icon" type="button" aria-label="分享任務卡" title="分享任務卡" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 15V3m-4 4 4-4 4 4M8 10H5v11h14V10h-3"></path></svg></button></div></div></div>
           <div class="gear-control"><label class="switch-control" for="pairingMode"><input id="pairingMode" type="checkbox" checked><span class="switch-track" aria-hidden="true"></span><span>智慧器材搭配</span></label><p id="pairingNote">開啟時，可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。</p></div>
           <div class="quest-grid" id="questGrid" aria-live="polite"></div>
           <p class="card-note">輕點卡片翻面 · 固定會保留該卡 · 蓋牌會略過整個類別，翻開後恢復</p>
@@ -489,7 +500,7 @@
             <div class="btn-row"><button id="undoQuest" class="btn btn-outline" type="button" aria-label="復原上一個操作" disabled><svg class="task-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 1 1 9 9"></path><path d="M3 4v7h7"></path></svg><span>復原</span></button><button id="confirmQuest" class="btn btn-primary" type="button">確認這組任務</button><button id="editQuest" class="btn btn-outline" type="button" hidden>返回調整任務</button></div>
           </div>
         </div>
-        <div class="quest-summary"><p id="questSentence" aria-live="polite"></p><div class="btn-row"><button class="btn btn-outline" id="shareQuest" type="button"><svg class="task-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M5 11v9h14v-9"></path></svg>分享任務卡</button><button class="btn btn-outline" id="saveFavorite" type="button">☆ 收藏組合</button></div></div>
+        <div class="quest-summary"><p id="questSentence" aria-live="polite"></p></div>
       </div>
     </section>
     <div class="container"><div class="closing"><div><h3>不是要拍得更像別人，<br>而是練習看見自己眼中的世界。</h3><p>The world doesn't change. The way you see it does.</p></div><a href="#play" class="btn btn-primary">再抽一次 ↗</a></div></div>
@@ -694,6 +705,8 @@
       el('confirmQuest').title=activeKeys().length?'保留這組條件，開始拍攝':'請先翻開至少一個牌組';
       el('editQuest').hidden=!confirmed||!!taskCompletedAt;el('editQuest').disabled=busy;
       el('drawAll').hidden=confirmed;el('unlockAll').hidden=confirmed;
+      el('unlockAll').disabled=busy||!KEYS.some(key=>locked[key]);
+      el('unlockAll').title=KEYS.some(key=>locked[key])?'解除所有固定':'目前沒有固定的卡片';
       el('pairingMode').checked=pairingEnabled;el('pairingMode').closest('.gear-control').hidden=confirmed;
       el('mobileDrawAll').textContent=taskCompletedAt?'開始新任務':confirmed?shootingTarget()!==null&&taskShotCount>=shootingTarget()?'完成任務':'＋ 拍了一張':el('drawAll').textContent;
       el('mobileDrawAll').disabled=busy||(confirmed&&!taskCompletedAt&&taskShotCount===Number.MAX_SAFE_INTEGER);
@@ -1499,7 +1512,12 @@
     }
     function taskFingerprint(task){return JSON.stringify([task.pairingEnabled,task.cards,task.covered])}
     function findFavorite(task){const fingerprint=taskFingerprint(task);return favoriteTasks.find(value=>taskFingerprint(value.task)===fingerprint)}
-    function renderFavoriteButton(button,task){const saved=!!findFavorite(task);button.textContent=saved?'★ 已收藏':'☆ 收藏組合';button.setAttribute('aria-pressed',String(saved))}
+    function renderFavoriteButton(button,task){
+      const saved=!!findFavorite(task);
+      if(button.classList.contains('task-icon')){button.setAttribute('aria-label',saved?'取消收藏組合':'收藏組合');button.title=saved?'已收藏 · 點擊取消收藏':'收藏組合';}
+      else button.textContent=saved?'★ 已收藏':'☆ 收藏組合';
+      button.setAttribute('aria-pressed',String(saved));
+    }
     function toggleFavorite(task){
       if(drawMotion||progressChangeResolve)return false;
       const value=validTaskSnapshot(task);if(!value)return false;
