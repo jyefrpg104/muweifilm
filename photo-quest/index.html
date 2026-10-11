@@ -85,7 +85,9 @@
     .switch-control input:checked + .switch-track:after {transform:translateX(17px)}
     .switch-control input:focus-visible + .switch-track {outline:3px solid #9DAF90; outline-offset:3px}
     .quest-grid {display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:13px}
-    .quest-thumb,.mobile-card-note,.mobile-draw-dock {display:none}
+    .quest-thumb,.quest-thumb-turn,.mobile-card-note,.mobile-draw-dock {display:none}
+    .quest-drawing .flip-inner {transition:none; will-change:transform}
+    .quest-drawing {pointer-events:none}
     .quest-col {min-width:0}
     .flip-button {width:100%; appearance:none; border:0; text-align:left; padding:0; background:transparent; display:block; perspective:900px; aspect-ratio:74 / 105; cursor:pointer; border-radius:10px}
     .flip-inner {position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .57s var(--motion-ease)}
@@ -282,6 +284,12 @@
       .quest-grid .flip-button {height:clamp(98px,27vw,132px); aspect-ratio:auto; perspective:none}
       .quest-grid .flip-inner,.quest-grid .card-commands {display:none}
       .quest-thumb {height:100%; display:flex; flex-direction:column; padding:11px 12px 9px; background:var(--paper); border:1px solid #E2E0D6; border-top:3px solid var(--card-accent); border-radius:9px; box-shadow:0 3px 9px #323A3305}
+      .quest-thumb-turn {display:block; position:relative; height:100%; transform-style:preserve-3d}
+      .quest-thumb-turn > .quest-thumb {position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden}
+      .quest-thumb-back {transform:rotateY(180deg); background:var(--card-back); border-color:transparent}
+      .quest-thumb-back .quest-thumb-title {font-family:var(--sans); font-size:14px; letter-spacing:.14em; font-weight:750; line-height:1.5}
+      .quest-thumb-back .quest-thumb-state {color:var(--sub)}
+      .quest-drawing .quest-thumb-turn {will-change:transform}
       .quest-thumb-top {font-size:10px; color:var(--sub); display:flex; justify-content:space-between; gap:5px; line-height:1.4}
       .quest-thumb-title {margin:auto 0; font-family:var(--serif); font-size:18px; line-height:1.2; text-align:center; overflow-wrap:anywhere}
       .quest-thumb-state {font-size:10px; line-height:1.4; color:#AB705B; min-height:14px; text-align:center}
@@ -385,7 +393,7 @@
           <p class="card-note">輕點卡片翻面 · 固定會保留該卡 · 蓋牌會略過整個類別，翻開後恢復</p>
           <p class="mobile-card-note">點卡片放大 · 查看提示、翻面與調整任務</p>
         </div>
-        <div class="quest-summary"><p id="questSentence"></p><div class="btn-row"><button class="btn btn-outline" id="copyQuest" type="button">複製任務摘要</button><button class="btn btn-outline" id="printQuest" type="button">列印這六張卡 ↗</button></div></div>
+        <div class="quest-summary"><p id="questSentence" aria-live="polite"></p><div class="btn-row"><button class="btn btn-outline" id="copyQuest" type="button">複製任務摘要</button><button class="btn btn-outline" id="printQuest" type="button">列印這六張卡 ↗</button></div></div>
       </div>
     </section>
     <div class="container"><div class="closing"><div><h3>不是要拍得更像別人，<br>而是練習看見自己眼中的世界。</h3><p>The world doesn't change. The way you see it does.</p></div><a href="#play" class="btn btn-primary">再抽一次 ↗</a></div></div>
@@ -539,6 +547,7 @@
     let detailKey=null,detailLibrary=null,detailPointer=null,detailSwipeAt=0;
     let detailTurnAngle=0,detailTurnMotion=null;
     let detailAnimations=[],detailMotionId=0,detailClosing=false,detailFlight=null;
+    let drawMotion=null;
     const el=id=>document.getElementById(id);
     const escapeHTML=(str)=>String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     function titleClass(t){return [...t].length>9?' compact':''}
@@ -589,37 +598,41 @@
     function questStateSnapshot(root){
       return {lock:feedbackText(root?.querySelector('[data-lock] .command-label,.detail-lock-label')),cover:feedbackText(root?.querySelector('[data-cover] .command-label,.detail-cover-label')),state:feedbackText(root?.querySelector('.quest-thumb-state')),label:feedbackText(root?.querySelector('.covered-label')),sub:feedbackText(root?.querySelector('.back-sub'))};
     }
-    function renderQuest({preserveDetail=false}={}){
+    function renderQuest({preserveDetail=false,updatedKeys=null,deferSummary=false}={}){
       const previous=Object.fromEntries(KEYS.map(key=>{
         const col=el('questGrid').querySelector(`[data-quest-key="${key}"]`);
         return [key,col?{...questStateSnapshot(col),locked:col.dataset.locked==='true',covered:col.dataset.covered==='true'}:null];
       }));
       const previousDetail=detailKey&&!detailLibrary?questStateSnapshot(el('questDialog')):null;
-      el('questGrid').innerHTML=KEYS.map(key=>{
+      const columns=KEYS.map(key=>{
         const m=DECK_META[key],item=quest[key],isCovered=covered[key];
         const faces=questFaces(key,item,isCovered),back=isCovered||flipStates[key];
         const label=mobileLayout.matches?`放大${m.cn}卡：${isCovered?'已蓋牌':item.title}`:isCovered?m.cn+'牌組已停用':'翻轉'+m.cn+'卡：'+item.title;
         const state=[locked[key]?'● 已固定':'',isCovered?'▱ 已蓋牌':''].filter(Boolean).join(' · ');
-        return `<div class="quest-col" data-quest-key="${key}" data-locked="${locked[key]}" data-covered="${isCovered}" style="--card-accent:${m.accent};--card-back:${m.back}"><button type="button" class="flip-button ${back?'flipped':''}" data-flip="${key}" aria-label="${escapeHTML(label)}" ${mobileLayout.matches?'aria-haspopup="dialog" aria-controls="questDialog"':`aria-pressed="${back}"`} ${isCovered&&!mobileLayout.matches?'disabled':''}><div class="flip-inner" ${mobileLayout.matches?'aria-hidden="true"':''}>${faces}</div><span class="quest-thumb${isCovered?' covered':''}" aria-hidden="true"><span class="quest-thumb-top"><span>${m.cn}</span><span>${m.en}</span></span><span class="quest-thumb-title">${isCovered?'本回合略過':titleMarkup(key,item)}</span><span class="quest-thumb-state">${state}</span></span></button><div class="card-commands"><button type="button" data-redraw="${key}" aria-label="重抽${m.cn}" ${isCovered?'disabled':''}>↻ 重抽</button><button type="button" data-lock="${key}" aria-label="${locked[key]?'解除固定':'固定'}${m.cn}卡" aria-pressed="${locked[key]}" ${isCovered?'disabled':''}><span class="command-label">${locked[key]?'● 已固定':'○ 固定'}</span></button><button type="button" data-cover="${key}" aria-label="${isCovered?'翻開並啟用':'蓋牌並停用'}${m.cn}牌組" aria-pressed="${isCovered}"><span class="command-label">${isCovered?'↗ 翻開':'▱ 蓋牌'}</span></button></div></div>`;
-      }).join('');
-      const count=activeKeys().length;
-      el('questCount').textContent=`${count} CARDS · 1 WALK`;
-      el('drawAll').textContent=count===6?'↻　重新抽取六張':count?`↻　重新抽取 ${count} 張`:'↻　重新抽取任務';
-      el('mobileDrawAll').textContent=el('drawAll').textContent;
-      el('printQuest').textContent=count?`列印這 ${count} 張卡 ↗`:'列印任務卡 ↗';
-      const parts=[];
-      if(!covered.camera)parts.push(`帶著 ${quest.camera.title}`);
-      if(!covered.frame)parts.push(`${smartPairingActive()&&!quest.camera.interchangeable?'使用':covered.camera?'使用':'搭配'} ${quest.frame.title}`);
-      const timePhrase=covered.time?'':`在${quest.time.title}`;
-      if(!covered.subject)parts.push(`${timePhrase}尋找「${quest.subject.title}」`);
-      else if(timePhrase)parts.push(`${timePhrase}拍攝`);
-      if(!covered.story)parts.push(`用「${quest.story.title}」詮釋`);
-      if(!covered.output)parts.push(`最後選出 ${quest.output.title}作品`);
-      const freeNote=!pairingEnabled&&!covered.camera&&!covered.frame?'（自由組合僅為創意提示，不保證實際器材相容）':'';
-      el('questSentence').textContent=parts.length?parts.join('，')+'。'+freeNote:'所有牌組皆已蓋牌；翻開至少一個牌組，再抽取任務。';
-      el('pairingNote').textContent=pairingEnabled
-        ? covered.camera||covered.frame?'相機與鏡頭皆啟用時會智慧搭配；蓋牌的類別不參與抽取。':'可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。鏡頭接環仍請依實物確認。'
-        : '自由組合模式：機身與鏡頭各自隨機。部分組合無法實際安裝，請把它當作視角創作練習。';
+        return `<div class="quest-col" data-quest-key="${key}" data-locked="${locked[key]}" data-covered="${isCovered}" style="--card-accent:${m.accent};--card-back:${m.back}"><button type="button" class="flip-button ${back?'flipped':''}" data-flip="${key}" aria-label="${escapeHTML(label)}" ${mobileLayout.matches?'aria-haspopup="dialog" aria-controls="questDialog"':`aria-pressed="${back}"`} ${isCovered&&!mobileLayout.matches?'disabled':''}><div class="flip-inner" ${mobileLayout.matches?'aria-hidden="true"':''}>${faces}</div><span class="quest-thumb-turn" aria-hidden="true"><span class="quest-thumb${isCovered?' covered':''}" aria-hidden="true"><span class="quest-thumb-top"><span>${m.cn}</span><span>${m.en}</span></span><span class="quest-thumb-title">${isCovered?'本回合略過':titleMarkup(key,item)}</span><span class="quest-thumb-state">${state}</span></span><span class="quest-thumb quest-thumb-back"><span class="quest-thumb-top"><span>${m.cn}</span><span>${m.en}</span></span><span class="quest-thumb-title">PHOTO<br>QUEST</span><span class="quest-thumb-state">${m.cn}牌組</span></span></span></button><div class="card-commands"><button type="button" data-redraw="${key}" aria-label="重抽${m.cn}" ${isCovered?'disabled':''}>↻ 重抽</button><button type="button" data-lock="${key}" aria-label="${locked[key]?'解除固定':'固定'}${m.cn}卡" aria-pressed="${locked[key]}" ${isCovered?'disabled':''}><span class="command-label">${locked[key]?'● 已固定':'○ 固定'}</span></button><button type="button" data-cover="${key}" aria-label="${isCovered?'翻開並啟用':'蓋牌並停用'}${m.cn}牌組" aria-pressed="${isCovered}"><span class="command-label">${isCovered?'↗ 翻開':'▱ 蓋牌'}</span></button></div></div>`;
+      });
+      if(updatedKeys===null)el('questGrid').innerHTML=columns.join('');
+      else updatedKeys.forEach(key=>{const col=el('questGrid').querySelector(`[data-quest-key="${key}"]`);if(col)col.outerHTML=columns[KEYS.indexOf(key)];});
+      if(!deferSummary){
+        const count=activeKeys().length;
+        el('questCount').textContent=`${count} CARDS · 1 WALK`;
+        el('drawAll').textContent=count===6?'↻　重新抽取六張':count?`↻　重新抽取 ${count} 張`:'↻　重新抽取任務';
+        el('mobileDrawAll').textContent=el('drawAll').textContent;
+        el('printQuest').textContent=count?`列印這 ${count} 張卡 ↗`:'列印任務卡 ↗';
+        const parts=[];
+        if(!covered.camera)parts.push(`帶著 ${quest.camera.title}`);
+        if(!covered.frame)parts.push(`${smartPairingActive()&&!quest.camera.interchangeable?'使用':covered.camera?'使用':'搭配'} ${quest.frame.title}`);
+        const timePhrase=covered.time?'':`在${quest.time.title}`;
+        if(!covered.subject)parts.push(`${timePhrase}尋找「${quest.subject.title}」`);
+        else if(timePhrase)parts.push(`${timePhrase}拍攝`);
+        if(!covered.story)parts.push(`用「${quest.story.title}」詮釋`);
+        if(!covered.output)parts.push(`最後選出 ${quest.output.title}作品`);
+        const freeNote=!pairingEnabled&&!covered.camera&&!covered.frame?'（自由組合僅為創意提示，不保證實際器材相容）':'';
+        el('questSentence').textContent=parts.length?parts.join('，')+'。'+freeNote:'所有牌組皆已蓋牌；翻開至少一個牌組，再抽取任務。';
+        el('pairingNote').textContent=pairingEnabled
+          ? covered.camera||covered.frame?'相機與鏡頭皆啟用時會智慧搭配；蓋牌的類別不參與抽取。':'可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。鏡頭接環仍請依實物確認。'
+          : '自由組合模式：機身與鏡頭各自隨機。部分組合無法實際安裝，請把它當作視角創作練習。';
+      }
       if(detailKey&&!detailLibrary){
         if(preserveDetail)syncQuestDetailControls();else renderQuestDetail();
         questDetailOrigin()?.classList.add('quest-origin');
@@ -645,6 +658,7 @@
           }
         }
       });
+      if(drawMotion)syncDrawControls(drawMotion);
     }
     function questDetailItem(){return detailLibrary?.item||quest[detailKey]}
     function questDetailCovered(){return !detailLibrary&&covered[detailKey]}
@@ -679,7 +693,7 @@
       openCardDetail(key);
     }
     function openCardDetail(key,libraryItem=null,libraryOrigin=null){
-      if(!KEYS.includes(key)||!mobileLayout.matches||el('questDialog').open)return;
+      if(drawMotion||!KEYS.includes(key)||!mobileLayout.matches||el('questDialog').open)return;
       const origin=libraryItem?libraryOrigin:el('questGrid').querySelector(`[data-flip="${key}"]`),from=origin?.getBoundingClientRect();
       detailLibrary=libraryItem?{item:libraryItem,origin,back:false}:null;
       detailKey=key;detailPointer=null;detailSwipeAt=0;
@@ -794,7 +808,7 @@
       }).catch(()=>{});
     }
     function setQuestDetailFace(back,direction=0){
-      if(!detailKey||questDetailCovered()||detailClosing||detailFlight)return;
+      if(drawMotion||!detailKey||questDetailCovered()||detailClosing||detailFlight)return;
       releaseQuestDetailPointer();stopQuestDetailTurn();
       const anchor=Math.round(detailTurnAngle/180)*180;
       let target=questDetailTurnBack(anchor)===back?anchor:anchor+(detailTurnAngle<anchor?-180:180);
@@ -833,6 +847,7 @@
     function closeQuestDetail(immediate=false){
       const dialog=el('questDialog');
       if(!dialog.open)return;
+      finishQuestDraw();
       stopQuestDetailTurn();releaseQuestDetailPointer();
       if(immediate){cancelQuestDetailMotion();dialog.close();return}
       if(detailClosing)return;
@@ -865,7 +880,7 @@
       if(detailKey)setQuestDetailFace(!questDetailBack(),direction);
     });
     el('questDetailFlip').addEventListener('pointerdown',e=>{
-      if(!e.isPrimary||e.button!==0||!detailKey||questDetailCovered()||detailClosing||detailFlight||detailPointer)return;
+      if(drawMotion||!e.isPrimary||e.button!==0||!detailKey||questDetailCovered()||detailClosing||detailFlight||detailPointer)return;
       detailSwipeAt=0;
       stopQuestDetailTurn();
       const anchor=Math.round(detailTurnAngle/180)*180;
@@ -876,11 +891,11 @@
     el('questDetailFlip').addEventListener('pointerup',e=>endQuestDetailPointer(e));
     el('questDetailFlip').addEventListener('pointercancel',e=>endQuestDetailPointer(e,true));
     el('questDetailFlip').addEventListener('lostpointercapture',e=>endQuestDetailPointer(e,true));
-    el('questDetailRedraw').addEventListener('click',()=>{if(detailKey&&!detailLibrary){reroll(detailKey);renderQuest()}});
+    el('questDetailRedraw').addEventListener('click',()=>{if(detailKey&&!detailLibrary)redrawQuestCard(detailKey)});
     el('questDetailLock').addEventListener('click',()=>{if(detailKey&&!detailLibrary)toggleLock(detailKey)});
     el('questDetailCover').addEventListener('click',()=>{if(detailKey&&!detailLibrary)toggleCover(detailKey)});
-    mobileLayout.addEventListener('change',()=>{if(!mobileLayout.matches)closeQuestDetail(true);else el('cardDialog').close();renderQuest();renderLibrary()});
-    window.addEventListener('resize',()=>{if(el('questDialog').open){cancelQuestDetailMotion();stopQuestDetailTurn();releaseQuestDetailPointer();if(detailClosing)closeQuestDetail(true);else renderQuestDetail()}});
+    mobileLayout.addEventListener('change',()=>{finishQuestDraw();if(!mobileLayout.matches)closeQuestDetail(true);else el('cardDialog').close();renderQuest();renderLibrary()});
+    window.addEventListener('resize',()=>{finishQuestDraw();if(el('questDialog').open){cancelQuestDetailMotion();stopQuestDetailTurn();releaseQuestDetailPointer();if(detailClosing)closeQuestDetail(true);else renderQuestDetail()}});
     function syncActiveFrame(rerollLens=false){
       if(covered.frame)return;
       let next=quest.frame;
@@ -890,8 +905,82 @@
       } else if(next.id.startsWith('B'))next=choice(DECKS.frame);
       if(next.id!==quest.frame.id){quest.frame=next;locked.frame=false;flipStates.frame=false;}
     }
+    function drawCards(keys){
+      return keys.flatMap(key=>{
+        const cards=[el('questGrid').querySelector(`[data-flip="${key}"]`)];
+        if(key===detailKey&&!detailLibrary)cards.push(el('questDetailFlip'));
+        return cards.filter(Boolean);
+      });
+    }
+    function drawSurface(card){return card.id==='questDetailFlip'||!mobileLayout.matches?card.querySelector('.flip-inner'):card.querySelector('.quest-thumb-turn')}
+    function syncDrawControls(session){
+      const controls=document.querySelectorAll('#questGrid button,#drawAll,#mobileDrawAll,#unlockAll,#pairingMode,#copyQuest,#printQuest,#questDetailCommands button,#questDetailFlip');
+      controls.forEach(node=>{if(!session.controls.has(node))session.controls.set(node,node.disabled);node.disabled=true;});
+      el('drawAll').textContent=el('mobileDrawAll').textContent='抽取中…';
+      el('questGrid').setAttribute('aria-busy','true');
+      drawCards(session.keys).forEach(card=>{card.classList.add('quest-drawing');session.cards.add(card);});
+    }
+    function drawAnimation(session,node,frames,options,start){
+      if(!node?.animate)return null;
+      const animation=node.animate(frames,{...options,fill:'both',easing:'cubic-bezier(.4,0,.2,1)'});
+      if(typeof start==='number')animation.startTime=start;
+      session.animations.push(animation);return animation;
+    }
+    function finishQuestDraw(session=drawMotion){
+      if(!session||drawMotion!==session)return;
+      drawMotion=null;
+      session.animations.forEach(animation=>animation.cancel());
+      session.cards.forEach(card=>{card.classList.remove('quest-drawing');const surface=drawSurface(card);if(surface)surface.style.transform='';});
+      session.controls.forEach((disabled,node)=>{node.disabled=disabled;});
+      session.keys.forEach(key=>flipStates[key]=false);
+      renderQuest({updatedKeys:session.installed?[]:session.keys,preserveDetail:session.installed||!session.keys.includes(detailKey)});
+      if(detailKey&&!detailLibrary&&session.keys.includes(detailKey)){detailTurnAngle=0;writeQuestDetailTurn();syncQuestDetailFace(false);}
+      el('questGrid').setAttribute('aria-busy','false');
+      const summary=el('questSentence');
+      if(summary.textContent!==session.summary&&summary.animate)summary.animate([{opacity:.45},{opacity:1}],{duration:180,easing:'cubic-bezier(.4,0,.2,1)'});
+      toast(session.message);session.resolve();
+    }
+    async function runQuestDraw(update,message){
+      if(drawMotion||detailClosing||detailFlight)return false;
+      const before=Object.fromEntries(KEYS.map(key=>[key,faceMarkup(key,quest[key])]));
+      if(update()===false)return false;
+      const keys=KEYS.filter(key=>!covered[key]&&before[key]!==faceMarkup(key,quest[key]));
+      if(!keys.length){toast('目前沒有可重抽的卡片；請先解除固定或調整器材搭配');return false;}
+      const session={keys,message,summary:el('questSentence').textContent,controls:new Map(),cards:new Set(),animations:[],installed:false};
+      session.finished=new Promise(resolve=>session.resolve=resolve);drawMotion=session;
+      stopQuestDetailTurn();releaseQuestDetailPointer();syncDrawControls(session);
+      try{
+        if(!reducedMotion.matches){
+          const start=document.timeline.currentTime;
+          const hiding=drawCards(keys).map(card=>{
+            const surface=drawSurface(card),matrix=getComputedStyle(surface).transform;
+            const rotation=matrix&&matrix!=='none'?new DOMMatrixReadOnly(matrix):null;
+            const from=card.id==='questDetailFlip'?detailTurnAngle:rotation?Math.atan2(-rotation.m13,rotation.m11)*180/Math.PI:0;
+            const target=coverTurnTarget(from,true);
+            if(Math.abs(target-from)<.1)return null;
+            return drawAnimation(session,surface,[{transform:`rotateY(${from}deg)`},{transform:`rotateY(${target}deg)`}],{duration:240},start);
+          }).filter(Boolean);
+          await Promise.all(hiding.map(animation=>animation.finished.catch(()=>{})));
+          if(drawMotion!==session)return false;
+        }
+        renderQuest({updatedKeys:keys,deferSummary:true,preserveDetail:!keys.includes(detailKey)});session.installed=true;
+        const start=document.timeline.currentTime,revealing=[];
+        keys.forEach((key,index)=>drawCards([key]).forEach(card=>{
+          const surface=drawSurface(card);
+          if(reducedMotion.matches)revealing.push(drawAnimation(session,surface,[{opacity:.6},{opacity:1}],{duration:160},start));
+          else{
+            surface.style.transform='rotateY(0deg)';
+            revealing.push(drawAnimation(session,surface,[{transform:'rotateY(180deg)'},{transform:'rotateY(0deg)'}],{duration:400,delay:index*120},start));
+          }
+        }));
+        await Promise.all(revealing.filter(Boolean).map(animation=>animation.finished.catch(()=>{})));
+        if(drawMotion!==session)return false;
+        finishQuestDraw(session);return true;
+      }catch(error){finishQuestDraw(session);return false;}
+    }
+    function redrawQuestCard(key){return runQuestDraw(()=>reroll(key),`已重新抽取${DECK_META[key].cn}卡`)}
     function toggleLock(key){
-      if(covered[key]||detailClosing||detailFlight)return;
+      if(drawMotion||covered[key]||detailClosing||detailFlight)return;
       locked[key]=!locked[key];renderQuest({preserveDetail:true});
     }
     function coverTurnTarget(from,back){
@@ -900,7 +989,7 @@
       return Math.abs(target-from)===180?360*Math.trunc(from/360):target;
     }
     function toggleCover(key){
-      if(detailClosing||detailFlight)return;
+      if(drawMotion||detailClosing||detailFlight)return;
       const inDetail=detailKey===key&&!detailLibrary;
       const origin=el('questGrid').querySelector(`[data-flip="${key}"]`);
       let from=covered[key]||flipStates[key]?180:0;
@@ -941,35 +1030,39 @@
     el('questGrid').addEventListener('click',e=>{
       const flip=e.target.closest('[data-flip]');const redraw=e.target.closest('[data-redraw]');const lock=e.target.closest('[data-lock]');const cover=e.target.closest('[data-cover]');
       if(flip){if(mobileLayout.matches)openQuestDetail(flip.dataset.flip);else if(!covered[flip.dataset.flip]){flipStates[flip.dataset.flip]=!flipStates[flip.dataset.flip];renderQuest()}}
-      if(redraw){reroll(redraw.dataset.redraw);renderQuest()}
+      if(redraw)redrawQuestCard(redraw.dataset.redraw);
       if(lock)toggleLock(lock.dataset.lock);
       if(cover)toggleCover(cover.dataset.cover);
     });
     function drawQuest(){
-      // Keep the camera when the lens is pinned: the pairing remains physically coherent.
+      if(drawMotion)return false;
       const keys=activeKeys();
-      if(!keys.length){toast('所有牌組皆已蓋牌；請先翻開至少一個牌組');return;}
-      keys.forEach(key=>{
-        if(locked[key])return;
-        if(key==='camera' && smartPairingActive() && locked.frame)return;
-        if(key==='frame' && smartPairingActive() && !quest.camera.interchangeable)return;
-        reroll(key);
-      });
-      renderQuest();toast('新的攝影任務已抽出');
+      if(!keys.length){toast('所有牌組皆已蓋牌；請先翻開至少一個牌組');return false;}
       if(mobileLayout.matches){
         const header=document.querySelector('.topbar').getBoundingClientRect().height;
         window.scrollTo({top:Math.max(0,el('questGrid').getBoundingClientRect().top+window.scrollY-header-16),behavior:reducedMotion.matches?'instant':'smooth'});
       }
+      return runQuestDraw(()=>{
+        // A pinned lens also keeps its camera, preserving the current pairing.
+        keys.forEach(key=>{
+          if(locked[key])return;
+          if(key==='camera'&&smartPairingActive()&&locked.frame)return;
+          if(key==='frame'&&smartPairingActive()&&!quest.camera.interchangeable)return;
+          reroll(key);
+        });
+      },'新的攝影任務已抽出');
     }
     el('drawAll').addEventListener('click',drawQuest);
     el('mobileDrawAll').addEventListener('click',drawQuest);
-    el('unlockAll').addEventListener('click',()=>{KEYS.forEach(key=>locked[key]=false);renderQuest();toast('所有卡片已解除固定')});
+    el('unlockAll').addEventListener('click',()=>{if(drawMotion)return;KEYS.forEach(key=>locked[key]=false);renderQuest();toast('所有卡片已解除固定')});
     el('pairingMode').addEventListener('change',e=>{
+      if(drawMotion)return;
       pairingEnabled=e.target.checked;
       syncActiveFrame(pairingEnabled);
       if(pairingEnabled&&!covered.frame){locked.frame=false;flipStates.frame=false;}
       renderQuest();toast(pairingEnabled?'已開啟智慧器材搭配':'已切換自由組合模式');
     });
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)finishQuestDraw()});
     // card library
     let activeDeck='story', activeGroup='all', activeQuery='', shownCount=12, activeModal=null;
     function renderTabs(){el('deckTabs').innerHTML=KEYS.map(key=>`<button type="button" class="tab" role="tab" aria-selected="${key===activeDeck}" data-tab="${key}">${DECK_META[key].cn} <span style="opacity:.72">${DECKS[key].length}</span></button>`).join('')}
@@ -1028,6 +1121,7 @@
     const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
     function switchPage(key,{section=null,writeHistory=true,animate=true,focusContent=false}={}){
       if(!PAGES.includes(key))return;
+      if(drawMotion&&key!==activePage)finishQuestDraw();
       const previous=activePage,changed=key!==previous;
       pageScroll[previous]=window.scrollY;
       if(pageAnimation){pageAnimation.cancel();pageAnimation=null;}
