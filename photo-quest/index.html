@@ -109,12 +109,16 @@
     .back-emblem:after {content:""; width:12px; height:12px; border:1px solid #859383; border-radius:50%}
     .back-num {position:absolute; bottom:19px; font-size:10px; letter-spacing:.2em; opacity:.55}
     .card-commands {display:flex; justify-content:space-between; gap:6px; margin-top:10px}
-    .card-commands button {background:none; border:0; border-radius:4px; font-size:11px; padding:4px 2px; color:#687269; line-height:1.4}
+    .card-commands button {background:none; border:0; border-radius:4px; font-size:11px; padding:4px 2px; color:#687269; line-height:1.4; transition:color .2s var(--motion-ease),background .2s var(--motion-ease),border-color .2s var(--motion-ease)}
     .card-commands button:hover {color:var(--ink); text-decoration:underline}
     .card-commands button[aria-pressed=true] {color:#AB705B; font-weight:750}
     .card-commands button:disabled {opacity:.4; cursor:default; text-decoration:none}
     .flip-button:disabled {cursor:default}
-    .card-face.covered-face {transform:none; opacity:.75}
+    .card-face.covered-face {opacity:.75}
+    .quest-state-turn .flip-inner {transition:none; will-change:transform}
+    .command-label {display:block; position:relative}
+    .quest-feedback-current {display:block}
+    .quest-feedback-previous {position:absolute; inset:0; display:grid; place-items:center; pointer-events:none}
     .covered-label {position:absolute; top:18px; font-size:11px; letter-spacing:.08em}
     .card-note {text-align:center; color:#888E84; font-size:11px; margin:22px 0 0}
     .quest-summary {display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; padding:23px 4px 0; gap:18px}
@@ -215,6 +219,7 @@
     .quest-detail-choose {width:100%; min-height:44px}
     .quest-detail-commands[hidden],.quest-detail-choose[hidden] {display:none!important}
     .quest-detail-commands button {flex:1; min-height:44px; font-size:12px; border:1px solid #DDE1D6; border-radius:7px; background:var(--paper); padding:9px 4px}
+    .quest-detail-commands button[aria-pressed=true] {background:#F1E6DD; border-color:#DFCEC0}
     .quest-detail-note {margin:0; font-size:11px; color:var(--sub); text-align:center}
     #toast {position:fixed; bottom:25px; left:50%; transform:translate(-50%,18px); background:#394A3A; color:white; font-size:12px; border-radius:7px; padding:10px 17px; box-shadow:0 8px 28px #343c3030; opacity:0; pointer-events:none; transition:opacity .24s,transform .24s; z-index:20}
     #toast.show {opacity:1; transform:translate(-50%,0)}
@@ -419,7 +424,7 @@
     <div class="quest-detail-content">
       <div class="quest-detail-head"><h3 id="questDetailTitle"></h3><button id="questDetailClose" class="quest-detail-close" type="button" aria-label="關閉任務卡片" autofocus>×</button></div>
       <button id="questDetailFlip" class="flip-button dialog-card quest-detail-card" type="button" aria-label="翻轉任務卡片" aria-describedby="questDetailNote"></button>
-      <div id="questDetailCommands" class="card-commands quest-detail-commands"><button id="questDetailRedraw" type="button">↻ 重抽</button><button id="questDetailLock" type="button">○ 固定</button><button id="questDetailCover" type="button">▱ 蓋牌</button></div>
+      <div id="questDetailCommands" class="card-commands quest-detail-commands"><button id="questDetailRedraw" type="button">↻ 重抽</button><button id="questDetailLock" type="button"><span class="command-label">○ 固定</span></button><button id="questDetailCover" type="button"><span class="command-label">▱ 蓋牌</span></button></div>
       <button id="questDetailChoose" class="btn btn-primary quest-detail-choose" type="button" hidden>放進今日任務 ↗</button>
       <p id="questDetailNote" class="quest-detail-note">左右拖動或點卡片翻面</p>
     </div>
@@ -563,13 +568,38 @@
       const hint=key==='frame'?frameHint(item):item.hint;
       return `<div class="card-face front"><div class="card-topline"><span>PHOTO QUEST<br>${m.en}</span><span>${escapeHTML(serial)}</span></div><div class="card-main"><div class="card-title${titleClass(displayTitle(key,item).main)}">${titleMarkup(key,item)}</div><div class="card-hint">${escapeHTML(hint||'')}</div></div><div class="card-footer"><span>FIELD CARD</span><span>VOL. 01</span></div></div><div class="card-face back"><div class="back-mark">PHOTO<br>QUEST</div><div class="back-emblem"></div><div class="back-sub">An Exercise in Seeing.</div><span class="back-num">${m.en} / 01</span></div>`;
     }
-    function renderQuest(){
+    function questFaces(key,item,isCovered){
+      return faceMarkup(key,item).replace('<div class="card-face back">',`<div class="card-face back${isCovered?' covered-face':''}"><span class="covered-label">${isCovered?DECK_META[key].cn+' · 已蓋牌':''}</span>`).replace('An Exercise in Seeing.</div>',`${isCovered?'本回合不抽取':'An Exercise in Seeing.'}</div>`);
+    }
+    function feedbackText(node){return node?.dataset.feedbackText??node?.textContent??''}
+    function animateQuestLabel(node,previous){
+      if(!node)return;
+      const next=node.textContent;node.dataset.feedbackText=next;
+      if(previous===next||reducedMotion.matches||!node.animate)return;
+      const current=document.createElement('span'),old=document.createElement('span');
+      current.className='quest-feedback-current';current.textContent=next;
+      old.className='quest-feedback-previous';old.textContent=previous;old.setAttribute('aria-hidden','true');
+      node.style.position='relative';node.replaceChildren(current,old);
+      const options={duration:200,easing:'cubic-bezier(.4,0,.2,1)'};
+      current.animate([{opacity:0},{opacity:1}],options);
+      const fading=old.animate([{opacity:1},{opacity:0}],options);
+      fading.finished.then(()=>old.remove()).catch(()=>old.remove());
+    }
+    function questStateSnapshot(root){
+      return {lock:feedbackText(root?.querySelector('[data-lock] .command-label,.detail-lock-label')),cover:feedbackText(root?.querySelector('[data-cover] .command-label,.detail-cover-label')),state:feedbackText(root?.querySelector('.quest-thumb-state')),label:feedbackText(root?.querySelector('.covered-label')),sub:feedbackText(root?.querySelector('.back-sub'))};
+    }
+    function renderQuest({preserveDetail=false}={}){
+      const previous=Object.fromEntries(KEYS.map(key=>{
+        const col=el('questGrid').querySelector(`[data-quest-key="${key}"]`);
+        return [key,col?{...questStateSnapshot(col),locked:col.dataset.locked==='true',covered:col.dataset.covered==='true'}:null];
+      }));
+      const previousDetail=detailKey&&!detailLibrary?questStateSnapshot(el('questDialog')):null;
       el('questGrid').innerHTML=KEYS.map(key=>{
         const m=DECK_META[key],item=quest[key],isCovered=covered[key];
-        const faces=isCovered?`<div class="card-face back covered-face"><span class="covered-label">${m.cn} · 已蓋牌</span><div class="back-mark">PHOTO<br>QUEST</div><div class="back-emblem"></div><div class="back-sub">本回合不抽取</div><span class="back-num">${m.en} / 01</span></div>`:faceMarkup(key,item);
+        const faces=questFaces(key,item,isCovered),back=isCovered||flipStates[key];
         const label=mobileLayout.matches?`放大${m.cn}卡：${isCovered?'已蓋牌':item.title}`:isCovered?m.cn+'牌組已停用':'翻轉'+m.cn+'卡：'+item.title;
         const state=[locked[key]?'● 已固定':'',isCovered?'▱ 已蓋牌':''].filter(Boolean).join(' · ');
-        return `<div class="quest-col" data-quest-key="${key}" style="--card-accent:${m.accent};--card-back:${m.back}"><button type="button" class="flip-button ${!isCovered&&flipStates[key]?'flipped':''}" data-flip="${key}" aria-label="${escapeHTML(label)}" ${mobileLayout.matches?'aria-haspopup="dialog" aria-controls="questDialog"':`aria-pressed="${!isCovered&&flipStates[key]}"`} ${isCovered&&!mobileLayout.matches?'disabled':''}><div class="flip-inner" ${mobileLayout.matches?'aria-hidden="true"':''}>${faces}</div><span class="quest-thumb${isCovered?' covered':''}" aria-hidden="true"><span class="quest-thumb-top"><span>${m.cn}</span><span>${m.en}</span></span><span class="quest-thumb-title">${isCovered?'本回合略過':titleMarkup(key,item)}</span><span class="quest-thumb-state">${state}</span></span></button><div class="card-commands"><button type="button" data-redraw="${key}" aria-label="重抽${m.cn}" ${isCovered?'disabled':''}>↻ 重抽</button><button type="button" data-lock="${key}" aria-label="${locked[key]?'解除固定':'固定'}${m.cn}卡" aria-pressed="${locked[key]}" ${isCovered?'disabled':''}>${locked[key]?'● 已固定':'○ 固定'}</button><button type="button" data-cover="${key}" aria-label="${isCovered?'翻開並啟用':'蓋牌並停用'}${m.cn}牌組" aria-pressed="${isCovered}">${isCovered?'↗ 翻開':'▱ 蓋牌'}</button></div></div>`;
+        return `<div class="quest-col" data-quest-key="${key}" data-locked="${locked[key]}" data-covered="${isCovered}" style="--card-accent:${m.accent};--card-back:${m.back}"><button type="button" class="flip-button ${back?'flipped':''}" data-flip="${key}" aria-label="${escapeHTML(label)}" ${mobileLayout.matches?'aria-haspopup="dialog" aria-controls="questDialog"':`aria-pressed="${back}"`} ${isCovered&&!mobileLayout.matches?'disabled':''}><div class="flip-inner" ${mobileLayout.matches?'aria-hidden="true"':''}>${faces}</div><span class="quest-thumb${isCovered?' covered':''}" aria-hidden="true"><span class="quest-thumb-top"><span>${m.cn}</span><span>${m.en}</span></span><span class="quest-thumb-title">${isCovered?'本回合略過':titleMarkup(key,item)}</span><span class="quest-thumb-state">${state}</span></span></button><div class="card-commands"><button type="button" data-redraw="${key}" aria-label="重抽${m.cn}" ${isCovered?'disabled':''}>↻ 重抽</button><button type="button" data-lock="${key}" aria-label="${locked[key]?'解除固定':'固定'}${m.cn}卡" aria-pressed="${locked[key]}" ${isCovered?'disabled':''}><span class="command-label">${locked[key]?'● 已固定':'○ 固定'}</span></button><button type="button" data-cover="${key}" aria-label="${isCovered?'翻開並啟用':'蓋牌並停用'}${m.cn}牌組" aria-pressed="${isCovered}"><span class="command-label">${isCovered?'↗ 翻開':'▱ 蓋牌'}</span></button></div></div>`;
       }).join('');
       const count=activeKeys().length;
       el('questCount').textContent=`${count} CARDS · 1 WALK`;
@@ -589,7 +619,31 @@
       el('pairingNote').textContent=pairingEnabled
         ? covered.camera||covered.frame?'相機與鏡頭皆啟用時會智慧搭配；蓋牌的類別不參與抽取。':'可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。鏡頭接環仍請依實物確認。'
         : '自由組合模式：機身與鏡頭各自隨機。部分組合無法實際安裝，請把它當作視角創作練習。';
-      if(detailKey&&!detailLibrary){renderQuestDetail();questDetailOrigin()?.classList.add('quest-origin')}
+      if(detailKey&&!detailLibrary){
+        if(preserveDetail)syncQuestDetailControls();else renderQuestDetail();
+        questDetailOrigin()?.classList.add('quest-origin');
+      }
+      KEYS.forEach(key=>{
+        const old=previous[key];if(!old)return;
+        const col=el('questGrid').querySelector(`[data-quest-key="${key}"]`);
+        if(old.locked!==locked[key]||old.covered!==covered[key]){
+          animateQuestLabel(col.querySelector('[data-lock] .command-label'),old.lock);
+          animateQuestLabel(col.querySelector('[data-cover] .command-label'),old.cover);
+          animateQuestLabel(col.querySelector('.quest-thumb-state'),old.state);
+          if(key===detailKey&&!detailLibrary&&previousDetail){
+            animateQuestLabel(el('questDetailLock').querySelector('.command-label'),previousDetail.lock);
+            animateQuestLabel(el('questDetailCover').querySelector('.command-label'),previousDetail.cover);
+          }
+        }
+        if(old.covered!==covered[key]){
+          animateQuestLabel(col.querySelector('.covered-label'),old.label);
+          animateQuestLabel(col.querySelector('.back-sub'),old.sub);
+          if(key===detailKey&&!detailLibrary&&previousDetail){
+            animateQuestLabel(el('questDetailFlip').querySelector('.covered-label'),previousDetail.label);
+            animateQuestLabel(el('questDetailFlip').querySelector('.back-sub'),previousDetail.sub);
+          }
+        }
+      });
     }
     function questDetailItem(){return detailLibrary?.item||quest[detailKey]}
     function questDetailCovered(){return !detailLibrary&&covered[detailKey]}
@@ -597,7 +651,7 @@
     function renderQuestDetail(){
       if(!detailKey)return;
       stopQuestDetailTurn();releaseQuestDetailPointer();
-      const key=detailKey,m=DECK_META[key],item=questDetailItem(),isCovered=questDetailCovered(),back=!isCovered&&questDetailBack(),card=el('questDetailFlip');
+      const key=detailKey,m=DECK_META[key],item=questDetailItem(),isCovered=questDetailCovered(),back=isCovered||questDetailBack(),card=el('questDetailFlip');
       el('questDetailCommands').hidden=!!detailLibrary;el('questDetailChoose').hidden=!detailLibrary;
       el('questDetailClose').setAttribute('aria-label',detailLibrary?'關閉圖鑑卡片':'關閉任務卡片');
       el('questDetailTitle').textContent=`${m.cn} · ${isCovered?'已蓋牌':item.id}`;
@@ -605,14 +659,18 @@
       card.classList.toggle('flipped',back);card.setAttribute('aria-pressed',String(back));
       card.setAttribute('aria-label',isCovered?`${m.cn}已蓋牌`:`翻轉${m.cn}卡：${item.title}，目前${back?'背面':'正面'}`);
       card.disabled=isCovered;
-      card.innerHTML=`<div class="flip-inner">${isCovered?`<div class="card-face back covered-face"><span class="covered-label">${m.cn} · 已蓋牌</span><div class="back-mark">PHOTO<br>QUEST</div><div class="back-sub">本回合不抽取</div></div>`:faceMarkup(key,item)}</div>`;
+      card.innerHTML=`<div class="flip-inner">${detailLibrary?faceMarkup(key,item):questFaces(key,item,isCovered)}</div>`;
       detailTurnAngle=back?180:0;
-      if(!isCovered)writeQuestDetailTurn();
+      writeQuestDetailTurn();syncQuestDetailControls();
+    }
+    function syncQuestDetailControls(){
+      if(!detailKey)return;
+      const key=detailKey,m=DECK_META[key],isCovered=questDetailCovered();
       el('questDetailRedraw').disabled=isCovered;el('questDetailLock').disabled=isCovered;
       el('questDetailRedraw').setAttribute('aria-label',`重抽${m.cn}`);
-      el('questDetailLock').textContent=locked[key]?'● 已固定':'○ 固定';el('questDetailLock').setAttribute('aria-pressed',String(locked[key]));
+      const lockLabel=el('questDetailLock').querySelector('.command-label');lockLabel.classList.add('detail-lock-label');lockLabel.textContent=locked[key]?'● 已固定':'○ 固定';lockLabel.dataset.feedbackText=lockLabel.textContent;el('questDetailLock').setAttribute('aria-pressed',String(locked[key]));
       el('questDetailLock').setAttribute('aria-label',`${locked[key]?'解除固定':'固定'}${m.cn}卡`);
-      el('questDetailCover').textContent=isCovered?'↗ 翻開':'▱ 蓋牌';el('questDetailCover').setAttribute('aria-pressed',String(isCovered));
+      const coverLabel=el('questDetailCover').querySelector('.command-label');coverLabel.classList.add('detail-cover-label');coverLabel.textContent=isCovered?'↗ 翻開':'▱ 蓋牌';coverLabel.dataset.feedbackText=coverLabel.textContent;el('questDetailCover').setAttribute('aria-pressed',String(isCovered));
       el('questDetailCover').setAttribute('aria-label',`${isCovered?'翻開並啟用':'蓋牌並停用'}${m.cn}牌組`);
       el('questDetailNote').textContent=isCovered?'已略過這個牌組，翻開後恢復抽取':'左右拖動或點卡片翻面';
     }
@@ -818,7 +876,7 @@
     el('questDetailFlip').addEventListener('pointercancel',e=>endQuestDetailPointer(e,true));
     el('questDetailFlip').addEventListener('lostpointercapture',e=>endQuestDetailPointer(e,true));
     el('questDetailRedraw').addEventListener('click',()=>{if(detailKey&&!detailLibrary){reroll(detailKey);renderQuest()}});
-    el('questDetailLock').addEventListener('click',()=>{if(detailKey&&!detailLibrary&&!covered[detailKey]){locked[detailKey]=!locked[detailKey];renderQuest()}});
+    el('questDetailLock').addEventListener('click',()=>{if(detailKey&&!detailLibrary)toggleLock(detailKey)});
     el('questDetailCover').addEventListener('click',()=>{if(detailKey&&!detailLibrary)toggleCover(detailKey)});
     mobileLayout.addEventListener('change',()=>{if(!mobileLayout.matches)closeQuestDetail(true);else el('cardDialog').close();renderQuest();renderLibrary()});
     window.addEventListener('resize',()=>{if(el('questDialog').open){cancelQuestDetailMotion();stopQuestDetailTurn();releaseQuestDetailPointer();if(detailClosing)closeQuestDetail(true);else renderQuestDetail()}});
@@ -831,10 +889,39 @@
       } else if(next.id.startsWith('B'))next=choice(DECKS.frame);
       if(next.id!==quest.frame.id){quest.frame=next;locked.frame=false;flipStates.frame=false;}
     }
+    function toggleLock(key){
+      if(covered[key]||detailClosing||detailFlight)return;
+      locked[key]=!locked[key];renderQuest({preserveDetail:true});
+    }
+    function coverTurnTarget(from,back){
+      if(back)return 180+360*Math.round((from-180)/360);
+      const target=360*Math.round(from/360);
+      return Math.abs(target-from)===180?360*Math.trunc(from/360):target;
+    }
     function toggleCover(key){
+      if(detailClosing||detailFlight)return;
+      const inDetail=detailKey===key&&!detailLibrary;
+      const origin=el('questGrid').querySelector(`[data-flip="${key}"]`);
+      let from=covered[key]||flipStates[key]?180:0;
+      if(inDetail){stopQuestDetailTurn();releaseQuestDetailPointer();from=detailTurnAngle}
+      else if(!mobileLayout.matches){
+        const matrix=getComputedStyle(origin.querySelector('.flip-inner')).transform;
+        if(matrix&&matrix!=='none'){const rotation=new DOMMatrixReadOnly(matrix);from=Math.atan2(-rotation.m13,rotation.m11)*180/Math.PI}
+      }
       covered[key]=!covered[key];flipStates[key]=false;
       if(key==='camera'||key==='frame')syncActiveFrame();
-      renderQuest();toast(covered[key]?`${DECK_META[key].cn}已蓋牌，本回合不抽取`:`${DECK_META[key].cn}已翻開，恢復參與抽卡`);
+      renderQuest();
+      const target=coverTurnTarget(from,covered[key]);
+      if(inDetail){detailTurnAngle=from;writeQuestDetailTurn();settleQuestDetailTurn(target)}
+      else if(!mobileLayout.matches&&!reducedMotion.matches&&Math.abs(target-from)>.1){
+        const card=el('questGrid').querySelector(`[data-flip="${key}"]`),inner=card.querySelector('.flip-inner');
+        if(inner.animate){
+          card.classList.add('quest-state-turn');
+          const turn=inner.animate([{transform:`rotateY(${from}deg)`},{transform:`rotateY(${target}deg)`}],{duration:Math.max(140,400*Math.min(1,Math.abs(target-from)/180)),easing:'cubic-bezier(.4,0,.2,1)',fill:'both'});
+          turn.finished.then(()=>{turn.cancel();card.classList.remove('quest-state-turn')}).catch(()=>card.classList.remove('quest-state-turn'));
+        }
+      }
+      toast(covered[key]?`${DECK_META[key].cn}已蓋牌，本回合不抽取`:`${DECK_META[key].cn}已翻開，恢復參與抽卡`);
     }
     function reroll(key){
       if(covered[key])return false;
@@ -854,7 +941,7 @@
       const flip=e.target.closest('[data-flip]');const redraw=e.target.closest('[data-redraw]');const lock=e.target.closest('[data-lock]');const cover=e.target.closest('[data-cover]');
       if(flip){if(mobileLayout.matches)openQuestDetail(flip.dataset.flip);else if(!covered[flip.dataset.flip]){flipStates[flip.dataset.flip]=!flipStates[flip.dataset.flip];renderQuest()}}
       if(redraw){reroll(redraw.dataset.redraw);renderQuest()}
-      if(lock&&!covered[lock.dataset.lock]){locked[lock.dataset.lock]=!locked[lock.dataset.lock];renderQuest()}
+      if(lock)toggleLock(lock.dataset.lock);
       if(cover)toggleCover(cover.dataset.cover);
     });
     function drawQuest(){
