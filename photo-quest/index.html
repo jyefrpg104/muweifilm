@@ -579,7 +579,8 @@
       const current=document.createElement('span'),old=document.createElement('span');
       current.className='quest-feedback-current';current.textContent=next;
       old.className='quest-feedback-previous';old.textContent=previous;old.setAttribute('aria-hidden','true');
-      node.style.position='relative';node.replaceChildren(current,old);
+      if(getComputedStyle(node).position==='static')node.style.position='relative';
+      node.replaceChildren(current,old);
       const options={duration:200,easing:'cubic-bezier(.4,0,.2,1)'};
       current.animate([{opacity:0},{opacity:1}],options);
       const fading=old.animate([{opacity:1},{opacity:0}],options);
