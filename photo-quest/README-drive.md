@@ -76,12 +76,14 @@ requests, cancellation, corrupt metadata, daily snapshots, and retention boundar
 | `Photo Quest/latest.json` | 原有最新備份，保持原合併機制 |
 | `Photo Quest/device-<deviceId>.json` | 原有每裝置備份 |
 | `Photo Quest/photo-quest-YYYY-MM-DD.json` | 原有每日快照，30 天規則只作用於 `kind=snapshot` |
-| `Photo Quest/Photo Walks/YYYY-MM-DD_對象_故事/quest-card.png` | 重用 `makeTaskImage(completedSnapshot)` 的 1080 × 1350 PNG，已有完整檔案時不重傳 |
+| `Photo Quest/Photo Walks/YYYY-MM-DD_對象_故事/YYMMDD_HHmm_quest card.png` | 依任務完成時的台北日期與 24 小時時間命名；重用 `makeTaskImage(completedSnapshot)` 的 1080 × 1350 PNG |
 | 同一任務資料夾的 `quest.json` | 單次任務與攝影作品索引，獨立於既有系統備份 |
 | 同一任務資料夾的原始照片 | JPEG、PNG、WebP、HEIC/HEIF，保留原始檔名、二進位內容與格式 |
 
 日期以 Asia/Taipei 的完成日期命名；對象及故事各限制 45 個 Unicode 字元，
 清除控制字元與常見非法檔名字元。資料夾名稱只供閱讀，同名任務不共用資料夾。
+已封存的舊名 `quest-card.png` 會在下次成功授權同步時更名，例如
+`261012_2339_quest card.png`；沿用原本 fileId，不重傳圖片或建立第二份檔案。
 
 ## 資料關聯與恢復
 

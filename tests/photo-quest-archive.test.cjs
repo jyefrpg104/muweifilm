@@ -45,6 +45,9 @@ function server(){
       return response({files:[...files.values()].filter(file=>!file.trashed&&file.appProperties?.kind===kind&&(!taskId||file.appProperties.taskId===taskId)&&(!parent||file.parents?.includes(parent))).map(({bytes,...file})=>file)});
     }
     if(u.searchParams.get('alt')==='media')return {...response({}),blob:async()=>new Blob([files.get(id)?.bytes||'private'])};
+    if(opt.method==='PATCH'&&files.has(id)){
+      const changed={...files.get(id),...JSON.parse(opt.body)};files.set(id,changed);return response(changed);
+    }
     const file=files.get(id);return file?response(file):response({},404);
   }
   return {files,calls,request,add,setHook:value=>hook=value,loseFolder:()=>lostFolder=true,loseChunk:()=>lostChunk=true};
@@ -66,9 +69,20 @@ module.exports=(async()=>{
   const files=kind=>[...f.srv.files.values()].filter(file=>file.appProperties?.kind===kind);
   assert.equal(files('quest-folder').length,1);assert.equal(files('quest-card').length,1);assert.equal(files('quest-json').length,1);
   assert.equal(files('walks')[0].parents[0],'root');assert.equal(files('quest-folder')[0].name,'2026-10-12_街角_剛剛離開');
+  assert.equal(files('quest-card')[0].name,'261012_1400_quest card.png');
+  assert.equal(f.api.cardFileName({...task('one'),completedAt:'2026-10-12T15:39:00Z'}),'261012_2339_quest card.png');
+  assert.equal(f.api.cardFileName({...task('one'),completedAt:'2026-10-12T16:01:00Z'}),'261013_0001_quest card.png');
   const document=()=>JSON.parse(files('quest-json')[0].bytes.toString());
   assert.equal(document().taskId,'one');assert.deepEqual(document().snapshot,task('one'));assert.equal(document().lens.id,'F01');assert.equal(document().camera.name,'camera C01');
   await Promise.all([f.archive.ensure('one'),f.archive.ensure('one')]);assert.equal(files('quest-folder').length,1);assert.equal(files('quest-card').length,1);assert.equal(f.images.length,1);
+  const originalCardId=files('quest-card')[0].id;
+  files('quest-card')[0].name='quest-card.png';
+  const oldMetadata=JSON.parse(f.store.get(f.api.STORAGE_KEY));delete oldMetadata.tasks[0].cardName;f.store.set(f.api.STORAGE_KEY,JSON.stringify(oldMetadata));
+  const migrated=fixture([task('one')],f.srv,f.store);await migrated.archive.flush();
+  assert.equal(files('quest-card').length,1);assert.equal(files('quest-card')[0].id,originalCardId);
+  assert.equal(files('quest-card')[0].name,'261012_1400_quest card.png');assert.equal(migrated.images.length,0);
+  assert.equal(migrated.archive.state('one').status,'completed');
+  assert.equal(migrated.archive.state('one').cardName,'261012_1400_quest card.png');
   console.log('PASS task folder, complete snapshot, original IDs and names, PNG reuse and single-flight archive');
 
   const first=selected('DSC0001.JPG'),second=selected('IMG_1001.HEIC','heic original','image/heic');
