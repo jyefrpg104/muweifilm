@@ -36,6 +36,38 @@ console.log('PASS actual App boot, v4 migration, favorite/delete/undo metadata, 
 module.exports=(async()=>{
   const f=boot();f.run('confirmTask();fillShotCount();finishShooting()');
   const completed=f.saved().archived[0];assert(completed.completedAt);
+  f.run('renderRecords()');
+  const completedRows=f.elements.get('recordsList').innerHTML;
+  assert.match(completedRows,/record-quick-actions/);
+  assert.match(completedRows,/data-record-share="/);
+  assert.match(completedRows,/data-record-favorite="/);
+  assert.match(completedRows,/record-delete-action/);
+  assert.doesNotMatch(completedRows,/<span>刪除<\/span>/);
+  const list=f.elements.get('recordsList');
+  const action=(selector,key)=>({target:{closest:query=>query===selector?{dataset:{[key]:completed.id}}:null}});
+  list.events.click(action('[data-record-favorite]','recordFavorite'));
+  assert.equal(f.saved().favorites.length,1);
+  f.run('recordTab="favorites";renderRecords()');
+  const favoriteRows=f.elements.get('recordsList').innerHTML;
+  assert.match(favoriteRows,/record-unfavorite-action/);
+  assert.match(favoriteRows,/aria-label="取消收藏：/);
+  assert.doesNotMatch(favoriteRows,/record-unfavorite-action[^>]*><svg[^>]*><path d="M3 6h18/);
+  f.run('recordTab="completed";renderRecords()');
+  list.events.click(action('[data-record-share]','recordShare'));
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(f.elements.get('sharePreview').hidden,false);
+  const classes=new Set(),swipeActions={delete:{disabled:true,tabIndex:-1},share:{disabled:true,tabIndex:-1},favorite:{disabled:true,tabIndex:-1}};
+  const row={dataset:{recordRow:completed.id},classList:{add:(...names)=>names.forEach(name=>classes.add(name)),remove:(...names)=>names.forEach(name=>classes.delete(name)),toggle:(name,on)=>on?classes.add(name):classes.delete(name)},
+    querySelector:selector=>selector==='[data-record-view]'?button:selector==='[data-record-reveal]'?{setAttribute(){}}:null,
+    querySelectorAll:selector=>selector==='.record-swipe-action'?Object.values(swipeActions):selector==='[data-record-delete]'?[swipeActions.delete]:[swipeActions.share,swipeActions.favorite]};
+  const button={dataset:{recordView:completed.id},style:{},closest:()=>row};
+  list.querySelectorAll=selector=>selector==='[data-record-row]'?[row]:classes.has('record-swipe-open')||classes.has('record-dragging')?[row]:[];
+  const pointer=(x,id)=>({target:{closest:selector=>selector==='[data-record-view]'?button:null},pointerId:id,clientX:x,clientY:0,isPrimary:true,button:0});
+  list.events.pointerdown(pointer(10,1));list.events.pointermove(pointer(110,1));list.events.pointerup(pointer(110,1));
+  assert.equal(f.run('swipedRecordSide'),'right');assert.equal(swipeActions.share.disabled,false);assert.equal(swipeActions.favorite.disabled,false);assert.equal(swipeActions.delete.disabled,true);
+  list.events.pointerdown(pointer(110,2));list.events.pointermove(pointer(-110,2));list.events.pointerup(pointer(-110,2));
+  assert.equal(f.run('swipedRecordSide'),'left');assert.equal(swipeActions.delete.disabled,false);assert.equal(swipeActions.share.disabled,true);
+  f.run('closeRecordSwipe()');assert.equal(classes.size,0);assert.equal(swipeActions.delete.disabled,true);
   const metadata=JSON.parse(f.storage.get('photo-quest:quest-archive:v1'));
   assert.equal(metadata.tasks[0].taskId,completed.id);assert.equal(metadata.tasks[0].status,'pending');
   f.run('showRecord(archivedTasks[0])');assert.equal(f.elements.get('archiveWorks').hidden,false);
