@@ -154,6 +154,31 @@
     .records-undo {display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 14px; border:1px solid #C9D4C3; border-radius:10px; background:var(--soft); font-size:13px; margin-bottom:16px}
     .records-undo .btn {font-size:12px; padding:8px 12px}
     @media(max-width:750px){.records-panel {padding:16px}.records-toolbar {gap:14px}.records-toolbar > .btn-row {gap:8px}.records-selection-actions {position:fixed; bottom:calc(var(--mobile-nav-height) + env(safe-area-inset-bottom)); left:0; right:0; margin:0; border-radius:0; min-height:var(--mobile-draw-height); padding:10px 16px; background:rgba(247,245,238,.97); backdrop-filter:blur(12px)}body.records-selecting {padding-bottom:calc(var(--mobile-nav-height) + var(--mobile-draw-height) + env(safe-area-inset-bottom))}body.records-selecting #toast {bottom:calc(var(--mobile-nav-height) + var(--mobile-draw-height) + 12px + env(safe-area-inset-bottom))}}
+    .records-toolbar {flex-wrap:nowrap; min-height:44px}
+    .records-toolbar .tools-tabs,.records-toolbar > .btn-row {flex:none}
+    .records-toolbar .btn {white-space:nowrap}
+    .records-selection-actions {height:64px; min-height:64px; box-sizing:border-box; gap:8px; flex-wrap:nowrap}
+    #recordsSelectedCount {white-space:nowrap; font-variant-numeric:tabular-nums; flex:1; min-width:0}
+    .records-selection-controls {display:flex; align-items:center; gap:2px; flex:none}
+    .records-select-all,.records-icon {appearance:none; border:0; background:transparent; min-height:44px; color:#74806F; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none}
+    .records-select-all {width:76px; padding:0 6px; font-size:12px; white-space:nowrap}
+    .records-icon {width:44px; padding:11px; display:grid; place-items:center; border-radius:8px}
+    .records-icon svg,.record-delete-action svg {width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; pointer-events:none}
+    .records-delete-icon {color:#A76752}.records-icon:disabled {color:#BBC0B6; cursor:default}
+    .records-icon:not(:disabled):hover,.records-select-all:hover {background:var(--soft)}
+    .records-icon:focus-visible,.records-select-all:focus-visible,.record-delete-action:focus-visible {outline:2px solid var(--sage-deep); outline-offset:2px}
+    .record-row {position:relative; display:block; padding:0; overflow:hidden; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none}
+    .record-open {position:relative; z-index:1; width:100%; padding:19px 10px; background:var(--paper); transition:transform .2s var(--motion-ease); overflow-wrap:anywhere}
+    .record-selected .record-open {background:var(--soft)}
+    .record-swipe-open .record-open {transform:translateX(-92px)}
+    .record-dragging .record-open {transition:none}
+    .record-delete-action {position:absolute; inset:0 0 0 auto; width:92px; border:0; background:#A76752; color:#fff; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; font-size:11px; visibility:hidden}
+    .record-swipe-open .record-delete-action {visibility:visible}
+    .record-manage {position:absolute; right:8px; top:50%; z-index:2; transform:translateY(-50%); display:none}
+    .record-swipe-open .record-manage {display:none!important}
+    @media(hover:hover) and (pointer:fine){.record-manage {display:grid}.record-row:not(.record-swipe-open):not(.record-selected) .record-open {padding-right:58px}}
+    @media(max-width:750px){.records-toolbar {gap:8px}.records-toolbar .tools-tabs {gap:6px}.records-toolbar .btn {padding:9px 10px}.records-selection-actions {height:var(--mobile-draw-height); min-height:var(--mobile-draw-height)}}
+    @media(prefers-reduced-motion:reduce){.record-open {transition:none}}
     .task-action-icon {width:17px; height:17px; flex:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; fill:none}
     .quest-panel.quest-confirmed .quest-grid .card-commands {display:none}
     .quest-confirmed-state {display:none; margin:10px 0 0; min-height:16px; font-size:11px; line-height:1.5; color:#AB705B; text-align:center}
@@ -519,13 +544,12 @@
     <div class="page-panel" id="page-records" role="tabpanel" aria-labelledby="nav-records" hidden>
     <section class="section" id="records" aria-labelledby="recordsTitle">
       <div class="container">
-        <div class="section-head"><div><div class="eyebrow">03 / YOUR PHOTO WALKS</div><h2 id="recordsTitle">任務紀錄</h2><p class="section-desc">留住完成的攝影散步，收藏想再挑戰的組合。點開查看，長按或按「選取」可整理多筆紀錄。</p></div></div>
+        <div class="section-head"><div><div class="eyebrow">03 / YOUR PHOTO WALKS</div><h2 id="recordsTitle">任務紀錄</h2><p class="section-desc">留住完成的攝影散步，收藏想再挑戰的組合。點開查看，左滑刪除；長按或按「選取」整理多筆紀錄。</p></div></div>
         <div class="records-panel">
-          <div class="records-toolbar"><div class="tools-tabs"><button class="btn btn-outline" id="recordsCompleted" type="button" aria-pressed="true">已完成</button><button class="btn btn-outline" id="recordsFavorites" type="button" aria-pressed="false">收藏</button></div><div class="btn-row"><button id="recordsSelect" class="btn btn-outline" type="button">選取</button><button id="recordsSelectAll" class="btn btn-outline" type="button" hidden>全選</button><button id="recordsCancel" class="btn btn-outline" type="button" hidden>取消</button></div></div>
-          <p id="recordsSelectionNote" class="tools-note" hidden></p>
+          <div class="records-toolbar"><div class="tools-tabs"><button class="btn btn-outline" id="recordsCompleted" type="button" aria-pressed="true">已完成</button><button class="btn btn-outline" id="recordsFavorites" type="button" aria-pressed="false">收藏</button></div><div class="btn-row"><button id="recordsSelect" class="btn btn-outline" type="button">選取</button></div></div>
           <div id="recordsUndoNotice" class="records-undo" role="status" aria-live="polite" hidden><span id="recordsUndoText"></span><button id="recordsRestoreDeleted" class="btn btn-outline" type="button">復原</button></div>
           <div id="recordsList"></div><div class="load-wrap"><button id="recordsMore" class="btn btn-outline" type="button" hidden>顯示更多紀錄</button></div>
-          <div id="recordsSelectionActions" class="records-selection-actions" hidden><span id="recordsSelectedCount" role="status" aria-live="polite">已選 0 筆</span><button id="recordsDelete" class="btn btn-danger" type="button" disabled>刪除 0 筆</button></div>
+          <div id="recordsSelectionActions" class="records-selection-actions" hidden><span id="recordsSelectedCount" role="status" aria-live="polite">已選 0</span><div class="records-selection-controls"><button id="recordsSelectAll" class="records-select-all" type="button" title="包含尚未顯示的紀錄">全選</button><button id="recordsDelete" class="records-icon records-delete-icon" type="button" aria-label="刪除選取紀錄" title="刪除選取紀錄" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"/></svg></button><button id="recordsCancel" class="records-icon" type="button" aria-label="退出選取模式" title="退出選取模式"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></div>
           <div class="tools-footer"><p class="tools-note">紀錄與收藏保存在此瀏覽器。匯出備份可留存或帶到其他裝置。</p><div class="btn-row"><button id="exportTasks" class="btn btn-outline" type="button">匯出備份</button><button id="importTasks" class="btn btn-outline" type="button">匯入備份</button></div><input id="backupFile" type="file" accept="application/json,.json" hidden><p id="recordsStatus" class="tools-status" role="status" aria-live="polite"></p></div>
         </div>
       </div>
@@ -1530,13 +1554,22 @@
     function recordDate(value){return new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value))}
     function recordSubject(task){return KEYS.filter(key=>!task.covered[key]&&(key==='subject'||key==='story')).map(key=>taskCard(key,task.cards[key]).title).join(' · ')||'自由攝影散步'}
     let recordsSelecting=false,selectedRecordIds=new Set(),pendingRecordDeletion=null,recordsDeletionUndo=null,recordsUndoTimer=null;
-    let recordPress=null,suppressedRecordClick=null;
+    let recordPress=null,suppressedRecordClick=null,recordGesture=null,swipedRecordId=null;
     function recordEntries(){return recordTab==='favorites'?favoriteTasks:archivedTasks}
     function clearRecordPress(){if(recordPress)clearTimeout(recordPress.timer);recordPress=null}
-    function cancelRecordSelection(){clearRecordPress();recordsSelecting=false;selectedRecordIds.clear();renderRecords()}
+    function closeRecordSwipe(){
+      swipedRecordId=null;
+      el('recordsList').querySelectorAll('.record-swipe-open,.record-dragging').forEach(row=>{row.classList.remove('record-swipe-open','record-dragging');const button=row.querySelector('[data-record-view]');if(button)button.style.transform='';const action=row.querySelector('[data-record-delete]');if(action){action.tabIndex=-1;action.disabled=true;}row.querySelector('[data-record-reveal]')?.setAttribute('aria-expanded','false');});
+    }
+    function revealRecordDelete(id){
+      closeRecordSwipe();if(recordsSelecting||taskStorageState==='unsupported')return;
+      const row=[...el('recordsList').querySelectorAll('[data-record-row]')].find(row=>row.dataset.recordRow===id);if(!row)return;
+      swipedRecordId=id;row.classList.add('record-swipe-open');const action=row.querySelector('[data-record-delete]');action.tabIndex=0;action.disabled=false;row.querySelector('[data-record-reveal]')?.setAttribute('aria-expanded','true');
+    }
+    function cancelRecordSelection(){clearRecordPress();recordGesture=null;closeRecordSwipe();recordsSelecting=false;selectedRecordIds.clear();renderRecords()}
     function enterRecordSelection(id=null){
       if(taskStorageState==='unsupported'||drawMotion||progressChangeResolve)return false;
-      recordsSelecting=true;if(id&&recordEntries().some(entry=>entry.id===id))selectedRecordIds.add(id);renderRecords();return true;
+      closeRecordSwipe();recordsSelecting=true;if(id&&recordEntries().some(entry=>entry.id===id))selectedRecordIds.add(id);renderRecords();return true;
     }
     function toggleRecordSelection(id){
       if(!recordEntries().some(entry=>entry.id===id))return;
@@ -1544,6 +1577,7 @@
       [...el('recordsList').querySelectorAll('[data-record-view]')].find(button=>button.dataset.recordView===id)?.focus({preventScroll:true});
     }
     function renderRecords(){
+      closeRecordSwipe();
       const favorites=recordTab==='favorites',values=recordEntries(),ids=new Set(values.map(entry=>entry.id));
       selectedRecordIds=new Set([...selectedRecordIds].filter(id=>ids.has(id)));
       el('recordsCompleted').textContent=`已完成 ${archivedTasks.length}`;el('recordsFavorites').textContent=`收藏 ${favoriteTasks.length}`;
@@ -1551,18 +1585,19 @@
       el('recordsSelect').hidden=recordsSelecting;el('recordsSelect').disabled=!values.length||taskStorageState==='unsupported';
       el('recordsCancel').hidden=!recordsSelecting;el('recordsSelectAll').hidden=!recordsSelecting;
       const all=values.length>0&&selectedRecordIds.size===values.length;
-      el('recordsSelectAll').textContent=all?'取消全選':`全選${favorites?'收藏':'已完成'}，共 ${values.length} 筆`;
+      el('recordsSelectAll').textContent=all?'取消全選':'全選';
+      el('recordsSelectAll').setAttribute('aria-label',all?'取消全選':`全選 ${values.length} 筆${favorites?'收藏':'紀錄'}，包含尚未顯示的項目`);
       el('recordsSelectAll').setAttribute('aria-pressed',String(all));
-      el('recordsSelectionNote').hidden=!recordsSelecting;el('recordsSelectionNote').textContent=`已選 ${selectedRecordIds.size} 筆 · 全選包含尚未載入的紀錄`;
       el('recordsSelectionActions').hidden=!recordsSelecting;
-      el('recordsSelectedCount').textContent=`已選 ${selectedRecordIds.size} 筆`;
-      el('recordsDelete').textContent=`${favorites?'取消收藏':'刪除'} ${selectedRecordIds.size} 筆`;
+      el('recordsSelectedCount').textContent=`已選 ${selectedRecordIds.size}`;
+      const deleteLabel=`${favorites?'取消收藏':'刪除'} ${selectedRecordIds.size} 筆`;el('recordsDelete').setAttribute('aria-label',deleteLabel);el('recordsDelete').title=deleteLabel;
       el('recordsDelete').disabled=!selectedRecordIds.size||taskStorageState==='unsupported';
       document.body.classList.toggle('records-selecting',recordsSelecting&&activePage==='records');
       el('recordsList').innerHTML=values.length?values.slice(0,recordsShown).map(entry=>{
         const task=favorites?entry.task:entry,id=entry.id,selected=selectedRecordIds.has(id);
         const label=recordsSelecting?`${selected?'取消選取':'選取'}：${recordSubject(task)}`:`查看任務：${recordSubject(task)}`;
-        return `<div class="record-row${selected?' record-selected':''}"><button class="record-open" type="button" data-record-view="${escapeHTML(id)}" aria-label="${escapeHTML(label)}" ${recordsSelecting?`aria-pressed="${selected}"`:'aria-haspopup="dialog"'}>${recordsSelecting?`<span class="record-checkbox" aria-hidden="true">${selected?'✓':''}</span>`:''}<span class="record-text"><strong>${escapeHTML(recordSubject(task))}</strong><small>${escapeHTML(recordDate(favorites?entry.savedAt:task.completedAt))} · ${favorites?'收藏的組合':`${task.shotCount} 張作品`}${recordsSelecting?'':' · 查看任務 ↗'}</small></span></button>${favorites&&!recordsSelecting?`<button class="btn btn-outline" type="button" data-favorite-remove="${escapeHTML(id)}" aria-label="取消收藏：${escapeHTML(recordSubject(task))}">取消收藏</button>`:''}</div>`;
+        const actionLabel=favorites?'取消收藏':'刪除',subject=escapeHTML(recordSubject(task)),safeId=escapeHTML(id);
+        return `<div class="record-row${selected?' record-selected':''}" data-record-row="${safeId}">${!recordsSelecting?`<button class="record-delete-action" type="button" data-record-delete="${safeId}" aria-label="${actionLabel}：${subject}" tabindex="-1" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"/></svg><span>${actionLabel}</span></button>`:''}<button class="record-open" type="button" data-record-view="${safeId}" aria-label="${escapeHTML(label)}" ${recordsSelecting?`aria-pressed="${selected}"`:'aria-haspopup="dialog"'}>${recordsSelecting?`<span class="record-checkbox" aria-hidden="true">${selected?'✓':''}</span>`:''}<span class="record-text"><strong>${subject}</strong><small>${escapeHTML(recordDate(favorites?entry.savedAt:task.completedAt))} · ${favorites?'收藏的組合':`${task.shotCount} 張作品`}${recordsSelecting?'':' · 查看任務 ↗'}</small></span></button>${!recordsSelecting?`<button class="records-icon record-manage" type="button" data-record-reveal="${safeId}" aria-label="顯示${actionLabel}選項：${subject}" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>`:''}</div>`;
       }).join(''):`<p class="records-empty">${favorites?'還沒有收藏。遇到喜歡的組合，按「收藏組合」留待下次。':'還沒有完成的任務。完成一趟攝影散步後，會保存在這裡。'}</p>`;
       el('recordsMore').hidden=values.length<=recordsShown;
       if(recordsDeletionUndo&&Date.now()>=recordsDeletionUndo.expiresAt){recordsDeletionUndo=null;clearTimeout(recordsUndoTimer);el('recordsStatus').textContent=el('recordsStatus').textContent.replace(/，可在 10 秒內復原。$/,'。');}
@@ -1585,6 +1620,9 @@
     }
     function deleteSelectedRecords(){
       const deletion=pendingRecordDeletion;pendingRecordDeletion=null;el('deleteRecordsDialog').close();
+      return deleteRecordEntries(deletion);
+    }
+    function deleteRecordEntries(deletion){
       if(!deletion||taskStorageState==='unsupported')return false;
       const ids=new Set(deletion.ids),values=deletion.tab==='favorites'?favoriteTasks:archivedTasks,entries=values.filter(entry=>ids.has(entry.id));if(!entries.length)return false;
       clearTimeout(recordsUndoTimer);
@@ -1615,26 +1653,46 @@
     el('recordsFavorites').addEventListener('click',()=>{recordTab='favorites';recordsShown=20;cancelRecordSelection()});
     el('recordsSelect').addEventListener('click',()=>enterRecordSelection());el('recordsCancel').addEventListener('click',cancelRecordSelection);
     el('recordsSelectAll').addEventListener('click',()=>{const entries=recordEntries();selectedRecordIds=selectedRecordIds.size===entries.length?new Set():new Set(entries.map(entry=>entry.id));renderRecords()});
-    el('recordsDelete').addEventListener('click',requestRecordDeletion);el('recordsRestoreDeleted').addEventListener('click',undoRecordsDeletion);
+    el('recordsDelete').addEventListener('click',()=>requestRecordDeletion());el('recordsRestoreDeleted').addEventListener('click',undoRecordsDeletion);
     el('cancelRecordsDelete').addEventListener('click',()=>{pendingRecordDeletion=null;el('deleteRecordsDialog').close()});
     el('acceptRecordsDelete').addEventListener('click',deleteSelectedRecords);el('deleteRecordsDialog').addEventListener('cancel',()=>pendingRecordDeletion=null);
     el('deleteRecordsDialog').addEventListener('close',()=>pendingRecordDeletion=null);
     el('recordsMore').addEventListener('click',()=>{recordsShown+=20;renderRecords()});
     el('recordsList').addEventListener('click',event=>{
-      const view=event.target.closest('[data-record-view]'),remove=event.target.closest('[data-favorite-remove]');
+      const view=event.target.closest('[data-record-view]'),remove=event.target.closest('[data-record-delete]'),reveal=event.target.closest('[data-record-reveal]');
+      if(remove&&!recordsSelecting){deleteRecordEntries({tab:recordTab,ids:[remove.dataset.recordDelete]});return;}
+      if(reveal&&!recordsSelecting){if(swipedRecordId===reveal.dataset.recordReveal)closeRecordSwipe();else revealRecordDelete(reveal.dataset.recordReveal);return;}
       if(view){const id=view.dataset.recordView;if(suppressedRecordClick&&suppressedRecordClick.id===id&&performance.now()<suppressedRecordClick.until&&event.detail!==0){suppressedRecordClick=null;event.preventDefault();return;}
-        if(recordsSelecting){toggleRecordSelection(id);return;}const entry=recordEntries().find(task=>task.id===id);if(entry)showRecord(recordTab==='favorites'?entry.task:entry);}
-      if(remove&&!recordsSelecting){const entry=favoriteTasks.find(task=>task.id===remove.dataset.favoriteRemove);if(entry)toggleFavorite(entry.task);}
+        if(recordsSelecting){toggleRecordSelection(id);return;}if(swipedRecordId===id){closeRecordSwipe();return;}closeRecordSwipe();const entry=recordEntries().find(task=>task.id===id);if(entry)showRecord(recordTab==='favorites'?entry.task:entry);}
     });
     el('recordsList').addEventListener('pointerdown',event=>{
-      clearRecordPress();suppressedRecordClick=null;const button=event.target.closest('[data-record-view]');if(!button||recordsSelecting||event.isPrimary===false||(event.button!==undefined&&event.button!==0))return;
-      const press={id:button.dataset.recordView,pointerId:event.pointerId,x:event.clientX,y:event.clientY,timer:null};recordPress=press;
-      press.timer=setTimeout(()=>{if(recordPress!==press)return;if(enterRecordSelection(press.id)){suppressedRecordClick={id:press.id,pointerId:press.pointerId,until:Infinity};try{el('recordsList').setPointerCapture(press.pointerId)}catch(error){}}},500);
+      clearRecordPress();recordGesture=null;suppressedRecordClick=null;const button=event.target.closest('[data-record-view]');if(!button||recordsSelecting||event.isPrimary===false||(event.button!==undefined&&event.button!==0))return;
+      const id=button.dataset.recordView,wasOpen=swipedRecordId===id;if(!wasOpen)closeRecordSwipe();
+      recordGesture={id,pointerId:event.pointerId,x:event.clientX,y:event.clientY,button,row:button.closest('[data-record-row]'),start:wasOpen?-92:0,offset:wasOpen?-92:0,axis:null};
+      const press={id,pointerId:event.pointerId,x:event.clientX,y:event.clientY,timer:null};recordPress=press;
+      press.timer=setTimeout(()=>{if(recordPress!==press)return;recordGesture=null;if(enterRecordSelection(press.id)){suppressedRecordClick={id:press.id,pointerId:press.pointerId,until:Infinity};try{el('recordsList').setPointerCapture(press.pointerId)}catch(error){}}},500);
     });
-    el('recordsList').addEventListener('pointermove',event=>{if(recordPress&&(event.pointerId!==recordPress.pointerId||Math.hypot(event.clientX-recordPress.x,event.clientY-recordPress.y)>10))clearRecordPress()});
-    ['pointerup','pointercancel','lostpointercapture','pointerleave'].forEach(type=>el('recordsList').addEventListener(type,clearRecordPress));
+    el('recordsList').addEventListener('pointermove',event=>{
+      const gesture=recordGesture;if(!gesture||event.pointerId!==gesture.pointerId)return;
+      const dx=event.clientX-gesture.x,dy=event.clientY-gesture.y;
+      if(!gesture.axis&&Math.max(Math.abs(dx),Math.abs(dy))>10){clearRecordPress();gesture.axis=Math.abs(dx)>Math.abs(dy)*1.2?'x':'y';if(gesture.axis==='x'){gesture.row.classList.add('record-dragging','record-swipe-open');try{el('recordsList').setPointerCapture(event.pointerId)}catch(error){}}}
+      if(gesture.axis!=='x')return;
+      gesture.offset=Math.max(-92,Math.min(0,gesture.start+dx));gesture.button.style.transform=`translateX(${gesture.offset}px)`;
+    });
+    function endRecordGesture(event,cancelled=false){
+      const gesture=recordGesture;if(!gesture||event.pointerId!==gesture.pointerId)return;recordGesture=null;clearRecordPress();
+      if(gesture.axis){suppressedRecordClick={id:gesture.id,pointerId:event.pointerId,until:performance.now()+700};}
+      if(gesture.axis==='x'){gesture.button.style.transform='';gesture.row.classList.remove('record-dragging');if(!cancelled&&gesture.offset<=-36)revealRecordDelete(gesture.id);else closeRecordSwipe();}
+      if(el('recordsList').hasPointerCapture?.(event.pointerId))el('recordsList').releasePointerCapture(event.pointerId);
+    }
+    el('recordsList').addEventListener('pointerup',event=>endRecordGesture(event));
+    el('recordsList').addEventListener('pointercancel',event=>endRecordGesture(event,true));
+    el('recordsList').addEventListener('lostpointercapture',event=>endRecordGesture(event,true));
+    el('recordsList').addEventListener('pointerleave',()=>{if(!recordGesture?.axis)clearRecordPress()});
+    document.addEventListener('pointerdown',event=>{if(swipedRecordId&&!event.target.closest(`[data-record-row]`))closeRecordSwipe()});
     ['pointerup','pointercancel'].forEach(type=>document.addEventListener(type,event=>{if(suppressedRecordClick?.pointerId===event.pointerId)suppressedRecordClick.until=performance.now()+700;clearRecordPress()}));
     el('recordsList').addEventListener('contextmenu',event=>{if(event.target.closest('[data-record-view]'))event.preventDefault()});
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&swipedRecordId)closeRecordSwipe()});
     document.addEventListener('keydown',event=>{if(event.key==='Escape'&&recordsSelecting&&!el('deleteRecordsDialog').open){cancelRecordSelection();el('recordsSelect').focus()}});
     el('recordFavorite').addEventListener('click',()=>viewedRecord&&toggleFavorite(viewedRecord));
     el('recordReplay').addEventListener('click',()=>viewedRecord&&beginTask(viewedRecord));
@@ -1787,3 +1845,4 @@
   </script>
 </body>
 </html>
+
