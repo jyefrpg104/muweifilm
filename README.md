@@ -1,82 +1,48 @@
-# muweifilm.com
+# MUWEI FILM — 網站與攝影抽卡遊戲
 
-單檔靜態網站。樣式內嵌，無 build、無框架、無第三方服務。
-在本機雙擊 `index.html` 就能看到完整結果。
+原始碼以獨立專案資料夾管理；**正式網站透過 GitHub Actions 建置成根目錄內容，並以 GitHub Pages 發布**。
 
-**沒有圖片也能直接上線**——圖框會顯示成標了檔名的佔位塊，之後一張一張換。
-
-```
-index.html    整個網站（含樣式）
-404.html      找不到頁面
-images/
-  works/         hero.jpg + 作品劇照
-  photography/   p1–p6.jpg
-  about/         portrait.jpg
-```
-
----
-
-## 上線（約 30 分鐘）
-
-1. GitHub → New repository → 命名 `muweifilm` → **Public** → Create
-2. Add file → Upload files → 拖入 `index.html`、`404.html` → Commit
-3. Cloudflare Pages → Create a project → Connect to Git → 選這個 repo
-4. Build command **留空**、Output directory 填 `/` → Save and Deploy
-5. 用它給的 `xxx.pages.dev` 網址確認
-6. 網域轉移完成後 → Custom domains → 加入 `muweifilm.com`
-
----
-
-## 補圖
-
-丟進對應資料夾，檔名對上就會自動顯示。佔位塊上寫的就是它要的檔名。
-
-| 路徑 | 尺寸 |
-|---|---|
-| `images/works/hero.jpg` | 1600×900 |
-| `images/works/*.jpg` | 1200×675（每支作品） |
-| `images/photography/p1–p6.jpg` | 1000×1250（直式） |
-| `images/about/portrait.jpg` | 1000×1250 |
-| `images/og.jpg` | 1200×630（社群分享縮圖） |
-
-單張壓到 300KB 以內。
-
----
-
-## 新增一支作品
-
-在 `index.html` 搜尋 `shotlist__rows`，複製下面這塊貼進去。
-順序就是清單顯示的順序。
-
-```html
-<li class="row">
-  <a href="YOUTUBE_網址" target="_blank" rel="noopener"
-     data-still="images/works/檔名.jpg">
-    <span class="row__year">年份</span>
-    <span class="row__client">客戶</span>
-    <span class="row__kind">片型</span>
-    <span class="row__title">片名</span>
-    <span class="row__go" aria-hidden="true">觀看</span>
-  </a>
-</li>
+```text
+muweifilm/
+├── muwei-website/            # 木尉網站 HTML、CSS、圖片
+│   ├── index.html
+│   ├── works.html
+│   ├── about.html
+│   ├── services.html
+│   ├── contact.html
+│   ├── 404.html
+│   ├── site.css
+│   ├── portrait.jpg
+│   └── images/
+├── photo-quest/              # 攝影抽卡遊戲（獨立專案）
+├── scripts/
+│   ├── build-site.sh         # 將網站組合成 dist/
+│   └── test-site.sh          # 確認檔案、素材及網域
+├── .github/workflows/
+│   ├── site-build-check.yml  # PR 自動測試（不部署）
+│   └── deploy-pages.yml      # GitHub Pages 人工啟動部署
+├── CNAME                     # www.muweifilm.com
+├── .nojekyll
+└── README.md
 ```
 
-`row__kind` 建議只用四種：形象片／紀錄片／知識型／短影音。
-分類越少，清單越好讀。
+正式網站 URL 仍然維持：
+- https://www.muweifilm.com/
+- https://www.muweifilm.com/works.html
+- https://www.muweifilm.com/about.html
+- https://www.muweifilm.com/services.html
+- https://www.muweifilm.com/contact.html
+- https://www.muweifilm.com/photo-quest/
 
-作品超過 12 支時再拆成獨立的 `works.html`。
+## 如何產生網站
 
----
+```bash
+bash scripts/build-site.sh
+bash scripts/test-site.sh
+```
 
-## 待核對
+建置後的 `dist/` 結構包含官網的 `index.html`、`site.css`、`images/` 與完整 `photo-quest/`。此 `dist/` 是發布用產物，不是原始碼資料夾。
 
-- 作品的年份是推測的
-- 兩支寫「待填」的客戶名稱
-- 主標「把難講的事，講得有人想看」是定位提案
+**重要：** 本儲存庫使用 GitHub Pages，而不是 Cloudflare Pages。根目錄沒有 `index.html` 時，**不能再使用** GitHub Pages 的「Deploy from a branch → main /(root)」。必須先改成 Actions 模式並完成一次成功部署，才可合併這個資料夾遷移。
 
----
-
-## 之後要改東西
-
-GitHub repo → 點 `index.html` → 鉛筆圖示 → 改 → Commit changes。
-約 30 秒後線上更新。
+DNS 由 Squarespace 管理，`www` CNAME 指向 `jyefrpg104.github.io`；本次整理不需要變更 DNS。詳細切換順序見 `MIGRATION-PLAN.md`。
