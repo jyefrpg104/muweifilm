@@ -185,12 +185,11 @@
     .record-dragging .record-open {transition:none}
     .record-swipe-action {appearance:none; border:0; padding:0; display:grid; place-items:center; box-sizing:border-box; height:100%; min-height:44px; line-height:0; cursor:pointer; visibility:hidden}
     .record-delete-action {position:absolute; inset:0 0 0 auto; width:72px; background:#A76752; color:#fff}
-    .record-unfavorite-action {background:#E7EBE1; color:#647760}
     .record-quick-actions {position:absolute; inset:0 auto 0 0; width:128px; display:flex}
     .record-quick-actions .record-swipe-action {width:64px; flex:none}
     .record-share-action {background:#ECECE5; color:#647760}
     .record-favorite-action {background:#E7EBE1; color:#647760}
-    .record-favorite-action[aria-pressed="true"] svg,.record-unfavorite-action svg {fill:currentColor}
+    .record-favorite-action[aria-pressed="true"] svg {fill:currentColor}
     .record-swipe-left .record-delete-action,.record-swipe-right .record-quick-actions .record-swipe-action {visibility:visible}
     .record-manage {position:absolute; right:8px; top:50%; z-index:2; transform:translateY(-50%); display:none}
     .record-swipe-open .record-manage {display:none!important}
@@ -569,7 +568,7 @@
     <div class="page-panel" id="page-records" role="tabpanel" aria-labelledby="nav-records" hidden>
     <section class="section" id="records" aria-labelledby="recordsTitle">
       <div class="container">
-        <div class="section-head"><div><div class="eyebrow">03 / YOUR PHOTO WALKS</div><h2 id="recordsTitle">任務紀錄</h2><p class="section-desc">留住完成的攝影散步，收藏想再挑戰的組合。點開查看；右滑分享或收藏，左滑刪除或取消收藏。長按或按「選取」整理多筆紀錄。</p></div></div>
+        <div class="section-head"><div><div class="eyebrow">03 / YOUR PHOTO WALKS</div><h2 id="recordsTitle">任務紀錄</h2><p class="section-desc">留住完成的攝影散步，收藏想再挑戰的組合。點開查看；右滑分享或收藏，已完成紀錄可左滑刪除。長按或按「選取」整理多筆紀錄。</p></div></div>
         <div class="records-panel">
           <div class="records-toolbar"><div class="tools-tabs"><button class="btn btn-outline" id="recordsCompleted" type="button" aria-pressed="true">已完成</button><button class="btn btn-outline" id="recordsFavorites" type="button" aria-pressed="false">收藏</button></div><div class="btn-row"><button id="recordsSelect" class="btn btn-outline" type="button">選取</button></div></div>
           <div id="recordsUndoNotice" class="records-undo" role="status" aria-live="polite" hidden><span id="recordsUndoText"></span><button id="recordsRestoreDeleted" class="btn btn-outline" type="button">復原</button></div>
@@ -1607,7 +1606,7 @@
       el('recordsList').querySelectorAll('.record-swipe-open,.record-dragging').forEach(row=>{row.classList.remove('record-swipe-open','record-swipe-left','record-swipe-right','record-dragging');const button=row.querySelector('[data-record-view]');if(button)button.style.transform='';row.querySelectorAll('.record-swipe-action').forEach(action=>{action.tabIndex=-1;action.disabled=true;});row.querySelector('[data-record-reveal]')?.setAttribute('aria-expanded','false');});
     }
     function revealRecordActions(id,side){
-      closeRecordSwipe();if(recordsSelecting||taskStorageState==='unsupported')return;
+      closeRecordSwipe();if(recordsSelecting||taskStorageState==='unsupported'||(recordTab==='favorites'&&side==='left'))return;
       const row=[...el('recordsList').querySelectorAll('[data-record-row]')].find(row=>row.dataset.recordRow===id);if(!row)return;
       swipedRecordId=id;swipedRecordSide=side;row.classList.add('record-swipe-open',`record-swipe-${side}`);
       row.querySelectorAll(side==='left'?'[data-record-delete]':'[data-record-share],[data-record-favorite]').forEach(action=>{action.tabIndex=0;action.disabled=false;});
@@ -1643,10 +1642,10 @@
       el('recordsList').innerHTML=values.length?values.slice(0,recordsShown).map(entry=>{
         const task=favorites?entry.task:entry,id=entry.id,selected=selectedRecordIds.has(id);
         const label=recordsSelecting?`${selected?'取消選取':'選取'}：${recordSubject(task)}`:`查看任務：${recordSubject(task)}`;
-        const actionLabel=favorites?'取消收藏':'刪除',subject=escapeHTML(recordSubject(task)),safeId=escapeHTML(id);
-        const removeIcon=favorites?recordStarIcon:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"/></svg>';
-        const actions=recordsSelecting?'':`<button class="record-swipe-action record-delete-action${favorites?' record-unfavorite-action':''}" type="button" data-record-delete="${safeId}" aria-label="${actionLabel}：${subject}" title="${actionLabel}" tabindex="-1" disabled>${removeIcon}</button><div class="record-quick-actions"><button class="record-swipe-action record-share-action" type="button" data-record-share="${safeId}" aria-label="分享任務卡：${subject}" title="分享任務卡" tabindex="-1" disabled>${recordShareIcon}</button><button class="record-swipe-action record-favorite-action" type="button" data-record-favorite="${safeId}" aria-label="${findFavorite(task)?'取消收藏':'收藏組合'}：${subject}" title="${findFavorite(task)?'取消收藏':'收藏組合'}" aria-pressed="${!!findFavorite(task)}" tabindex="-1" disabled>${recordStarIcon}</button></div>`;
-        return `<div class="record-row${selected?' record-selected':''}" data-record-row="${safeId}">${actions}<button class="record-open" type="button" data-record-view="${safeId}" aria-label="${escapeHTML(label)}" ${recordsSelecting?`aria-pressed="${selected}"`:'aria-haspopup="dialog"'}>${recordsSelecting?`<span class="record-checkbox" aria-hidden="true">${selected?'✓':''}</span>`:''}<span class="record-text"><strong>${subject}</strong><small>${escapeHTML(recordDate(favorites?entry.savedAt:task.completedAt))} · ${favorites?'收藏的組合':`${task.shotCount} 張拍攝紀錄`}${recordsSelecting?'':' · 查看任務 ↗'}</small></span></button>${!recordsSelecting?`<button class="records-icon record-manage" type="button" data-record-reveal="${safeId}" aria-label="顯示${actionLabel}選項：${subject}" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>`:''}</div>`;
+        const subject=escapeHTML(recordSubject(task)),safeId=escapeHTML(id),saved=!!findFavorite(task);
+        const remove=favorites?'':`<button class="record-swipe-action record-delete-action" type="button" data-record-delete="${safeId}" aria-label="刪除：${subject}" title="刪除" tabindex="-1" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"/></svg></button>`;
+        const actions=recordsSelecting?'':`${remove}<div class="record-quick-actions"><button class="record-swipe-action record-share-action" type="button" data-record-share="${safeId}" aria-label="分享任務卡：${subject}" title="分享任務卡" tabindex="-1" disabled>${recordShareIcon}</button><button class="record-swipe-action record-favorite-action" type="button" data-record-favorite="${safeId}" aria-label="${saved?'取消收藏':'收藏組合'}：${subject}" title="${saved?'取消收藏':'收藏組合'}" aria-pressed="${saved}" tabindex="-1" disabled>${recordStarIcon}</button></div>`;
+        return `<div class="record-row${selected?' record-selected':''}" data-record-row="${safeId}">${actions}<button class="record-open" type="button" data-record-view="${safeId}" aria-label="${escapeHTML(label)}" ${recordsSelecting?`aria-pressed="${selected}"`:'aria-haspopup="dialog"'}>${recordsSelecting?`<span class="record-checkbox" aria-hidden="true">${selected?'✓':''}</span>`:''}<span class="record-text"><strong>${subject}</strong><small>${escapeHTML(recordDate(favorites?entry.savedAt:task.completedAt))} · ${favorites?'收藏的組合':`${task.shotCount} 張拍攝紀錄`}${recordsSelecting?'':' · 查看任務 ↗'}</small></span></button>${!recordsSelecting?`<button class="records-icon record-manage" type="button" data-record-reveal="${safeId}" aria-label="顯示${favorites?'分享與取消收藏':'刪除'}選項：${subject}" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>`:''}</div>`;
       }).join(''):`<p class="records-empty">${favorites?'還沒有收藏。遇到喜歡的組合，按「收藏組合」留待下次。':'還沒有完成的任務。完成一趟攝影散步後，會保存在這裡。'}</p>`;
       el('recordsMore').hidden=values.length<=recordsShown;
       if(recordsDeletionUndo&&Date.now()>=recordsDeletionUndo.expiresAt){recordsDeletionUndo=null;clearTimeout(recordsUndoTimer);el('recordsStatus').textContent=el('recordsStatus').textContent.replace(/，可在 10 秒內復原。$/,'。');}
@@ -1711,8 +1710,8 @@
       const view=event.target.closest('[data-record-view]'),remove=event.target.closest('[data-record-delete]'),share=event.target.closest('[data-record-share]'),favorite=event.target.closest('[data-record-favorite]'),reveal=event.target.closest('[data-record-reveal]');
       if(remove&&!recordsSelecting){deleteRecordEntries({tab:recordTab,ids:[remove.dataset.recordDelete]});return;}
       if(share&&!recordsSelecting){const id=share.dataset.recordShare,entry=recordEntries().find(value=>value.id===id);closeRecordSwipe();if(entry)openTaskShare(recordTab==='favorites'?entry.task:entry);return;}
-      if(favorite&&!recordsSelecting){const id=favorite.dataset.recordFavorite,entry=recordEntries().find(value=>value.id===id);closeRecordSwipe();if(entry)toggleFavorite(recordTab==='favorites'?entry.task:entry);return;}
-      if(reveal&&!recordsSelecting){if(swipedRecordId===reveal.dataset.recordReveal&&swipedRecordSide==='left')closeRecordSwipe();else revealRecordActions(reveal.dataset.recordReveal,'left');return;}
+      if(favorite&&!recordsSelecting){const id=favorite.dataset.recordFavorite,entry=recordEntries().find(value=>value.id===id);closeRecordSwipe();if(entry){if(recordTab==='favorites')deleteRecordEntries({tab:'favorites',ids:[id]});else toggleFavorite(entry);}return;}
+      if(reveal&&!recordsSelecting){const side=recordTab==='favorites'?'right':'left';if(swipedRecordId===reveal.dataset.recordReveal&&swipedRecordSide===side)closeRecordSwipe();else revealRecordActions(reveal.dataset.recordReveal,side);return;}
       if(view){const id=view.dataset.recordView;if(suppressedRecordClick&&suppressedRecordClick.id===id&&performance.now()<suppressedRecordClick.until&&event.detail!==0){suppressedRecordClick=null;event.preventDefault();return;}
         if(recordsSelecting){toggleRecordSelection(id);return;}if(swipedRecordId===id){closeRecordSwipe();return;}closeRecordSwipe();const entry=recordEntries().find(task=>task.id===id);if(entry)showRecord(recordTab==='favorites'?entry.task:entry);}
     });
@@ -1729,7 +1728,7 @@
       const dx=event.clientX-gesture.x,dy=event.clientY-gesture.y;
       if(!gesture.axis&&Math.max(Math.abs(dx),Math.abs(dy))>10){clearRecordPress();gesture.axis=Math.abs(dx)>Math.abs(dy)*1.2?'x':'y';if(gesture.axis==='x'){gesture.row.classList.add('record-dragging','record-swipe-open');try{el('recordsList').setPointerCapture(event.pointerId)}catch(error){}}}
       if(gesture.axis!=='x')return;
-      gesture.offset=Math.max(-72,Math.min(128,gesture.start+dx));
+      gesture.offset=Math.max(recordTab==='favorites'?0:-72,Math.min(128,gesture.start+dx));
       gesture.row.classList.toggle('record-swipe-left',gesture.offset<0);
       gesture.row.classList.toggle('record-swipe-right',gesture.offset>0);
       gesture.button.style.transform=`translateX(${gesture.offset}px)`;
