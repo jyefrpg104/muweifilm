@@ -1,34 +1,27 @@
-# GitHub Pages migration plan (no production changes yet)
+# GitHub Pages deployment and site migration
 
-Current deployment settings (confirmed in GitHub Pages UI):
-- Source: **Deploy from a branch**
-- Branch: `main` / `(root)`
-- Custom domain: `www.muweifilm.com` (DNS check successful)
-- Domain DNS `www` CNAME is managed by Squarespace and points to `jyefrpg104.github.io`.
+## Confirmed architecture
 
-**Do not** use Cloudflare `_redirects`: the site is hosted on GitHub Pages.
+- Registrar / DNS: Squarespace, `www` CNAME → `jyefrpg104.github.io`.
+- Website: GitHub Pages, Source **GitHub Actions**, custom domain `www.muweifilm.com`.
+- Build script `scripts/build-site.sh` supports `muwei-website/` source and the legacy root layout.
+- Workflow `.github/workflows/deploy-pages.yml` uploads the generated `dist/`, deploys Pages on each push to `main`, and checks the published custom domain byte-for-byte.
 
-## Phase 1 — Safe preparation (this branch)
+## Verified checkpoints
 
-- Add `scripts/build-site.sh` to generate a clean `dist/` publishing directory.
-- Add `scripts/test-site.sh` to validate copied files, assets, CNAME, and Photo Quest.
-- Add a build-check GitHub Actions workflow triggered by PRs. **This workflow never deploys.**
-- Leave `main`, DNS, GitHub Pages Source, and the live website unchanged.
+- PR #2: `dist/` builder and tests passed without changes to production.
+- PR #3: the manual deployment workflow was installed without changing website files.
+- PR #5: automatic deployment workflow merged, using the legacy root layout as the first test. GitHub Pages deployed successfully; all 10 URLs passed published-content comparison (home, index, works, about, services, contact, CSS, portrait, Photo Quest homepage and icon).
+- This change: moves site source to `muwei-website/` and preserves all original HTML/CSS/image SHAs and `photo-quest/` blob SHAs.
 
-## Phase 2 — Activate GitHub Actions before moving site files
+## Validation for this migration
 
-1. Wait for PR build checks to pass. Merge Phase 1 only after review.
-2. Add and merge a **separate** GitHub Pages deployment workflow on `main` that publishes the builder's `dist/` through `actions/configure-pages`, `actions/upload-pages-artifact`, and `actions/deploy-pages`; ensure `pages: write` and `id-token: write` permissions and concurrency handling.
-3. From Repository → Settings → Pages, switch Source from **Deploy from a branch** to **GitHub Actions**.
-4. Trigger the workflow using `workflow_dispatch` (or push a fresh commit) and verify the deployment and the live URLs: `/`, `/index.html`, `/works.html`, `/about.html`, `/contact.html`, `/site.css`, `/images/about/portrait.jpg`, and `/photo-quest/`.
-5. If unsuccessful, revert the Pages Source setting to `Deploy from a branch`, branch `main`, folder `/(root)` before proceeding.
+- PR build checks must pass.
+- After merge, verify the new GitHub Pages deployment `build` and `deploy` jobs both pass.
+- Live check covers `/`, `/index.html`, `/works.html`, `/about.html`, `/services.html`, `/contact.html`, `/site.css`, `/images/about/portrait.jpg`, `/photo-quest/` and `/photo-quest/apple-touch-icon-v1.png`.
 
-## Phase 3 — Folder migration after GitHub Actions deployment is proven
+## Rollback
 
-1. On a separate branch, move only the portfolio's HTML, CSS, images, and 404 to `muwei-website/`.
-2. Keep `photo-quest/`, `CNAME`, and `.nojekyll` at the repository root.
-3. Keep `scripts/build-site.sh` and `scripts/test-site.sh` as-is: they already support the new layout.
-4. Validate `dist/` and the Pages deployment before and after merge.
-5. Do not change Squarespace DNS or custom domain.
+If the site fails after this migration, revert the migration commit on `main`. The build script supports both source layouts, so Actions will redeploy the old root-based website. **Keep Source = GitHub Actions** to avoid breaking the deployed root path. No Squarespace DNS change is necessary.
 
-The old deployment source is never changed during Phase 1. A successful build artifact alone does not prove live deployment; test production before moving any site source files.
+Always validate actual production Pages deployment separately from successful PR build checks.
