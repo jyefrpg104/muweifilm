@@ -1704,11 +1704,8 @@
         ctx.font=`22px ${sans}`;ctx.fillStyle='#70776D';const hints=off?['自由發揮，不限制這項條件']:canvasLines(ctx,hint||'',w-50);
         if(hints.length>2)throw Error('卡片提示無法完整排入分享圖片');hints.forEach((line,i)=>ctx.fillText(line,x+w/2,y+203+i*29));ctx.textAlign='left';
       });
-      const target=task.covered.output?null:parseInt(taskCard('output',task.cards.output).title,10);
-      const progress=task.completedAt?`已完成 · ${task.shotCount} 張作品`:task.confirmedAt||task.shotCount?`拍攝進度 · ${task.shotCount}${target===null?'':`／${target}`} 張`:'今日拍攝任務';
-      ctx.fillStyle='#647760';ctx.font=`500 28px ${sans}`;ctx.fillText(progress,64,1132);
-      ctx.fillStyle='#70776D';ctx.font=`22px ${sans}`;ctx.fillText(task.pairingEnabled?'帶著一點偶然，重新觀看世界。':'自由組合 · 器材相容請自行確認',64,1190);
-      ctx.strokeStyle='#E5E3D8';ctx.beginPath();ctx.moveTo(64,1236);ctx.lineTo(1016,1236);ctx.stroke();ctx.font=`20px ${sans}`;ctx.fillText('6 DECKS / ONE WAY OF SEEING',64,1285);ctx.textAlign='right';ctx.fillText('muweifilm.com/photo-quest',1016,1285);
+      ctx.fillStyle='#70776D';ctx.font=`22px ${sans}`;ctx.fillText(task.pairingEnabled?'帶著一點偶然，重新觀看世界。':'自由組合 · 器材相容請自行確認',64,1161);
+      ctx.strokeStyle='#E5E3D8';ctx.beginPath();ctx.moveTo(64,1207);ctx.lineTo(1016,1207);ctx.stroke();ctx.font=`20px ${sans}`;ctx.fillText('6 DECKS / ONE WAY OF SEEING',64,1256);ctx.textAlign='right';ctx.fillText('muweifilm.com/photo-quest',1016,1256);
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('圖片產生失敗');return blob;
     }
     async function openTaskShare(source=taskSnapshot()){
