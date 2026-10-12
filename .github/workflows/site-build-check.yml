@@ -13,6 +13,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+      - name: Verify Photo Quest cloud backup and local storage
+        run: |
+          node tests/photo-quest-drive.test.cjs
+          node tests/photo-quest-app-storage.test.cjs
       - name: Build publishable website (does not deploy)
         run: bash scripts/build-site.sh
       - name: Verify output and unchanged assets

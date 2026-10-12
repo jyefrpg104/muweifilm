@@ -135,6 +135,16 @@
     .record-field {border:1px solid var(--line); border-top:3px solid var(--card-accent); border-radius:9px; padding:13px; background:var(--bg); min-width:0}
     .record-field small {display:block; color:var(--sub); font-size:10px; margin-bottom:7px}
     .record-field strong {font-size:15px; font-weight:500; line-height:1.7; overflow-wrap:anywhere}
+    .cloud-backup {border-top:1px solid var(--line); margin-top:24px; padding-top:22px}
+    .cloud-backup-head {display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:8px}
+    .cloud-backup h3 {font-size:15px; margin:0; font-weight:650}
+    .cloud-badge {font-size:11px; color:var(--sage-deep); background:#E7EBE1; padding:4px 9px; border-radius:20px; white-space:nowrap}
+    .cloud-backup .tools-note {margin-bottom:12px}
+    .cloud-backup .btn-row {gap:8px}
+    .cloud-backup .btn {font-size:12px; padding:10px 13px}
+    .cloud-link {display:inline-flex; font-size:12px; color:var(--sage-deep); margin-top:12px; text-decoration:underline; text-underline-offset:3px}
+    .cloud-link[hidden] {display:none!important}
+    @media(max-width:360px){.cloud-backup-head {align-items:flex-start; flex-direction:column}}
     .tools-footer {border-top:1px solid var(--line); padding-top:16px; margin-top:10px}
     .tools-footer .btn,.task-tools > .btn-row .btn {font-size:12px; padding:10px 13px}
     .share-preview {display:block; width:min(100%,360px); height:auto; border-radius:12px; border:1px solid var(--line); margin:0 auto 16px}
@@ -536,7 +546,14 @@
           <div id="recordsUndoNotice" class="records-undo" role="status" aria-live="polite" hidden><span id="recordsUndoText"></span><button id="recordsRestoreDeleted" class="btn btn-outline" type="button">復原</button></div>
           <div id="recordsList"></div><div class="load-wrap"><button id="recordsMore" class="btn btn-outline" type="button" hidden>顯示更多紀錄</button></div>
           <div id="recordsSelectionActions" class="records-selection-actions" hidden><span id="recordsSelectedCount" role="status" aria-live="polite">已選 0</span><div class="records-selection-controls"><button id="recordsSelectAll" class="records-select-all" type="button" title="包含尚未顯示的紀錄">全選</button><button id="recordsDelete" class="records-icon records-delete-icon" type="button" aria-label="刪除選取紀錄" title="刪除選取紀錄" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"/></svg></button><button id="recordsCancel" class="records-icon" type="button" aria-label="退出選取模式" title="退出選取模式"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></div>
-          <div class="tools-footer"><p class="tools-note">紀錄與收藏保存在此瀏覽器。匯出備份可留存或帶到其他裝置。</p><div class="btn-row"><button id="exportTasks" class="btn btn-outline" type="button">匯出備份</button><button id="importTasks" class="btn btn-outline" type="button">匯入備份</button></div><input id="backupFile" type="file" accept="application/json,.json" hidden><p id="recordsStatus" class="tools-status" role="status" aria-live="polite"></p></div>
+          <section class="cloud-backup" aria-labelledby="cloudTitle">
+            <div class="cloud-backup-head"><h3 id="cloudTitle">Google Drive 備份</h3><span id="cloudBadge" class="cloud-badge">未連線</span></div>
+            <p id="cloudStatus" class="tools-note" role="status" aria-live="polite">任務先保存在此裝置。連接後，自動備份到你的 Google Drive。</p>
+            <div class="btn-row"><button id="cloudConnect" class="btn btn-primary" type="button">連接 Google Drive</button><button id="cloudSync" class="btn btn-outline" type="button" hidden>立即同步</button><button id="cloudRestore" class="btn btn-outline" type="button" hidden>還原雲端任務</button><button id="cloudDisconnect" class="btn btn-outline" type="button" hidden>中斷連線</button></div>
+            <a id="cloudFolder" class="cloud-link" target="_blank" rel="noopener noreferrer" hidden>查看 Drive 備份 ↗</a>
+            <p class="tools-status">備份包含任務、拍攝進度與收藏，不包含照片。新裝置會合併紀錄；目前任務可另外還原。</p>
+          </section>
+          <div class="tools-footer"><p class="tools-note">也可以匯出一份備份，另行留存或帶到其他裝置。</p><div class="btn-row"><button id="exportTasks" class="btn btn-outline" type="button">匯出備份</button><button id="importTasks" class="btn btn-outline" type="button">匯入備份</button></div><input id="backupFile" type="file" accept="application/json,.json" hidden><p id="recordsStatus" class="tools-status" role="status" aria-live="polite"></p></div>
         </div>
       </div>
     </section>
@@ -560,8 +577,10 @@
   <dialog id="recordDialog" class="task-tools" aria-labelledby="recordTitle"><div class="tools-head"><h3 id="recordTitle">任務紀錄</h3><button id="recordClose" class="tools-close" type="button" aria-label="關閉紀錄內容">×</button></div><p id="recordMeta" class="tools-note"></p><div id="recordFields" class="record-fields"></div><div class="btn-row"><button id="recordReplay" class="btn btn-primary" type="button">再次挑戰</button><button id="recordShare" class="btn btn-outline" type="button">分享任務卡</button><button id="recordFavorite" class="btn btn-outline" type="button">☆ 收藏組合</button></div></dialog>
   <dialog id="shareDialog" class="task-tools" aria-labelledby="shareTitle"><div class="tools-head"><h3 id="shareTitle">分享任務卡</h3><button id="shareClose" class="tools-close" type="button" aria-label="關閉分享任務卡">×</button></div><p class="tools-note">保存這一刻的任務，傳給朋友或留作今天的拍攝小抄。</p><img id="sharePreview" class="share-preview" alt="本次任務的六張攝影卡片與拍攝狀態" hidden><p id="shareSaveHint" class="tools-note" hidden>存到 iPhone 相簿，請在下一步選擇「儲存影像」。</p><div class="btn-row"><button id="nativeShare" class="btn btn-primary" type="button" hidden>分享／儲存圖片</button><a id="downloadShare" class="btn btn-outline" hidden>下載檔案</a></div><p id="shareStatus" class="tools-status" role="status" aria-live="polite">正在準備圖片…</p></dialog>
   <dialog id="backupDialog" class="progress-change" aria-labelledby="backupTitle"><h3 id="backupTitle">匯入這份備份？</h3><p id="backupNote"></p><label class="tools-note" style="display:flex;gap:9px;align-items:flex-start;margin-bottom:20px"><input id="restoreBackupCurrent" type="checkbox">同時還原備份中的目前任務，取代這台裝置的目前任務</label><div class="btn-row"><button id="cancelBackup" class="btn btn-outline" type="button" autofocus>取消</button><button id="acceptBackup" class="btn btn-primary" type="button">合併紀錄</button></div></dialog>
+  <dialog id="cloudRestoreDialog" class="progress-change" aria-labelledby="cloudRestoreTitle" aria-describedby="cloudRestoreNote"><h3 id="cloudRestoreTitle">還原雲端的目前任務？</h3><p id="cloudRestoreNote"></p><div class="btn-row"><button id="cloudRestoreCancel" class="btn btn-outline" type="button" autofocus>保留目前任務</button><button id="cloudRestoreAccept" class="btn btn-primary" type="button">還原任務</button></div></dialog>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="printArea" aria-hidden="true"></div>
+  <script src="cloud-backup.js"></script>
   <script>
     'use strict';
     // This entire page works offline. Add, remove or rewrite cards in these lists.
@@ -681,6 +700,7 @@
     let previousTask=null,previousAction='',previousEffect=null,taskStorageState='ready';
     let archivedTasks=[],favoriteTasks=[],recordTab='completed',recordsShown=20,viewedRecord=null,pendingBackup=null;
     let deletedArchiveIds=new Set();
+    let cloudDrive=null,pendingCloudRestore=null;
     const newTaskId=()=>window.crypto?.randomUUID?.()||`pq-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     function taskSnapshot(){
       return {id:taskId,createdAt:taskCreatedAt,confirmedAt:taskConfirmedAt,shotCount:taskShotCount,completedAt:taskCompletedAt,pairingEnabled,cards:Object.fromEntries(KEYS.map(key=>[key,quest[key].id])),locked:{...locked},covered:{...covered}};
@@ -731,9 +751,9 @@
       const chooseLabel=confirmed?'請先返回調整任務':'放進今日任務 ↗';
       ['dialogChoose','questDetailChoose'].forEach(id=>{el(id).disabled=confirmed||busy;el(id).textContent=chooseLabel;});
     }
-    function persistTask(){
+    function persistTask({fromCloud=false}={}){
       if(taskStorageState!=='unsupported'){
-        try{localStorage.setItem(TASK_STORAGE_KEY,JSON.stringify({version:4,deletedArchives:[...deletedArchiveIds],current:taskSnapshot(),previous:previousTask,previousAction,previousEffect,archived:archivedTasks,favorites:favoriteTasks,savedAt:new Date().toISOString()}));taskStorageState='ready';}
+        try{const cloudSync=cloudDrive?.observe(backupPayload(),fromCloud);localStorage.setItem(TASK_STORAGE_KEY,JSON.stringify({version:5,cloudSync,deletedArchives:[...deletedArchiveIds],current:taskSnapshot(),previous:previousTask,previousAction,previousEffect,archived:archivedTasks,favorites:favoriteTasks,savedAt:new Date().toISOString()}));taskStorageState='ready';}
         catch(error){taskStorageState='unavailable';}
       }
       renderTaskSession();renderRecords();
@@ -747,9 +767,9 @@
       try{raw=localStorage.getItem(TASK_STORAGE_KEY);}
       catch(error){taskStorageState='unavailable';renderTaskSession();return;}
       try{record=raw?JSON.parse(raw):null;}catch(error){record=null;}
-      if(record&&Number.isInteger(record.version)&&record.version>4){taskStorageState='unsupported';renderTaskSession();return;}
-      const current=(record?.version===1||record?.version===2||record?.version===3||record?.version===4)?validTaskSnapshot(record.current):null;
-      if((record?.version===3||record?.version===4)&&!current){
+      if(record&&Number.isInteger(record.version)&&record.version>5){taskStorageState='unsupported';renderTaskSession();return;}
+      const current=(record?.version===1||record?.version===2||record?.version===3||record?.version===4||record?.version===5)?validTaskSnapshot(record.current):null;
+      if((record?.version===3||record?.version===4||record?.version===5)&&!current){
         archivedTasks=validArchives(record.archived);favoriteTasks=validFavorites(record.favorites);
         deletedArchiveIds=new Set(validDeletedArchiveIds(record.deletedArchives));
         taskStorageState='unsupported';renderTaskSession();renderRecords();toast('目前任務無法讀取，已保留原始紀錄且暫不覆寫');return;
@@ -759,13 +779,13 @@
         previousAction=previousTask&&typeof record.previousAction==='string'?record.previousAction.slice(0,100):'';
         archivedTasks=validArchives(record.archived);favoriteTasks=validFavorites(record.favorites);
         deletedArchiveIds=new Set(validDeletedArchiveIds(record.deletedArchives));
-        if(record.version>=3&&(!Array.isArray(record.archived)||!Array.isArray(record.favorites)||archivedTasks.length!==record.archived.length||favoriteTasks.length!==record.favorites.length||(record.version===4&&(!Array.isArray(record.deletedArchives)||deletedArchiveIds.size!==record.deletedArchives.length)))){
+        if(record.version>=3&&(!Array.isArray(record.archived)||!Array.isArray(record.favorites)||archivedTasks.length!==record.archived.length||favoriteTasks.length!==record.favorites.length||(record.version>=4&&(!Array.isArray(record.deletedArchives)||deletedArchiveIds.size!==record.deletedArchives.length)))){
           taskStorageState='unsupported';renderTaskSession();renderRecords();toast('部分紀錄無法讀取，暫不覆寫原始保存資料');return;
         }
         const migrateCompletion=!!current.completedAt&&!deletedArchiveIds.has(current.id)&&!archivedTasks.some(task=>task.id===current.id);
         previousEffect=previousTask&&previousTask.id===current.id&&current.completedAt&&!previousTask.completedAt&&(record.previousEffect?.archiveAdded===current.id||migrateCompletion)?{archiveAdded:current.id}:null;
         if(migrateCompletion)archivedTasks.unshift(current);
-        if(record.version<4||migrateCompletion||(!current.completedAt&&!current.pairingEnabled))persistTask();else{renderTaskSession();renderRecords();}
+        if(record.version<5||migrateCompletion||(!current.completedAt&&!current.pairingEnabled))persistTask();else{renderTaskSession();renderRecords();}
       }else{persistTask();if(raw)toast('原本的保存資料無法讀取，已建立新任務');}
     }
     function taskEditable(){
@@ -1817,7 +1837,49 @@
     function restorePage({initial=false}={}){let target=location.hash.slice(1);if(target==='design'){target='records';history.replaceState(null,'','#records');}switchPage(PAGES.includes(target)?target:'play',{section:target==='top'?'top':initial&&target==='play'?'play':null,writeHistory:false,animate:false})}
     window.addEventListener('popstate',restorePage);
     window.addEventListener('hashchange',restorePage);
-    restoreTask();renderQuest();renderLibrary();
+    // Keep the task and its sync metadata in the same atomic localStorage envelope.
+    let initialCloudRecord=null,initialCloudBackup=null;
+    try{initialCloudRecord=JSON.parse(localStorage.getItem(TASK_STORAGE_KEY)||'null');
+      if(initialCloudRecord&&validTaskSnapshot(initialCloudRecord.current))initialCloudBackup={format:'photo-quest-backup',version:2,exportedAt:initialCloudRecord.savedAt,current:initialCloudRecord.current,archived:validArchives(initialCloudRecord.archived),favorites:validFavorites(initialCloudRecord.favorites),deletedArchives:validDeletedArchiveIds(initialCloudRecord.deletedArchives)};
+    }catch(error){}
+    try{cloudDrive=PhotoQuestDrive.create({
+      initialMeta:initialCloudRecord?.cloudSync,initialBackup:initialCloudBackup,initialSavedAt:Date.parse(initialCloudRecord?.savedAt)||0,
+      getBackup:backupPayload,parseBackup,canSync:()=>taskStorageState==='ready',
+      applyMerged:value=>{archivedTasks=value.archived;favoriteTasks=value.favorites;deletedArchiveIds=new Set(value.deletedArchives);persistTask({fromCloud:true});},
+      saveMetadata:()=>persistTask({fromCloud:true}),
+      render:value=>{
+        el('cloudBadge').textContent=value.status;el('cloudStatus').textContent=value.detail;
+        el('cloudConnect').textContent=value.loading?'載入 Google 連線…':value.remembered?'重新連線':'連接 Google Drive';
+        el('cloudConnect').hidden=value.connected;el('cloudConnect').disabled=value.busy||value.loading;
+        el('cloudSync').hidden=!value.connected;el('cloudSync').disabled=value.busy;
+        el('cloudDisconnect').hidden=!value.remembered&&!value.connected;el('cloudDisconnect').disabled=value.busy;
+        el('cloudRestore').hidden=!value.restoreAvailable;
+        el('cloudFolder').hidden=!value.folderId;if(value.folderId)el('cloudFolder').href='https://drive.google.com/drive/folders/'+encodeURIComponent(value.folderId);
+      },
+      requestRestore:task=>{
+        if(drawMotion||progressChangeResolve){toast('請等目前操作完成，再還原任務');return;}
+        pendingCloudRestore=task;
+        el('cloudRestoreNote').textContent=`${recordSubject(task)} · ${recordDate(task.completedAt||task.createdAt)}。將取代這台裝置的目前任務；取代前的任務會加入收藏，已完成紀錄會保留。`;
+        el('cloudRestoreDialog').showModal();
+      }
+    });}catch(error){el('cloudBadge').textContent='同步已暫停';el('cloudStatus').textContent='本機同步資訊無法讀取，請先匯出備份；目前任務仍可使用。';el('cloudConnect').disabled=true;}
+    el('cloudConnect').addEventListener('click',()=>cloudDrive?.connect());
+    el('cloudSync').addEventListener('click',()=>cloudDrive?.sync());
+    el('cloudDisconnect').addEventListener('click',()=>{cloudDrive?.disconnect();toast('已中斷同步，本機與 Drive 的備份都會保留');});
+    el('cloudRestore').addEventListener('click',()=>cloudDrive?.restoreCurrent());
+    el('cloudRestoreCancel').addEventListener('click',()=>{pendingCloudRestore=null;el('cloudRestoreDialog').close();});
+    el('cloudRestoreDialog').addEventListener('cancel',()=>pendingCloudRestore=null);
+    el('cloudRestoreAccept').addEventListener('click',()=>{
+      const value=pendingCloudRestore;pendingCloudRestore=null;el('cloudRestoreDialog').close();if(!value||taskStorageState!=='ready')return;
+      const before=taskSnapshot();
+      if(taskFingerprint(before)!==taskFingerprint(value)&&!findFavorite(before))favoriteTasks.unshift({id:newTaskId(),savedAt:new Date().toISOString(),task:{...before,confirmedAt:null,completedAt:null,shotCount:0}});
+      applyTaskSnapshot(value);previousTask=before;previousAction='還原雲端目前任務';previousEffect=null;closeQuestDetail(true);persistTask();renderQuest();toast('雲端任務已還原，原本任務已保留');
+    });
+    window.addEventListener('online',()=>cloudDrive?.networkChanged());
+    window.addEventListener('offline',()=>cloudDrive?.networkChanged());
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudDrive?.networkChanged();});
+    window.addEventListener('storage',event=>{if(event.key===TASK_STORAGE_KEY||event.key===null)cloudDrive?.externalChange();});
+    restoreTask();renderQuest();renderLibrary();cloudDrive?.start();
     restorePage({initial:true});
   </script>
 </body>
