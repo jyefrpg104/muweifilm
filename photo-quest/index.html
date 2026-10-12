@@ -1687,7 +1687,9 @@
     }
     el('recordsList').addEventListener('pointerup',event=>endRecordGesture(event));
     el('recordsList').addEventListener('pointercancel',event=>endRecordGesture(event,true));
-    el('recordsList').addEventListener('lostpointercapture',event=>endRecordGesture(event,true));
+    // Touch devices initially capture the row button; transferring capture to the list
+    // emits a bubbling lostpointercapture from that child, not a cancelled swipe.
+    el('recordsList').addEventListener('lostpointercapture',event=>{if(event.target===el('recordsList'))endRecordGesture(event,true)});
     el('recordsList').addEventListener('pointerleave',()=>{if(!recordGesture?.axis)clearRecordPress()});
     document.addEventListener('pointerdown',event=>{if(swipedRecordId&&!event.target.closest(`[data-record-row]`))closeRecordSwipe()});
     ['pointerup','pointercancel'].forEach(type=>document.addEventListener(type,event=>{if(suppressedRecordClick?.pointerId===event.pointerId)suppressedRecordClick.until=performance.now()+700;clearRecordPress()}));
