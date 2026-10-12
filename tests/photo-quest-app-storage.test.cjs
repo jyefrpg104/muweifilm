@@ -1,0 +1,31 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const html=fs.readFileSync(__dirname+'/../photo-quest/index.html','utf8');
+const app=html.split('  <script>')[1].split('  </script>')[0];
+const source=fs.readFileSync(__dirname+'/../photo-quest/cloud-backup.js','utf8');
+function boot(record){
+  const elements=new Map(),storage=new Map(),timers=[];let id=0;
+  class Element{
+    constructor(){this.style={setProperty(){},removeProperty(){}};this.dataset={};this.classList={toggle(){},add(){},remove(){},contains:()=>false};this.events={};this.open=false;this.hidden=false;this.textContent='';this.innerHTML='';this.value='';}
+    addEventListener(name,fn){this.events[name]=fn}setAttribute(){}removeAttribute(){}getAttribute(){return ''}
+    querySelector(){return new Element()}querySelectorAll(){return []}closest(){return new Element()}getBoundingClientRect(){return {x:0,y:0,top:0,left:0,width:400,height:80,right:400,bottom:80}}focus(){}append(){}remove(){}showModal(){this.open=true}close(){this.open=false}
+  }
+  const document={getElementById:key=>{if(!elements.has(key))elements.set(key,new Element());return elements.get(key)},querySelector:()=>new Element(),querySelectorAll:()=>[],createElement:()=>new Element(),body:new Element(),documentElement:new Element(),addEventListener(){},fonts:{ready:Promise.resolve()},visibilityState:'visible'};
+  if(record)storage.set('photo-quest:current-task:v1',JSON.stringify(record));
+  const context={console,Date,Intl,JSON,Math,Map,Set,Object,Number,String,Array,RegExp,Promise,Error,URL,URLSearchParams,AbortController,DOMException,structuredClone,
+    document,localStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value)},navigator:{onLine:true},crypto:{randomUUID:()=>`id-${++id}`},
+    fetch:async()=>{throw Error('Unexpected network')},matchMedia:()=>({matches:false,addEventListener(){}}),scrollY:0,scrollTo(){},addEventListener(){},location:{hash:''},history:{pushState(){},replaceState(){}},setTimeout:(fn,delay)=>{timers.push({fn,delay});return timers.length},clearTimeout(){},performance:{now:()=>0},getComputedStyle:()=>({position:'static'}),google:{accounts:{oauth2:{initTokenClient:()=>({requestAccessToken(){}})}}}};
+  context.window=context;vm.createContext(context);vm.runInContext(source,context);vm.runInContext(app,context);
+  return {context,elements,storage,run:code=>vm.runInContext(code,context),saved:()=>JSON.parse(storage.get('photo-quest:current-task:v1'))};
+}
+let f=boot();let saved=f.saved();assert.equal(saved.version,5);assert(saved.cloudSync);assert.equal(f.run('!!validTaskSnapshot(taskSnapshot())'),true);assert.equal(f.elements.get('cloudBadge').textContent,'未連線');
+const legacy={...saved,version:4};delete legacy.cloudSync;f=boot(legacy);assert.equal(f.saved().version,5);assert.equal(f.saved().current.id,legacy.current.id);
+f.run('toggleFavorite(taskSnapshot())');assert.equal(f.saved().favorites.length,1);assert.equal(f.saved().cloudSync.events.filter(x=>x.type==='favorite'&&!x.deleted).length,1);
+f.run('toggleFavorite(taskSnapshot())');assert.equal(f.saved().favorites.length,0);assert.equal(f.saved().cloudSync.events.find(x=>x.type==='favorite').deleted,true);
+const completed=f.run("(()=>{const t=taskSnapshot();t.id='finished-test';t.confirmedAt=new Date().toISOString();t.shotCount=100;t.completedAt=new Date().toISOString();return t})()");
+f.run('archivedTasks.push('+JSON.stringify(completed)+');persistTask()');assert.equal(f.saved().archived.length,1);
+f.run('deleteRecordEntries({tab:"completed",ids:['+JSON.stringify(completed.id)+']})');assert.equal(f.saved().archived.length,0);assert.equal(f.saved().cloudSync.events.find(x=>x.type==='archive').deleted,true);
+f.run('undoRecordsDeletion()');assert.equal(f.saved().archived.length,1);assert.equal(f.saved().cloudSync.events.find(x=>x.type==='archive').deleted,false);
+const payload=f.run('backupPayload()');assert.equal(f.run('parseBackup('+JSON.stringify(payload)+').archived.length'),1);
+f.run('pendingCloudRestore='+JSON.stringify(completed));f.elements.get('cloudRestoreAccept').events.click();assert.equal(f.saved().current.completedAt,completed.completedAt);
+const unsupported={...f.saved(),version:99};f=boot(unsupported);assert.equal(f.saved().version,99);assert.equal(f.run('taskStorageState'),'unsupported');
+console.log('PASS actual App boot, v4 migration, favorite/delete/undo metadata, backup parsing, cloud restore, future-version protection');
