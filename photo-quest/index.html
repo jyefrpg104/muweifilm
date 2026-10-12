@@ -49,7 +49,7 @@
     .btn-row {display:flex; flex-wrap:wrap; gap:12px; align-items:center}
     .btn {display:inline-flex; gap:10px; align-items:center; justify-content:center; border-radius:9px; border:1px solid transparent; padding:12px 19px; min-height:44px; font-size:13px; font-weight:650; transition:transform .2s,background .2s,border-color .2s,color .2s}
     .btn:hover {transform:translateY(-2px)}
-    .btn[hidden],.gear-control[hidden] {display:none!important}
+    .btn[hidden] {display:none!important}
     .btn:disabled {opacity:.45; cursor:default; transform:none}
     .btn-primary {background:#657E66; color:#fff}
     .btn-primary:hover {background:#4E6B52}
@@ -183,15 +183,6 @@
     .quest-panel.quest-confirmed .quest-grid .card-commands {display:none}
     .quest-confirmed-state {display:none; margin:10px 0 0; min-height:16px; font-size:11px; line-height:1.5; color:#AB705B; text-align:center}
     .quest-panel.quest-confirmed .quest-confirmed-state {display:block}
-    .gear-control {display:flex; align-items:center; justify-content:space-between; gap:20px; border:1px solid #DFE5D8; border-radius:11px; background:rgba(255,254,250,.52); padding:12px 15px; margin-bottom:20px}
-    .gear-control p {margin:0; color:#798379; font-size:11px; line-height:1.6; max-width:620px; text-align:right}
-    .switch-control {display:inline-flex; align-items:center; gap:10px; color:#4C604E; font-size:12px; font-weight:650; white-space:nowrap; cursor:pointer}
-    .switch-control input {position:absolute; opacity:0; width:1px; height:1px}
-    .switch-track {height:20px; width:37px; border-radius:20px; background:#D3D7CE; display:inline-block; position:relative; transition:background .2s}
-    .switch-track:after {content:''; position:absolute; top:3px; left:3px; width:14px; height:14px; background:white; border-radius:50%; box-shadow:0 1px 3px #0002; transition:transform .2s}
-    .switch-control input:checked + .switch-track {background:#79947A}
-    .switch-control input:checked + .switch-track:after {transform:translateX(17px)}
-    .switch-control input:focus-visible + .switch-track {outline:3px solid #9DAF90; outline-offset:3px}
     .quest-grid {display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:13px}
     .quest-thumb,.quest-thumb-turn,.mobile-card-note,.mobile-draw-dock {display:none}
     .quest-drawing .flip-inner {transition:none; will-change:transform}
@@ -334,7 +325,7 @@
     #toast {position:fixed; bottom:25px; left:50%; transform:translate(-50%,18px); background:#394A3A; color:white; font-size:12px; border-radius:7px; padding:10px 17px; box-shadow:0 8px 28px #343c3030; opacity:0; pointer-events:none; transition:opacity .24s,transform .24s; z-index:20}
     #toast.show {opacity:1; transform:translate(-50%,0)}
     #printArea {display:none}
-    .page-tab,.btn,.switch-track,.switch-track::after,.tab,.library-card,#toast {transition-timing-function:var(--motion-ease)}
+    .page-tab,.btn,.tab,.library-card,#toast {transition-timing-function:var(--motion-ease)}
     @media(max-width:1100px){
       .quest-grid {grid-template-columns:repeat(3,minmax(0,1fr)); gap:17px}
       .library-grid {grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -398,8 +389,6 @@
       .progress-controls #progressPlus {flex:1}
       .progress-bottom {align-items:flex-start; flex-wrap:wrap}
       .progress-bottom .btn {width:100%}
-      .gear-control {gap:8px; margin-bottom:12px; padding:10px 12px}
-      .gear-control p {display:none}
       .quest-grid {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
       .quest-grid .flip-button {height:clamp(98px,27vw,132px); aspect-ratio:auto; perspective:none}
       .quest-grid .flip-inner,.quest-grid .card-commands,.quest-panel.quest-confirmed .quest-confirmed-state {display:none}
@@ -447,7 +436,6 @@
       #play .section-head {margin-bottom:10px}
       .quest-panel {display:flex; flex-direction:column}
       .quest-toolbar {order:0; margin:0 0 10px}
-      .gear-control {order:1; margin-bottom:10px}
       .quest-grid {order:2}
       .mobile-card-note {order:3}
       .shooting-progress {order:4}
@@ -456,7 +444,6 @@
     @media(max-width:750px) and (max-height:620px){
       #play .section-head {position:absolute; width:1px; height:1px; clip-path:inset(50%); overflow:hidden; margin:0}
       .quest-grid .flip-button {height:90px}
-      .gear-control {margin-bottom:6px}
       .quest-thumb {padding:8px 10px 6px}
     }
     @media(max-width:360px){.container {width:calc(100% - 28px)}.quest-panel {padding:10px}.card-face{padding:10px}.card-topline,.card-footer {font-size:8px}.card-title {font-size:18px}.mini-title {font-size:17px}.mini-top{font-size:8px}}
@@ -510,7 +497,6 @@
         <div class="section-head"><div><div class="eyebrow">01 / DRAW YOUR QUEST</div><h2 id="playTitle">今天，拍什麼？</h2><p class="section-desc">每個啟用的類別各抽一張。點擊卡片可以翻面，也能重抽、固定或蓋牌略過該類別。</p></div><div class="section-meta" id="questCount">6 CARDS · 1 WALK</div></div>
         <div class="quest-panel">
           <div class="quest-toolbar"><div class="toolbar-caption"><strong>今日任務</strong><span id="questDate"></span></div><div class="toolbar-actions"><button id="drawAll" class="btn btn-primary" type="button">↻　重新抽卡</button><div class="task-icon-actions" role="group" aria-label="任務操作"><button id="unlockAll" class="task-icon" type="button" aria-label="解除所有固定" title="解除所有固定" disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 7.5-2M12 15v2"></path></svg></button><button id="saveFavorite" class="task-icon" type="button" aria-label="收藏組合" title="收藏組合" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m12 3 2.8 5.7 6.3.9-4.55 4.45 1.08 6.28L12 17.35l-5.63 2.98 1.08-6.28L2.9 9.6l6.3-.9Z"></path></svg></button><button id="shareQuest" class="task-icon" type="button" aria-label="分享任務卡" title="分享任務卡" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 15V3m-4 4 4-4 4 4M8 10H5v11h14V10h-3"></path></svg></button></div></div></div>
-          <div class="gear-control"><label class="switch-control" for="pairingMode"><input id="pairingMode" type="checkbox" checked><span class="switch-track" aria-hidden="true"></span><span>智慧器材搭配</span></label><p id="pairingNote">開啟時，可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。</p></div>
           <div class="quest-grid" id="questGrid" aria-live="polite"></div>
           <p class="card-note">輕點卡片翻面 · 固定會保留該卡 · 蓋牌會略過整個類別，翻開後恢復</p>
           <p class="mobile-card-note">點卡片放大 · 查看提示、翻面與調整任務</p>
@@ -670,6 +656,7 @@
       for(const item of pool){ticket-=item.weight;if(ticket<0)return item;}
       return pool[pool.length-1];
     }
+    // Active tasks always pair gear; keep historical completed snapshots readable.
     let pairingEnabled = true;
     const frameForCamera = camera => camera.interchangeable?choice(DECKS.frame):FIXED_FRAMES[camera.id];
     const quest = Object.fromEntries(KEYS.map(key=>[key,drawCard(key)]));
@@ -716,8 +703,9 @@
       return {id:value.id,createdAt:value.createdAt,confirmedAt:value.confirmedAt,shotCount,completedAt,pairingEnabled:value.pairingEnabled,cards:Object.fromEntries(KEYS.map(key=>[key,value.cards[key]])),locked:Object.fromEntries(KEYS.map(key=>[key,value.locked[key]])),covered:Object.fromEntries(KEYS.map(key=>[key,value.covered[key]]))};
     }
     function applyTaskSnapshot(value){
-      taskId=value.id;taskCreatedAt=value.createdAt;taskConfirmedAt=value.confirmedAt;taskShotCount=value.shotCount;taskCompletedAt=value.completedAt;pairingEnabled=value.pairingEnabled;
+      taskId=value.id;taskCreatedAt=value.createdAt;taskConfirmedAt=value.confirmedAt;taskShotCount=value.shotCount;taskCompletedAt=value.completedAt;pairingEnabled=value.completedAt?value.pairingEnabled:true;
       KEYS.forEach(key=>{quest[key]=taskCard(key,value.cards[key]);locked[key]=value.locked[key];covered[key]=value.covered[key];flipStates[key]=false;});
+      if(!taskCompletedAt)syncActiveFrame();
     }
     function renderTaskSession(){
       const confirmed=!!taskConfirmedAt||!!taskCompletedAt,busy=!!drawMotion||!!progressChangeResolve;
@@ -731,7 +719,6 @@
       el('drawAll').hidden=confirmed;el('unlockAll').hidden=confirmed;
       el('unlockAll').disabled=busy||!KEYS.some(key=>locked[key]);
       el('unlockAll').title=KEYS.some(key=>locked[key])?'解除所有固定':'目前沒有固定的卡片';
-      el('pairingMode').checked=pairingEnabled;el('pairingMode').closest('.gear-control').hidden=confirmed;
       el('mobileDrawAll').textContent=taskCompletedAt?'開始新任務':confirmed?shootingTarget()!==null&&taskShotCount>=shootingTarget()?'完成任務':'＋ 拍了一張':el('drawAll').textContent;
       el('mobileDrawAll').disabled=busy||(confirmed&&!taskCompletedAt&&taskShotCount===Number.MAX_SAFE_INTEGER);
       el('questCompleteCopy').hidden=!taskCompletedAt;
@@ -778,7 +765,7 @@
         const migrateCompletion=!!current.completedAt&&!deletedArchiveIds.has(current.id)&&!archivedTasks.some(task=>task.id===current.id);
         previousEffect=previousTask&&previousTask.id===current.id&&current.completedAt&&!previousTask.completedAt&&(record.previousEffect?.archiveAdded===current.id||migrateCompletion)?{archiveAdded:current.id}:null;
         if(migrateCompletion)archivedTasks.unshift(current);
-        if(record.version<4||migrateCompletion)persistTask();else{renderTaskSession();renderRecords();}
+        if(record.version<4||migrateCompletion||(!current.completedAt&&!current.pairingEnabled))persistTask();else{renderTaskSession();renderRecords();}
       }else{persistTask();if(raw)toast('原本的保存資料無法讀取，已建立新任務');}
     }
     function taskEditable(){
@@ -860,13 +847,15 @@
       if(source){
         const value=validTaskSnapshot(source);if(!value)return false;
         applyTaskSnapshot(value);taskShotCount=0;taskConfirmedAt=taskCompletedAt=null;
+        pairingEnabled=true;syncActiveFrame();
         const approval=approveTaskChange(before,true);if(approval!==true&&!await approval)return false;
       }else{
         if(!taskCompletedAt)return false;
         switchPage('play',{section:'play',focusContent:true});
         return runQuestDraw(()=>{
+          pairingEnabled=true;
           KEYS.forEach(key=>{quest[key]=drawCard(key,quest[key].id);locked[key]=false;covered[key]=false;flipStates[key]=false;});
-          if(pairingEnabled)quest.frame=frameForCamera(quest.camera);
+          quest.frame=frameForCamera(quest.camera);
           taskShotCount=0;taskConfirmedAt=taskCompletedAt=null;taskId=newTaskId();taskCreatedAt=new Date().toISOString();
         },'新任務已抽出，可以調整後確認出發',{allowCompleted:true,forceAll:true});
       }
@@ -985,11 +974,7 @@
         else if(timePhrase)parts.push(`${timePhrase}拍攝`);
         if(!covered.story)parts.push(`用「${quest.story.title}」詮釋`);
         if(!covered.output)parts.push(`最後選出 ${quest.output.title}作品`);
-        const freeNote=!pairingEnabled&&!covered.camera&&!covered.frame?'（自由組合僅為創意提示，不保證實際器材相容）':'';
-        el('questSentence').textContent=parts.length?parts.join('，')+'。'+freeNote:'所有牌組皆已蓋牌；翻開至少一個牌組，再抽取任務。';
-        el('pairingNote').textContent=pairingEnabled
-          ? covered.camera||covered.frame?'相機與鏡頭皆啟用時會智慧搭配；蓋牌的類別不參與抽取。':'可換鏡相機從 20 款鏡頭抽取；固定鏡頭機身會自動使用內建鏡頭。鏡頭接環仍請依實物確認。'
-          : '自由組合模式：機身與鏡頭各自隨機。部分組合無法實際安裝，請把它當作視角創作練習。';
+        el('questSentence').textContent=parts.length?parts.join('，')+'。':'所有牌組皆已蓋牌；翻開至少一個牌組，再抽取任務。';
       }
       if(detailKey&&!detailLibrary){
         if(preserveDetail)syncQuestDetailControls();else renderQuestDetail();
@@ -1278,7 +1263,7 @@
     }
     function taskDateLabel(date){return new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'long',day:'numeric'}).format(new Date(date))}
     function questCopyNodes(includeStatus=false,includeDate=false){
-      const ids=['questSentence','pairingNote'];
+      const ids=['questSentence'];
       if(includeStatus)ids.push('questCount','taskStatus','taskSaveStatus','progressCount','progressNote','questCompleteCopy');
       if(includeDate)ids.push('questDate');
       return ids.map(el).filter(Boolean);
@@ -1310,7 +1295,7 @@
       toast(session.message);session.resolve();
     }
     function syncDrawControls(session){
-      const controls=document.querySelectorAll('#questGrid button,#drawAll,#mobileDrawAll,#unlockAll,#pairingMode,#undoQuest,#confirmQuest,#editQuest,#shareQuest,#saveFavorite,#startNextQuest,#progressPlus,#progressMinus,#progressComplete,#finishQuest,#dialogChoose,#questDetailChoose,#questDetailCommands button,#questDetailFlip');
+      const controls=document.querySelectorAll('#questGrid button,#drawAll,#mobileDrawAll,#unlockAll,#undoQuest,#confirmQuest,#editQuest,#shareQuest,#saveFavorite,#startNextQuest,#progressPlus,#progressMinus,#progressComplete,#finishQuest,#dialogChoose,#questDetailChoose,#questDetailCommands button,#questDetailFlip');
       controls.forEach(node=>{if(!session.controls.has(node))session.controls.set(node,node.disabled);node.disabled=true;});
       el('drawAll').textContent=el('mobileDrawAll').textContent=session.label||'抽取中…';
       el('questGrid').setAttribute('aria-busy','true');
@@ -1425,7 +1410,7 @@
         toast('鏡頭已固定；先解除鏡頭鎖定，才能重抽相機');return false;
       }
       if(key==='frame' && smartPairingActive() && !quest.camera.interchangeable){
-        toast('這台相機使用內建鏡頭；切換至自由組合可獨立抽鏡頭');return false;
+        toast('這台相機使用內建鏡頭，不需另外搭配鏡頭');return false;
       }
       const arr=DECKS[key];if(arr.length<2)return false;
       const next=drawCard(key,quest[key].id);
@@ -1465,16 +1450,6 @@
       const before=taskSnapshot();KEYS.forEach(key=>locked[key]=false);
       if(!commitTask(before,'解除所有固定')){toast('目前沒有固定的卡片');return;}
       renderQuest();toast('所有卡片已解除固定');
-    });
-    el('pairingMode').addEventListener('change',async e=>{
-      if(drawMotion||detailClosing||detailFlight||!taskEditable()){e.target.checked=pairingEnabled;return;}
-      const before=taskSnapshot();
-      pairingEnabled=e.target.checked;
-      syncActiveFrame(pairingEnabled);
-      if(pairingEnabled&&!covered.frame){locked.frame=false;flipStates.frame=false;}
-      const approval=approveTaskChange(before);if(approval!==true&&!await approval)return;
-      commitTask(before,'切換器材搭配模式');
-      renderQuest();toast(pairingEnabled?'已開啟智慧器材搭配':'已切換自由組合模式');
     });
     document.addEventListener('visibilitychange',()=>{if(document.hidden)finishQuestDraw()});
     // card library
