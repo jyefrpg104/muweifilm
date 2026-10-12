@@ -17,6 +17,10 @@
     const clean=value=>Array.from(String(value).normalize('NFC').replace(/[\u0000-\u001f\u007f/\\:*?"<>|]/g,'_').replace(/\s+/g,' ').trim()).slice(0,45).join('')||'自由';
     return `${day}_${clean(task.covered.subject?'不限':card('subject',task.cards.subject).title)}_${clean(task.covered.story?'不限':card('story',task.cards.story).title)}`;
   }
+  function cardFileName(task){
+    const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Taipei',year:'2-digit',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(task.completedAt)).map(part=>[part.type,part.value]));
+    return `${parts.year}${parts.month}${parts.day}_${parts.hour}${parts.minute}_quest card.png`;
+  }
   function mimeType(file){
     const extension=String(file.name||'').split('.').pop().toLowerCase();
     const types={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',heic:'image/heic',heif:'image/heif'};
@@ -178,14 +182,18 @@
     async function prepare(task){
       check(task.id);update(task.id,{status:'uploading',phase:'archive',error:''});
       await folders(task);check(task.id);
-      const existing=await findFile('quest-card',task);
+      const existing=await findFile('quest-card',task),name=cardFileName(task);
       let cardId=existing?.id;
-      if(!cardId){
+      if(cardId&&existing.name!==name){
+        const renamed=await json('/files/'+encodeURIComponent(cardId)+'?fields='+encodeURIComponent(FIELDS),{
+          method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
+        if(renamed.id!==cardId)throw Error('任務卡更名結果無法確認，請重試。');
+      }else if(!cardId){
         const blob=await adapter.makeTaskImage(copy(task));check(task.id);
         const id=await reserve(task.id,'card');
-        cardId=(await upload(task,blob,{name:'quest-card.png',mimeType:'image/png',appProperties:tags('quest-card',task.id)},id)).id;
+        cardId=(await upload(task,blob,{name,mimeType:'image/png',appProperties:tags('quest-card',task.id)},id)).id;
       }
-      update(task.id,{cardId});await writeQuest(task);check(task.id);
+      update(task.id,{cardId,cardName:name});await writeQuest(task);check(task.id);
       update(task.id,{status:'completed',phase:null,error:''});
       return state(task.id);
     }
@@ -215,7 +223,7 @@
       if(pumping||halted||!drive.ready())return;pumping=true;
       try{for(const task of adapter.tasks()){
         if(!drive.ready())break;
-        const value=entry(task.id);if(!task.completedAt||busy.has(task.id)||value.status==='completed')continue;
+        const value=entry(task.id);if(!task.completedAt||busy.has(task.id)||(value.status==='completed'&&value.cardName===cardFileName(task)))continue;
         try{await ensure(task.id);}catch(error){/* visible retry state; completion is never undone */}
       }}finally{pumping=false;}
     }
@@ -265,5 +273,5 @@
     function stop(){halted=true;clearTimeout(scheduled);scheduled=null;unsubscribe();notify(null);}
     return {observe,state,ensure,flush,uploadPhotos,thumbnail,stop,storageKey:STORAGE_KEY};
   }
-  root.PhotoQuestArchive={create,folderName,questDocument,mimeType,STORAGE_KEY};
+  root.PhotoQuestArchive={create,folderName,cardFileName,questDocument,mimeType,STORAGE_KEY};
 })(typeof window==='undefined'?globalThis:window);
