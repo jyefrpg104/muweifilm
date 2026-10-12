@@ -9,7 +9,7 @@ const clone=x=>JSON.parse(JSON.stringify(x));
 function server(){
   const files=new Map();let next=1;const calls=[];let email=account,fail=0,hook=null;
   function add(kind,payload,extra={}){const id=String(next++);files.set(id,{id,name:kind,appProperties:{photoQuest:'v1',kind,...extra},createdTime:'2026-10-12T00:00:00Z',payload:clone(payload)});return id;}
-  const response=(data,status=200)=>({ok:status===200,status,text:async()=>JSON.stringify(data)});
+  const response=(data,status=200)=>({ok:status===200,status,text:async()=>JSON.stringify(data),blob:async()=>new Blob([JSON.stringify(data)]),headers:{get:()=>null}});
   async function fetch(url,opt={}){
     calls.push({url,opt});if(hook)await hook(url,opt);if(fail)return response({},fail);
     const parsed=new URL(url),path=parsed.pathname;
@@ -42,10 +42,10 @@ function fixture(value=backup(),srv=server(),options={}){
     getBackup:()=>clone(local),parseBackup:raw=>{if(raw.format!=='photo-quest-backup'||!Array.isArray(raw.archived)||!Array.isArray(raw.favorites)||!Array.isArray(raw.deletedArchives))throw Error('invalid backup');return clone(raw)},canSync:()=>saved,
     applyMerged:data=>{local={...local,archived:clone(data.archived),favorites:clone(data.favorites),deletedArchives:clone(data.deletedArchives)};drive.observe(local,true)},saveMetadata:()=>{},render:data=>state=data,requestRestore:value=>restored=value});
   drive.observe(local);drive.start();
-  return {drive,srv,context,store,timers,get state(){return state},get local(){return local},get auth(){return auth},get restored(){return restored},setOnline:value=>online=value,setSaved:value=>saved=value,
+  return {drive,srv,context,store,timers,get state(){return state},get local(){return local},get auth(){return auth},get restored(){return restored},setOnline:value=>online=value,advance:ms=>clock+=ms,setSaved:value=>saved=value,
     change:fn=>{clock+=10;fn(local);drive.observe(local)},connect:async()=>{drive.connect();await authPromise},tick:delay=>{for(const [id,item]of timers){if(item.delay===delay){timers.delete(id);item.fn();return true}}return false},api:context.PhotoQuestDrive};
 }
-(async()=>{
+module.exports=(async()=>{
   let f=fixture(backup(task('current'),[task('old',true)]));
   await f.connect();assert.equal(f.state.status,'已同步');assert.equal(f.srv.files.size,4);assert(![...f.store.values()].join().includes('test-token'));
   const latest=()=>[...f.srv.files.values()].find(x=>x.appProperties.kind==='latest').payload;
@@ -86,4 +86,24 @@ function fixture(value=backup(),srv=server(),options={}){
   const snapshot=[...f.srv.files.values()].find(x=>x.appProperties.kind==='snapshot'&&x.appProperties.day==='2026-10-12');const content=JSON.stringify(snapshot.payload);
   f.change(value=>value.current.shotCount=9);await f.drive.sync();assert.equal(JSON.stringify(snapshot.payload),content);assert.equal([...f.srv.files.values()].filter(x=>x.appProperties.day==='2026-10-12').length,1);
   console.log('PASS immutable daily copy, 30-calendar-day retention, no unrelated file deletion');
-})().catch(error=>{console.error(error);process.exitCode=1});
+
+  f=fixture();await f.connect();assert.equal(f.drive.archiveTransport.ready(),true);
+  const result=await f.drive.archiveTransport.request('https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)');
+  assert.equal((await result.json()).user.emailAddress,account);
+  assert.equal(f.srv.calls.at(-1).opt.headers.Authorization,'Bearer test-token');
+  await assert.rejects(f.drive.archiveTransport.request('https://example.com/steal'),/不支援/);
+  await assert.rejects(f.drive.archiveTransport.request('https://googleusercontent.com.evil.example/thumb'),/不支援/);
+  f.advance(3600*1000);assert.equal(f.drive.archiveTransport.ready(),false);
+  await assert.rejects(f.drive.archiveTransport.request('https://www.googleapis.com/drive/v3/about'),/重新連接/);
+  await f.connect();f.srv.setFailure(401);
+  await assert.rejects(f.drive.archiveTransport.request('https://www.googleapis.com/drive/v3/about'),/到期/);
+  assert.equal(f.state.connected,false);assert.equal(f.drive.archiveTransport.ready(),false);
+  f.srv.setFailure(0);await f.connect();
+  let release,started;const gate=new Promise(resolve=>release=resolve),began=new Promise(resolve=>started=resolve);
+  f.srv.setHook(async(url,opt)=>{if(url.includes('/about')){assert(opt.signal);started(opt.signal);await gate;}});
+  const pending=f.drive.archiveTransport.request('https://www.googleapis.com/drive/v3/about');
+  const signal=await began;f.drive.disconnect();assert(signal.aborted);release();await assert.rejects(pending,/停止同步/);
+  assert(![...f.store.values()].join().includes('test-token'));
+  console.log('PASS archive shares verified OAuth, rejects foreign hosts, expires safely and aborts on disconnect without persisting tokens');
+})().catch(error=>{console.error(error);process.exitCode=1;throw error;});
+
