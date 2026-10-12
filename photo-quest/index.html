@@ -475,6 +475,27 @@
       .print-card-hint {font-size:8pt;line-height:1.7;color:#797E75;margin-top:4mm}
       .print-card-bottom {font-size:7pt;letter-spacing:.6px;color:#888E84;border-top:1px solid #E6E4DB;padding-top:3mm;display:flex;justify-content:space-between}
     }
+    .archive-works {border-top:1px solid var(--line);margin-top:24px;padding-top:22px}
+    .archive-works[hidden] {display:none!important}
+    .archive-head {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+    .archive-head h3 {font-size:16px;margin:0}
+    .archive-works .btn {font-size:12px;padding:10px 13px}
+    .archive-gallery {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+    .archive-photo {min-width:0;display:block;font-size:11px;overflow-wrap:anywhere;line-height:1.7}
+    .archive-photo > span:not(.archive-thumb) {display:block;margin-top:6px}
+    .archive-photo small {color:var(--sage-deep)}
+    .archive-thumb {aspect-ratio:1;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--soft);overflow:hidden;color:var(--sub);font-size:11px}
+    .archive-thumb img {width:100%;height:100%;object-fit:cover}
+    .archive-selection {margin:16px 0}
+    .archive-selected {display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+    .archive-selected img {width:64px;height:64px;object-fit:cover;border-radius:8px;flex:none}
+    .archive-selected > div {min-width:0;flex:1;overflow-wrap:anywhere}
+    .archive-selected strong {display:block;font-size:12px;font-weight:600}
+    .archive-selected small {display:block;font-size:11px;color:var(--sub)}
+    .archive-selected progress {width:100%;height:8px;accent-color:var(--sage-deep)}
+    .archive-selected progress[hidden] {display:none}
+    .archive-selected .archive-error {color:var(--clay)}
+    @media(max-width:450px){.archive-gallery {grid-template-columns:repeat(2,minmax(0,1fr))}.archive-head {align-items:flex-start}.archive-head .cloud-badge {white-space:normal}.archive-works .btn-row .btn {flex:1 1 130px}}
   </style>
 </head>
 <body data-page="play">
@@ -574,13 +595,32 @@
   <dialog id="cardDialog" aria-labelledby="dialogTitle"><button id="dialogClose" class="dialog-close" type="button" aria-label="關閉卡片">×</button><div class="dialog-content"><button class="flip-button dialog-card" id="dialogFlip" type="button" aria-label="翻轉卡片"></button><div class="dialog-side"><div class="eyebrow" id="dialogGroup"></div><h3 id="dialogTitle"></h3><p id="dialogDescription"></p><div class="dialog-actions"><button id="dialogChoose" class="btn btn-primary" type="button">放進今日任務 ↗</button><button id="dialogTurn" class="btn btn-outline" type="button">翻轉看看</button></div></div></div></dialog>
   <dialog id="progressChangeDialog" class="progress-change" aria-labelledby="progressChangeTitle" aria-describedby="progressChangeNote"><h3 id="progressChangeTitle">開始新的任務？</h3><p id="progressChangeNote"></p><div class="btn-row"><button id="cancelProgressChange" class="btn btn-outline" type="button" autofocus>保留原任務</button><button id="acceptProgressChange" class="btn btn-primary" type="button">開始新任務</button></div></dialog>
   <dialog id="deleteRecordsDialog" class="progress-change" aria-labelledby="deleteRecordsTitle" aria-describedby="deleteRecordsNote"><h3 id="deleteRecordsTitle">刪除這些紀錄？</h3><p id="deleteRecordsNote"></p><div class="btn-row"><button id="cancelRecordsDelete" class="btn btn-outline" type="button" autofocus>保留</button><button id="acceptRecordsDelete" class="btn btn-danger" type="button">刪除</button></div></dialog>
-  <dialog id="recordDialog" class="task-tools" aria-labelledby="recordTitle"><div class="tools-head"><h3 id="recordTitle">任務紀錄</h3><button id="recordClose" class="tools-close" type="button" aria-label="關閉紀錄內容">×</button></div><p id="recordMeta" class="tools-note"></p><div id="recordFields" class="record-fields"></div><div class="btn-row"><button id="recordReplay" class="btn btn-primary" type="button">再次挑戰</button><button id="recordShare" class="btn btn-outline" type="button">分享任務卡</button><button id="recordFavorite" class="btn btn-outline" type="button">☆ 收藏組合</button></div></dialog>
+  <dialog id="recordDialog" class="task-tools" aria-labelledby="recordTitle"><div class="tools-head"><h3 id="recordTitle">任務紀錄</h3><button id="recordClose" class="tools-close" type="button" aria-label="關閉紀錄內容">×</button></div><p id="recordMeta" class="tools-note"></p><div id="recordFields" class="record-fields"></div><div class="btn-row"><button id="recordReplay" class="btn btn-primary" type="button">再次挑戰</button><button id="recordShare" class="btn btn-outline" type="button">分享任務卡</button><button id="recordFavorite" class="btn btn-outline" type="button">☆ 收藏組合</button></div>
+    <section id="archiveWorks" class="archive-works" aria-labelledby="archiveTitle" hidden>
+      <div class="archive-head"><h3 id="archiveTitle">攝影作品</h3><span id="archiveStatus" class="cloud-badge" role="status" aria-live="polite">尚未同步</span></div>
+      <p id="archiveCount" class="tools-note">尚未上傳攝影作品</p>
+      <div id="archiveGallery" class="archive-gallery"></div>
+      <button id="archiveMore" class="btn btn-outline" type="button" hidden>顯示更多作品</button>
+      <div class="btn-row">
+        <button id="archivePick" class="btn btn-outline" type="button">＋ 上傳照片</button>
+        <a id="archiveDrive" class="btn btn-outline" target="_blank" rel="noopener noreferrer" hidden>↗ 開啟 Google Drive</a>
+        <button id="archiveConnect" class="btn btn-outline" type="button">連接 Google Drive</button>
+        <button id="archiveRetry" class="btn btn-outline" type="button">補傳任務檔案</button>
+      </div>
+      <input id="archiveFiles" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif" multiple hidden>
+      <p id="archiveNotice" class="tools-status" role="status" aria-live="polite"></p>
+      <div id="archiveSelection" class="archive-selection"></div>
+      <div class="btn-row"><button id="archiveUpload" class="btn btn-primary" type="button" hidden>確認上傳</button><button id="archiveClear" class="btn btn-outline" type="button" hidden>清除選取</button></div>
+    </section>
+  </dialog>
   <dialog id="shareDialog" class="task-tools" aria-labelledby="shareTitle"><div class="tools-head"><h3 id="shareTitle">分享任務卡</h3><button id="shareClose" class="tools-close" type="button" aria-label="關閉分享任務卡">×</button></div><p class="tools-note">保存這一刻的任務，傳給朋友或留作今天的拍攝小抄。</p><img id="sharePreview" class="share-preview" alt="本次任務的六張攝影卡片與拍攝狀態" hidden><p id="shareSaveHint" class="tools-note" hidden>存到 iPhone 相簿，請在下一步選擇「儲存影像」。</p><div class="btn-row"><button id="nativeShare" class="btn btn-primary" type="button" hidden>分享／儲存圖片</button><a id="downloadShare" class="btn btn-outline" hidden>下載檔案</a></div><p id="shareStatus" class="tools-status" role="status" aria-live="polite">正在準備圖片…</p></dialog>
   <dialog id="backupDialog" class="progress-change" aria-labelledby="backupTitle"><h3 id="backupTitle">匯入這份備份？</h3><p id="backupNote"></p><label class="tools-note" style="display:flex;gap:9px;align-items:flex-start;margin-bottom:20px"><input id="restoreBackupCurrent" type="checkbox">同時還原備份中的目前任務，取代這台裝置的目前任務</label><div class="btn-row"><button id="cancelBackup" class="btn btn-outline" type="button" autofocus>取消</button><button id="acceptBackup" class="btn btn-primary" type="button">合併紀錄</button></div></dialog>
   <dialog id="cloudRestoreDialog" class="progress-change" aria-labelledby="cloudRestoreTitle" aria-describedby="cloudRestoreNote"><h3 id="cloudRestoreTitle">還原雲端的目前任務？</h3><p id="cloudRestoreNote"></p><div class="btn-row"><button id="cloudRestoreCancel" class="btn btn-outline" type="button" autofocus>保留目前任務</button><button id="cloudRestoreAccept" class="btn btn-primary" type="button">還原任務</button></div></dialog>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="printArea" aria-hidden="true"></div>
   <script src="cloud-backup.js"></script>
+  <script src="quest-archive.js"></script>
+  <script src="quest-archive-ui.js"></script>
   <script>
     'use strict';
     // This entire page works offline. Add, remove or rewrite cards in these lists.
@@ -700,7 +740,7 @@
     let previousTask=null,previousAction='',previousEffect=null,taskStorageState='ready';
     let archivedTasks=[],favoriteTasks=[],recordTab='completed',recordsShown=20,viewedRecord=null,pendingBackup=null;
     let deletedArchiveIds=new Set();
-    let cloudDrive=null,pendingCloudRestore=null;
+    let cloudDrive=null,pendingCloudRestore=null,questArchive=null,archiveUI=null;
     const newTaskId=()=>window.crypto?.randomUUID?.()||`pq-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     function taskSnapshot(){
       return {id:taskId,createdAt:taskCreatedAt,confirmedAt:taskConfirmedAt,shotCount:taskShotCount,completedAt:taskCompletedAt,pairingEnabled,cards:Object.fromEntries(KEYS.map(key=>[key,quest[key].id])),locked:{...locked},covered:{...covered}};
@@ -756,7 +796,7 @@
         try{const cloudSync=cloudDrive?.observe(backupPayload(),fromCloud);localStorage.setItem(TASK_STORAGE_KEY,JSON.stringify({version:5,cloudSync,deletedArchives:[...deletedArchiveIds],current:taskSnapshot(),previous:previousTask,previousAction,previousEffect,archived:archivedTasks,favorites:favoriteTasks,savedAt:new Date().toISOString()}));taskStorageState='ready';}
         catch(error){taskStorageState='unavailable';}
       }
-      renderTaskSession();renderRecords();
+      renderTaskSession();renderRecords();questArchive?.observe();
     }
     function commitTask(before,label){
       if(JSON.stringify(before)===JSON.stringify(taskSnapshot()))return false;
@@ -1592,7 +1632,7 @@
         const task=favorites?entry.task:entry,id=entry.id,selected=selectedRecordIds.has(id);
         const label=recordsSelecting?`${selected?'取消選取':'選取'}：${recordSubject(task)}`:`查看任務：${recordSubject(task)}`;
         const actionLabel=favorites?'取消收藏':'刪除',subject=escapeHTML(recordSubject(task)),safeId=escapeHTML(id);
-        return `<div class="record-row${selected?' record-selected':''}" data-record-row="${safeId}">${!recordsSelecting?`<button class="record-delete-action" type="button" data-record-delete="${safeId}" aria-label="${actionLabel}：${subject}" tabindex="-1" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"/></svg><span>${actionLabel}</span></button>`:''}<button class="record-open" type="button" data-record-view="${safeId}" aria-label="${escapeHTML(label)}" ${recordsSelecting?`aria-pressed="${selected}"`:'aria-haspopup="dialog"'}>${recordsSelecting?`<span class="record-checkbox" aria-hidden="true">${selected?'✓':''}</span>`:''}<span class="record-text"><strong>${subject}</strong><small>${escapeHTML(recordDate(favorites?entry.savedAt:task.completedAt))} · ${favorites?'收藏的組合':`${task.shotCount} 張作品`}${recordsSelecting?'':' · 查看任務 ↗'}</small></span></button>${!recordsSelecting?`<button class="records-icon record-manage" type="button" data-record-reveal="${safeId}" aria-label="顯示${actionLabel}選項：${subject}" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>`:''}</div>`;
+        return `<div class="record-row${selected?' record-selected':''}" data-record-row="${safeId}">${!recordsSelecting?`<button class="record-delete-action" type="button" data-record-delete="${safeId}" aria-label="${actionLabel}：${subject}" tabindex="-1" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"/></svg><span>${actionLabel}</span></button>`:''}<button class="record-open" type="button" data-record-view="${safeId}" aria-label="${escapeHTML(label)}" ${recordsSelecting?`aria-pressed="${selected}"`:'aria-haspopup="dialog"'}>${recordsSelecting?`<span class="record-checkbox" aria-hidden="true">${selected?'✓':''}</span>`:''}<span class="record-text"><strong>${subject}</strong><small>${escapeHTML(recordDate(favorites?entry.savedAt:task.completedAt))} · ${favorites?'收藏的組合':`${task.shotCount} 張拍攝紀錄`}${recordsSelecting?'':' · 查看任務 ↗'}</small></span></button>${!recordsSelecting?`<button class="records-icon record-manage" type="button" data-record-reveal="${safeId}" aria-label="顯示${actionLabel}選項：${subject}" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>`:''}</div>`;
       }).join(''):`<p class="records-empty">${favorites?'還沒有收藏。遇到喜歡的組合，按「收藏組合」留待下次。':'還沒有完成的任務。完成一趟攝影散步後，會保存在這裡。'}</p>`;
       el('recordsMore').hidden=values.length<=recordsShown;
       if(recordsDeletionUndo&&Date.now()>=recordsDeletionUndo.expiresAt){recordsDeletionUndo=null;clearTimeout(recordsUndoTimer);el('recordsStatus').textContent=el('recordsStatus').textContent.replace(/，可在 10 秒內復原。$/,'。');}
@@ -1601,9 +1641,9 @@
     }
     function showRecord(task){
       viewedRecord=structuredClone(task);el('recordTitle').textContent=task.completedAt?'已完成的任務':'收藏的組合';
-      el('recordMeta').textContent=task.completedAt?`${task.shotCount} 張作品 · 完成於 ${recordDate(task.completedAt)}`:'再次挑戰會建立新任務，原本的收藏會保留。';
+      el('recordMeta').textContent=task.completedAt?`${task.shotCount} 張拍攝紀錄 · 完成於 ${recordDate(task.completedAt)}`:'再次挑戰會建立新任務，原本的收藏會保留。';
       el('recordFields').innerHTML=KEYS.map(key=>`<div class="record-field" style="--card-accent:${DECK_META[key].accent}"><small>${DECK_META[key].cn} · ${DECK_META[key].en}</small><strong>${escapeHTML(task.covered[key]?'不限':taskCard(key,task.cards[key]).title)}</strong></div>`).join('');
-      renderFavoriteButton(el('recordFavorite'),task);el('recordDialog').showModal();
+      renderFavoriteButton(el('recordFavorite'),task);el('recordDialog').showModal();archiveUI?.show(task);
     }
     function requestRecordDeletion(){
       if(!recordsSelecting||!selectedRecordIds.size||taskStorageState==='unsupported')return false;
@@ -1879,9 +1919,16 @@
     window.addEventListener('offline',()=>cloudDrive?.networkChanged());
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')cloudDrive?.networkChanged();});
     window.addEventListener('storage',event=>{if(event.key===TASK_STORAGE_KEY||event.key===null)cloudDrive?.externalChange();});
-    restoreTask();renderQuest();renderLibrary();cloudDrive?.start();
+    if(cloudDrive&&window.PhotoQuestArchive&&window.PhotoQuestArchiveUI){
+      questArchive=PhotoQuestArchive.create({drive:cloudDrive.archiveTransport,tasks:()=>archivedTasks,
+        canWrite:()=>taskStorageState==='ready',card:taskCard,makeTaskImage,changed:()=>archiveUI?.changed()});
+      archiveUI=PhotoQuestArchiveUI.create({archive:questArchive,drive:cloudDrive,el,escapeHTML});
+      window.addEventListener('storage',event=>{if(event.key===questArchive.storageKey||event.key===null)questArchive.stop();});
+    }
+    restoreTask();questArchive?.observe();renderQuest();renderLibrary();cloudDrive?.start();
     restorePage({initial:true});
   </script>
 </body>
 </html>
+
 

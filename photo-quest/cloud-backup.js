@@ -65,6 +65,8 @@
     let accessToken=null,expiresAt=0,authClient=null,authPending=false,libraryLoading=false,ready=false,authGeneration=0;
     let syncing=false,dirty=true,timer=null,retryTimer=null,retries=0,epoch=0,controller=null,revision=0,blocked=false;
     let message='',folderId=null,latestFileId=null,ownFileId=null,cloudCurrent=null;
+    const archiveControllers=new Set(),listeners=new Set();
+    let accountVerified=false;
     const isOnline=()=>adapter.online?adapter.online():root.navigator.onLine!==false;
     const persistConnection=()=>{try{storage.setItem(CONNECTION_KEY,JSON.stringify({enabled:remembered,lastSyncedAt}))}catch(error){}};
     const usableToken=()=>accessToken&&Date.now()<expiresAt;
@@ -79,6 +81,7 @@
       else if(remembered&&dirty){status='尚未同步';detail='資料已保存在此裝置，準備同步到 Google Drive。';}
       else if(remembered){status='已同步';detail=lastSyncedAt?`上次同步：${new Intl.DateTimeFormat('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(lastSyncedAt))}`:'已連接 Google Drive。';}
       adapter.render({status,detail,remembered,connected:!!usableToken(),busy:authPending||syncing,loading:libraryLoading,restoreAvailable:!!cloudCurrent&&!syncing&&!authPending,folderId});
+      listeners.forEach(listener=>listener());
     }
     function metadata(){return clone(meta)}
     function stamp(){return Math.max(Date.now(),meta.updatedAt+1,...meta.events.map(event=>event.at+1))}
@@ -190,7 +193,7 @@
             const about=await request('/about?fields=user(emailAddress)',{},generation);
             if(!await accountMatches(about.user?.emailAddress))throw Error('這是你的個人版本，請使用設定時的 Google 帳號連線。');
             guard(generation);
-            remembered=true;message='';persistConnection();controller=null;render();await sync();
+            accountVerified=true;remembered=true;message='';persistConnection();controller=null;render();await sync();
           }catch(error){if(generation===epoch){accessToken=null;expiresAt=0;controller=null;message=error.message;render();}}
         },error_callback:error=>{if(authGeneration!==epoch)return;authPending=false;message=error.type==='popup_failed_to_open'?'Google 視窗未開啟，請允許此網站的彈出視窗，再按一次連線。':'Google 連線已取消，任務仍保存在此裝置。';render();}
       });return true;
@@ -207,18 +210,41 @@
       if(blocked||authPending||syncing)return;
       if(!isOnline()){message='目前沒有網路，請連線後再連接 Google Drive。';render();return;}
       if(!authClient&&!initializeAuth()){message='Google 連線工具尚未載入，請稍後再按一次。';render();return;}
-      epoch++;authGeneration=epoch;message='';authPending=true;render();
+      epoch++;authGeneration=epoch;accountVerified=false;message='';authPending=true;render();
       try{authClient.requestAccessToken({prompt:remembered?'':'consent'})}catch(error){authPending=false;message='無法開啟 Google 連線，請稍後再試。';render();}
     }
     function disconnect(){
+      accountVerified=false;archiveControllers.forEach(value=>value.abort());
       epoch++;controller?.abort();controller=null;clearTimeout(timer);clearTimeout(retryTimer);
       accessToken=null;expiresAt=0;remembered=false;authPending=false;syncing=false;message='';folderId=null;cloudCurrent=null;persistConnection();render();
     }
     function start(){ready=true;render();loadAuth();}
     function networkChanged(){message='';render();if(isOnline())schedule(0);}
-    function externalChange(){blocked=true;epoch++;controller?.abort();syncing=false;clearTimeout(timer);clearTimeout(retryTimer);render();}
+    function externalChange(){blocked=true;epoch++;controller?.abort();archiveControllers.forEach(value=>value.abort());syncing=false;clearTimeout(timer);clearTimeout(retryTimer);render();}
     function restoreCurrent(){if(cloudCurrent)adapter.requestRestore(clone(cloudCurrent));}
-    return {observe,metadata,start,connect,disconnect,sync,networkChanged,externalChange,restoreCurrent};
+    // Archive requests share verified OAuth, but never share the backup AbortController.
+    // No token is exposed to the archive module or persisted in browser storage.
+    function archiveReady(){return !!(accountVerified&&remembered&&usableToken()&&isOnline()&&!blocked&&folderId);}
+    async function archiveRequest(url,options={},accepted=[]){
+      const target=new URL(url,API+'/');
+      if(target.origin!=='https://www.googleapis.com'||!/^\/(?:upload\/)?drive\/v3\//.test(target.pathname))throw Error('不支援的 Drive 請求');
+      if(!archiveReady())throw Error(blocked?'另一個頁面已更新資料，請重新整理。':!isOnline()?'目前離線，任務已保存在本機。':'請先重新連接 Google Drive。');
+      const generation=epoch,abort=new AbortController();archiveControllers.add(abort);
+      const timeout=setTimeout(()=>abort.abort(),60000);
+      try{
+        const response=await net(target.href,{...options,headers:{...options.headers,Authorization:`Bearer ${accessToken}`},signal:abort.signal});
+        guard(generation);
+        if(response.status===401){accessToken=null;expiresAt=0;accountVerified=false;message='Google 連線已到期，請重新連線後補傳。';render();throw Error(message);}
+        if(!response.ok&&!accepted.includes(response.status)){const error=Error(`Google Drive 上傳失敗（${response.status}）`);error.status=response.status;throw error;}
+        // Materialize the body before clearing timeout; binary images remain binary.
+        const blob=await response.blob();guard(generation);
+        return {status:response.status,ok:response.ok,headers:response.headers,blob:async()=>blob,text:()=>blob.text(),json:async()=>JSON.parse(await blob.text())};
+      }finally{clearTimeout(timeout);archiveControllers.delete(abort);}
+    }
+    const archiveTransport={ready:archiveReady,rootFolder:()=>archiveReady()?folderId:null,request:archiveRequest,
+      subscribe:listener=>{listeners.add(listener);return ()=>listeners.delete(listener)}};
+    return {observe,metadata,start,connect,disconnect,sync,networkChanged,externalChange,restoreCurrent,archiveTransport};
   }
   root.PhotoQuestDrive={create,mergeBundles,validMeta,seedMeta,fingerprint};
 })(typeof window==='undefined'?globalThis:window);
+
