@@ -1,9 +1,11 @@
 name: Deploy website to GitHub Pages
 
-# Intentionally manual-only for the initial cutover. This workflow does NOT
-# auto-deploy on push until the GitHub Pages source has been switched to Actions
-# and a successful production deployment has been verified.
+# After switching Settings -> Pages -> Source to GitHub Actions, all changes on
+# main get an automatic Pages deploy, with live URL checks. This workflow
+# supports root-layout and the muwei-website/ source folder.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -46,3 +48,12 @@ jobs:
       - name: Deploy artifact to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Check out for byte-level live verification
+        uses: actions/checkout@v4
+
+      - name: Rebuild expected deployment files
+        run: bash scripts/build-site.sh
+
+      - name: Verify published HTML, CSS, images and Photo Quest
+        run: bash scripts/check-live-site.sh
