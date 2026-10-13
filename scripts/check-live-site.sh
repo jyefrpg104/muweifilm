@@ -13,6 +13,8 @@ paths=(
   "/contact.html|dist/contact.html"
   "/site.css|dist/site.css"
   "/images/about/portrait.jpg|dist/images/about/portrait.jpg"
+  "/reifo/|dist/reifo/index.html"
+  "/reifo/about/|dist/reifo/about/index.html"
   "/photo-quest/|dist/photo-quest/index.html"
   "/photo-quest/apple-touch-icon-v1.png|dist/photo-quest/apple-touch-icon-v1.png"
 )
