@@ -377,6 +377,17 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
             linear-gradient(140deg,#a6b3a6,#d9dacf)!important
 }
 .study-1::after,.study-2::after,.study-3::before{content:none!important;display:none!important}
+/* These dense editorial cards need a shorter measure on smaller handsets. */
+@media (max-width:770px),(orientation:portrait) and (max-width:1024px){
+ .mc-solo-number{font-size:clamp(52px,8.7dvh,78px)}
+ .mc-preface{font-size:clamp(24px,6.5vw,31px);line-height:1.65}
+ .mc-warm .mc-text p{margin-bottom:9px}
+ .mc-manifesto{font-size:clamp(19px,5.05vw,25px);line-height:1.58}
+ .mc-manifesto p{margin-bottom:11px}
+ .mc-cover .mc-visual{max-height:clamp(120px,20dvh,192px)}
+ .mc-meta{flex:0 0 auto}
+ .mc-foot{flex:0 0 auto}
+}
 /* On handheld, each swipe has one exact snap destination instead of proximity scrolling. */
 @media (max-width:770px),(orientation:portrait) and (max-width:1024px){
  .mobile-book{
