@@ -509,18 +509,28 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
  #mobileBook .mobile-page:nth-child(3) .mobile-sheet.mc-condensed .mc-window + .mc-content{
    margin-top:clamp(23px,3.4dvh,35px);
  }
+ /* Keep a 44px tap target, but draw a smaller 32px circle around the same 19px arrow. */
+ .toolbar .toolbar-center{gap:13px}
  .toolbar .back-to-cover{
-   display:none;
+   display:none;position:relative;
    box-sizing:border-box;
    width:44px;height:44px;flex:0 0 44px;place-items:center;
-   padding:0;margin-left:3px;
-   border:1px solid rgba(48,49,47,.30);border-radius:50%;
+   padding:0;margin-left:6px;
+   border:0;border-radius:50%;
    color:var(--ink);background:transparent;cursor:pointer;
    -webkit-tap-highlight-color:transparent;
  }
+ .toolbar .back-to-cover::before{
+   content:"";position:absolute;inset:6px;
+   border:1px solid rgba(48,49,47,.30);border-radius:50%;
+   pointer-events:none;
+ }
+ .toolbar .back-to-cover svg{position:relative;z-index:1}
  .toolbar .back-to-cover:not([hidden]){display:grid}
  .toolbar .back-to-cover[hidden]{display:none!important}
  .toolbar .back-to-cover:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+ /* Disable mandatory snap only during the intentional eased return journey. */
+ .mobile-book.is-returning{scroll-snap-type:none!important;scroll-behavior:auto!important}
 }
 @media (max-width:770px) and (max-height:730px){
  #mobileBook .mobile-page:nth-child(3) .mc-window + .mc-content{
@@ -852,12 +862,42 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
    update(i);
  }
  prev.onclick=()=>go(active-1);next.onclick=()=>go(active+1);
+ // Return animation: ease-in-out from any card, with snapping suspended until we reach the cover.
+ let returnFrame=0;
+ mobilePages[0].setAttribute('tabindex','-1');
+ const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+ function stopReturn(){
+   if(returnFrame)cancelAnimationFrame(returnFrame);
+   returnFrame=0;
+   mobileBook.classList.remove('is-returning');
+ }
+ function finishReturn(){
+   stopReturn();
+   mobileBook.scrollTop=0;
+   update(0);
+   mobilePages[0].focus({preventScroll:true});
+ }
  backToCover.addEventListener('click',()=>{
    if(!mobile())return;
-   // Jump directly without touring every intermediate card.
-   mobileBook.scrollTo({top:0,behavior:'instant'});
-   update(0);
+   stopReturn();
+   const origin=mobileBook.scrollTop;
+   if(origin<1||reducedMotion.matches){finishReturn();return}
+   const duration=Math.min(1700,Math.max(750,560+origin*.13));
+   // Smooth acceleration, then smooth deceleration, even across twelve cards.
+   const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+   const start=performance.now();
+   mobileBook.classList.add('is-returning');
+   function frame(now){
+     const t=Math.min(1,(now-start)/duration);
+     mobileBook.scrollTop=origin*(1-ease(t));
+     if(t<1)returnFrame=requestAnimationFrame(frame);
+     else finishReturn();
+   }
+   returnFrame=requestAnimationFrame(frame);
  });
+ // A new swipe must always override an automated return.
+ mobileBook.addEventListener('pointerdown',stopReturn,{passive:true});
+ mobileBook.addEventListener('wheel',stopReturn,{passive:true});
  document.addEventListener('keydown',e=>{
    if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
    if(['ArrowRight','ArrowDown','PageDown'].includes(e.key)){e.preventDefault();go(active+1)}
@@ -882,7 +922,7 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
    e.preventDefault();wheelLock=true;go(active+(e.deltaY>0?1:-1));setTimeout(()=>wheelLock=false,470);
  },{passive:false});
  const mq=window.matchMedia('(max-width:770px), (orientation:portrait) and (max-width:1024px)');
- const sync=()=>{active=0;book.scrollTo({left:0,behavior:'instant'});mobileBook.scrollTo({top:0,behavior:'instant'});update(0);requestAnimationFrame(fitMobileCards)};
+ const sync=()=>{stopReturn();active=0;book.scrollTo({left:0,behavior:'instant'});mobileBook.scrollTo({top:0,behavior:'instant'});update(0);requestAnimationFrame(fitMobileCards)};
  if(mq.addEventListener)mq.addEventListener('change',sync);else mq.addListener(sync);
  let resizeFrame=0;
  window.addEventListener('resize',()=>{
