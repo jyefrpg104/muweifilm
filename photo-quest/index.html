@@ -208,6 +208,8 @@
     .flip-button {width:100%; appearance:none; border:0; text-align:left; padding:0; background:transparent; display:block; perspective:900px; aspect-ratio:74 / 105; cursor:pointer; border-radius:10px}
     .flip-inner {position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .57s var(--motion-ease)}
     .flip-button.flipped .flip-inner {transform:rotateY(180deg)}
+    .quest-grid .flip-button {touch-action:pan-y; user-select:none; -webkit-user-select:none}
+    .quest-grid .flip-button.is-dragging {cursor:grabbing}
     .card-face {position:absolute; inset:0; border-radius:10px; backface-visibility:hidden; -webkit-backface-visibility:hidden; box-shadow:0 4px 13px rgba(36,44,34,.055); border:1px solid #E2E0D6; display:flex; flex-direction:column; padding:clamp(12px,1.5vw,19px); background:var(--paper); overflow:hidden}
     .card-face.front:before {content:""; height:3px; width:30px; border-radius:3px; background:var(--card-accent); position:absolute; top:0; left:clamp(12px,1.5vw,19px)}
     .card-topline {display:flex; justify-content:space-between; align-items:start; gap:4px; color:#696E63; font-size:clamp(8px,.78vw,10px); letter-spacing:.08em; line-height:1.45; font-weight:750; padding-top:8px}
@@ -1485,9 +1487,105 @@
       if(key==='camera' && smartPairingActive()){quest.frame=frameForCamera(next);flipStates.frame=false;}
       return true;
     }
+    // Match the phone's directional flip: left/right clicks determine rotation
+    // direction, and horizontal pointer drags continuously control the angle.
+    const desktopAngles=new WeakMap(),desktopMotions=new WeakMap();
+    let desktopPointer=null,desktopSuppressClick=null;
+    function desktopAngle(card,key){
+      const motion=desktopMotions.get(card);
+      if(motion){
+        const progress=motion.animation.effect?.getComputedTiming().progress;
+        if(typeof progress==='number')return motion.from+(motion.to-motion.from)*progress;
+      }
+      return desktopAngles.get(card)??(flipStates[key]?180:0);
+    }
+    function writeDesktopAngle(card,angle){
+      const inner=card.querySelector('.flip-inner');
+      if(!inner)return;
+      inner.style.transition='none';
+      inner.style.transform=`rotateY(${angle}deg)`;
+      desktopAngles.set(card,angle);
+    }
+    function settleDesktopFlip(card,key,to,from=desktopAngle(card,key)){
+      const previous=desktopMotions.get(card);
+      if(previous){desktopMotions.delete(card);previous.animation.cancel();}
+      const back=Math.cos(to*Math.PI/180)<0;
+      flipStates[key]=back;
+      card.classList.toggle('flipped',back);
+      card.setAttribute('aria-pressed',String(back));
+      writeDesktopAngle(card,from);
+      const inner=card.querySelector('.flip-inner');
+      if(!inner?.animate||reducedMotion.matches||Math.abs(to-from)<.1){
+        writeDesktopAngle(card,to);return;
+      }
+      const animation=inner.animate([{transform:`rotateY(${from}deg)`},{transform:`rotateY(${to}deg)`}],{
+        duration:Math.max(140,400*Math.min(1,Math.abs(to-from)/180)),
+        easing:'cubic-bezier(.4,0,.2,1)',fill:'both'
+      });
+      const motion={animation,from,to};desktopMotions.set(card,motion);
+      animation.finished.then(()=>{
+        if(desktopMotions.get(card)!==motion)return;
+        desktopMotions.delete(card);writeDesktopAngle(card,to);animation.cancel();
+      }).catch(()=>{});
+    }
+    el('questGrid').addEventListener('pointerdown',e=>{
+      const card=e.target.closest('[data-flip]'),key=card?.dataset.flip;
+      if(mobileLayout.matches||desktopPointer||drawMotion||!e.isPrimary||e.button!==0||!key||covered[key])return;
+      desktopSuppressClick=null;
+      const angle=desktopAngle(card,key),running=desktopMotions.get(card);
+      if(running){desktopMotions.delete(card);running.animation.cancel();}
+      writeDesktopAngle(card,angle);
+      const face=flipStates[key]?180:0;
+      desktopPointer={id:e.pointerId,card,key,x:e.clientX,y:e.clientY,
+        width:card.getBoundingClientRect().width||200,angle,
+        anchor:face+360*Math.round((angle-face)/360),axis:null,dx:0,
+        samples:[{x:e.clientX,time:e.timeStamp??Date.now()}]};
+      card.setPointerCapture?.(e.pointerId);
+    });
+    el('questGrid').addEventListener('pointermove',e=>{
+      const p=desktopPointer;if(!p||e.pointerId!==p.id)return;
+      const dx=e.clientX-p.x,dy=e.clientY-p.y;
+      if(!p.axis&&Math.max(Math.abs(dx),Math.abs(dy))>=8)
+        p.axis=Math.abs(dx)>Math.abs(dy)*1.2?'x':'y';
+      const time=e.timeStamp??Date.now();p.samples.push({x:e.clientX,time});
+      while(p.samples.length>2&&time-p.samples[0].time>100)p.samples.shift();
+      p.dx=dx;
+      if(p.axis!=='x')return;
+      e.preventDefault?.();p.card.classList.add('is-dragging');
+      writeDesktopAngle(p.card,p.angle+Math.max(-180,Math.min(180,dx/p.width*180)));
+    });
+    function endDesktopPointer(e,cancelled=false){
+      const p=desktopPointer;if(!p||e.pointerId!==p.id)return;
+      desktopPointer=null;p.card.classList.remove('is-dragging');
+      if(p.card.hasPointerCapture?.(p.id))p.card.releasePointerCapture(p.id);
+      if(!p.axis){
+        if(cancelled)settleDesktopFlip(p.card,p.key,p.anchor);
+        return;
+      }
+      desktopSuppressClick={card:p.card,until:Date.now()+500};
+      if(p.axis!=='x'){settleDesktopFlip(p.card,p.key,p.anchor);return;}
+      const first=p.samples[0],last=p.samples[p.samples.length-1];
+      const velocity=(last.x-first.x)/Math.max(1,last.time-first.time);
+      const flick=Math.abs(p.dx)>=16&&Math.abs(velocity)>=.55&&Math.sign(velocity)===Math.sign(p.dx);
+      const reversing=Math.abs(velocity)>=.55&&Math.sign(velocity)!==Math.sign(p.dx);
+      const commit=!cancelled&&((Math.abs(p.dx)>=p.width*.3&&!reversing)||flick);
+      settleDesktopFlip(p.card,p.key,p.anchor+(commit?Math.sign(p.dx)*180:0));
+    }
+    el('questGrid').addEventListener('pointerup',e=>endDesktopPointer(e));
+    el('questGrid').addEventListener('pointercancel',e=>endDesktopPointer(e,true));
+    el('questGrid').addEventListener('lostpointercapture',e=>endDesktopPointer(e,true));
     el('questGrid').addEventListener('click',e=>{
       const flip=e.target.closest('[data-flip]');const redraw=e.target.closest('[data-redraw]');const lock=e.target.closest('[data-lock]');const cover=e.target.closest('[data-cover]');
-      if(flip){if(mobileLayout.matches)openQuestDetail(flip.dataset.flip);else if(!covered[flip.dataset.flip]){flipStates[flip.dataset.flip]=!flipStates[flip.dataset.flip];renderQuest()}}
+      if(flip){
+        if(mobileLayout.matches)openQuestDetail(flip.dataset.flip);
+        else if(!covered[flip.dataset.flip]){
+          if(desktopSuppressClick?.card===flip&&e.detail!==0&&Date.now()<desktopSuppressClick.until){desktopSuppressClick=null;return;}
+          const rect=flip.getBoundingClientRect();
+          const direction=e.detail!==0&&e.clientX<rect.left+rect.width/2?-1:1;
+          const from=desktopAngle(flip,flip.dataset.flip);
+          settleDesktopFlip(flip,flip.dataset.flip,from+direction*180,from);
+        }
+      }
       if(redraw)redrawQuestCard(redraw.dataset.redraw);
       if(lock)toggleLock(lock.dataset.lock);
       if(cover)toggleCover(cover.dataset.cover);
