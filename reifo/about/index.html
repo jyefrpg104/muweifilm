@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F4F0E8">
+<meta name="description" content="reifo. — To see what was always there. 一本關於觀看、察覺與重新發現的獨立創作誌。">
+<title>About reifo. — The Art of Noticing</title>
+<link rel="canonical" href="https://www.muweifilm.com/reifo/about/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@400;500;600&family=Noto+Serif+JP:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/chiron-hei-hk-webfont@2.6.9/css/vf.css" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F0E8;--ink:#30312F;--sage:#A6AA96;--brown:#B5A18F;--fog:#D8D9D4;
+  --edge:rgba(48,49,47,.2);--line-light:rgba(244,240,232,.32);
+  --en:"Helvetica Neue","Avenir Next","Inter",Arial,sans-serif;
+  --eng-book:"Cormorant Garamond","EB Garamond",Georgia,serif;
+  --cn-book:"GenWanMin TW","GenWanMin TC","源雲明體","Noto Serif TC","Source Han Serif TC","Songti TC","AR PL UMing TW","AR PL Mingti2L Big5",serif;
+  --cn-text:"Chiron Hei HK WS","Chiron Hei HK","Noto Sans TC","PingFang TC",sans-serif;
+  --jp:"Noto Serif JP","Hiragino Mincho ProN",serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink)}
+body{font-family:var(--cn-text);-webkit-font-smoothing:antialiased;font-weight:310}
+button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-offset:5px}
+.book{height:100dvh;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;scroll-behavior:smooth;overscroll-behavior-x:contain}
+.book::-webkit-scrollbar{display:none}
+.spread{flex:0 0 100vw;height:100dvh;min-height:630px;scroll-snap-align:start;position:relative;overflow:hidden;padding:clamp(31px,4.4vw,72px) clamp(34px,6.1vw,105px) 102px;display:flex;flex-direction:column;isolation:isolate}
+.spread:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:10;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.32' filter='url(%23noise)'/%3E%3C/svg%3E")}
+.paper-fold{position:absolute;left:50%;top:0;bottom:0;z-index:1;width:2px;background:linear-gradient(90deg,transparent,rgba(85,78,67,.03),transparent);pointer-events:none}
+.kicker{font-family:var(--en);font-size:10px;font-weight:500;letter-spacing:.19em;text-transform:uppercase}
+.page-top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-shrink:0;position:relative;z-index:2;line-height:1.3}
+.page-top .top-right{opacity:.53;font-family:var(--eng-book);font-size:17px;font-style:italic;letter-spacing:.03em}
+.page-bottom{position:absolute;bottom:101px;left:clamp(34px,6.1vw,105px);right:clamp(34px,6.1vw,105px);height:1px;background:currentColor;opacity:.14;z-index:2}
+.page-no{position:absolute;bottom:122px;right:clamp(34px,6.1vw,105px);font-family:var(--eng-book);font-size:17px;line-height:1;font-style:italic;opacity:.48;z-index:4}
+.layout{flex:1;min-height:0;position:relative;z-index:2}
+.en{font-family:var(--en)}
+.book-serif{font-family:var(--eng-book);font-style:italic;font-weight:400}
+.cn-serif{font-family:var(--cn-book);font-weight:400;line-height:1.85}
+.cn-text{font-family:var(--cn-text);font-weight:310;line-height:2.12;letter-spacing:.07em}
+.jp{font-family:var(--jp);letter-spacing:.23em}
+.body-note{font-size:clamp(12px,1.06vw,15px);line-height:2.12;letter-spacing:.07em;max-width:510px}
+.small-note{font-family:var(--en);font-size:10px;letter-spacing:.17em;text-transform:uppercase;line-height:1.65;opacity:.58}
+.book-hr{width:100%;height:1px;background:currentColor;opacity:.23}
+/* 01 COVER — an independent art book, not a corporate deck */
+.cover{background:var(--paper)}
+.cover-layout{display:grid;grid-template-columns:47% 53%;gap:0;height:100%;padding-top:clamp(17px,4vh,45px)}
+.cover-col{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding-right:5vw;min-width:0}
+.cover-edition{font-size:11px;letter-spacing:.19em;opacity:.61}
+.cover-logo{font-family:var(--en);font-weight:300;font-size:clamp(91px,14.7vw,244px);letter-spacing:-.107em;margin:0 0 8px -.075em;line-height:.84}
+.cover-namejp{font-size:clamp(14px,1.2vw,18px);margin-left:.3em;letter-spacing:.42em}
+.cover-intro{margin-top:8vh}
+.cover-intro h2{font-family:var(--eng-book);font-weight:300;font-style:italic;letter-spacing:-.035em;line-height:1.04;font-size:clamp(38px,4.6vw,75px);margin:0 0 22px}
+.cover-intro p{font-size:clamp(14px,1.3vw,20px);letter-spacing:.18em;margin:0;font-weight:400}
+.cover-signature{margin-top:clamp(21px,3.5vh,50px);display:flex;gap:14px;align-items:center;font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.55}
+.cover-signature:before{content:"";width:36px;height:1px;background:currentColor}
+.photo{position:relative;overflow:hidden;background:#c1c2b7;isolation:isolate}
+.cover-photo{height:100%;min-height:420px;box-shadow:0 8px 35px rgba(70,60,50,.07)}
+.cover-photo svg{height:100%;width:100%;display:block;filter:grayscale(.18) contrast(.88) saturate(.68)}
+.photo:after{content:"";pointer-events:none;position:absolute;inset:0;background:linear-gradient(160deg,rgba(244,240,232,.08),transparent 35%,rgba(52,49,39,.12));mix-blend-mode:multiply}
+.photo-caption{position:absolute;z-index:2;bottom:18px;left:22px;font-family:var(--en);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#f9f4e8;text-shadow:0 1px 4px #3337}
+.photo-corner{position:absolute;right:19px;top:19px;font:14px var(--en);color:#faf7ef;opacity:.65;z-index:3}
+/* 02 PREFACE */
+.preface{background:#eeeae1}
+.preface-layout{display:grid;grid-template-columns:.93fr 1.07fr;gap:10vw;height:100%;align-items:center}
+.preface-index{font-family:var(--eng-book);font-size:clamp(90px,14vw,210px);font-style:italic;font-weight:300;line-height:.76;color:#c2b8a9;margin-bottom:40px}
+.preface-lead{font-size:clamp(26px,2.72vw,44px);letter-spacing:.13em;line-height:1.88;margin:0;font-family:var(--cn-book)}
+.preface-aside{align-self:center;max-width:480px;padding-top:5vh}
+.preface-aside .book-serif{font-size:clamp(27px,3.3vw,49px);line-height:1.1;display:block;margin-bottom:42px}
+.preface-aside p{font-size:clamp(13px,1.15vw,17px);line-height:2.37;letter-spacing:.085em;margin:0 0 21px}
+.preface-aside .author{margin-top:38px;font-family:var(--eng-book);font-style:italic;font-size:24px;letter-spacing:.03em}
+/* 03 PHILOSOPHY */
+.philosophy{background:var(--fog)}
+.philosophy-layout{display:grid;grid-template-columns:52% 1fr;gap:6vw;align-items:center;height:100%}
+.window-scene{height:min(66vh,590px);min-height:350px;position:relative;overflow:hidden;background:linear-gradient(112deg,#e5e5dc 0 20%,#bcc1b4 21% 44%,#ebe9df 45% 47%,#c5c9bd 48% 100%);filter:saturate(.73)}
+.window-scene:before{content:"";position:absolute;top:-10%;left:42%;width:31%;height:120%;background:linear-gradient(89deg,rgba(50,62,51,.18),transparent);transform:skewX(-18deg);filter:blur(1px)}
+.window-scene:after{content:"";position:absolute;left:9%;bottom:-4%;height:18%;width:100%;background:linear-gradient(0deg,#90998d,#c9cabe);transform:rotate(-4deg);box-shadow:0 -17px 40px #8d978644}
+.scene-sun{position:absolute;top:18%;left:58%;width:19%;aspect-ratio:1;border-radius:50%;background:#f2efe1;filter:blur(15px);opacity:.6}
+.scene-rectangle{position:absolute;left:24%;top:-6%;height:115%;width:2.2%;background:#5f675e3b;box-shadow:4px 0 10px #53645227}
+.scene-caption{position:absolute;left:20px;bottom:18px;color:#373e35;letter-spacing:.15em;font:10px var(--en);z-index:5}
+.philo-text{padding-left:1vw}
+.philo-text .book-serif{font-size:clamp(28px,3.6vw,58px);display:block;margin-bottom:2.5vh;letter-spacing:-.03em;line-height:1.08}
+.philo-text blockquote{font-size:clamp(23px,2.35vw,36px);letter-spacing:.095em;margin:0 0 30px;line-height:1.9}
+.philo-text p{font-size:clamp(13px,1.08vw,16px);line-height:2.25;max-width:460px;letter-spacing:.07em}
+/* 04 NAME */
+.naming{background:var(--paper)}
+.naming-layout{display:flex;flex-direction:column;justify-content:center;height:100%}
+.naming-head{display:flex;justify-content:space-between;gap:5vw;align-items:end;margin-bottom:42px}
+.naming-logo{font-family:var(--en);font-weight:300;font-size:clamp(112px,19vw,285px);letter-spacing:-.1em;line-height:.86;margin:0 0 0 -.075em}
+.naming-head p{max-width:345px;font-size:clamp(13px,1vw,16px);margin:0 0 8px;line-height:2.25;letter-spacing:.075em}
+.name-study{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--edge);border-bottom:1px solid var(--edge)}
+.name-part{padding:25px 30px 29px 0;display:grid;grid-template-columns:.38fr 1fr;align-items:start;gap:1.8vw}
+.name-part+.name-part{border-left:1px solid var(--edge);padding-left:2.8vw}
+.name-part .letters{font-family:var(--eng-book);font-size:clamp(54px,7vw,115px);font-style:italic;font-weight:300;line-height:.86;letter-spacing:-.06em}
+.name-part .meaning{font-family:var(--eng-book);font-size:clamp(25px,2.1vw,37px);font-style:italic;display:block;margin-bottom:9px;line-height:1.1}
+.name-part .desc{font-size:clamp(12px,1vw,15px);line-height:2;letter-spacing:.07em}
+.naming-foot{font-size:11px;opacity:.54;line-height:1.9;margin-top:24px;letter-spacing:.06em}
+/* 05 METHOD */
+.method{background:#e8e7df}
+.method-layout{display:flex;flex-direction:column;justify-content:center;height:100%}
+.method-heading{display:flex;align-items:end;justify-content:space-between;gap:4vw;margin:1.5vh 0 30px}
+.method-heading h2{margin:0;font-family:var(--eng-book);font-size:clamp(55px,7.5vw,118px);font-style:italic;font-weight:300;line-height:.81;letter-spacing:-.05em}
+.method-heading p{margin:0;max-width:300px;font-size:clamp(12px,1vw,15px);line-height:2.1}
+.method-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2.7vw,47px);border-top:1px solid var(--edge);padding-top:25px}
+.method-card .study{height:clamp(125px,23vh,215px);position:relative;overflow:hidden;margin-bottom:24px;background:#c0c5b9}
+.study-1{background:linear-gradient(142deg,#d5d4cb 0 33%,#ece7d8 33% 59%,#bbb9aa 60% 100%)!important}
+.study-1:after{content:"";position:absolute;left:42%;top:0;width:1px;height:100%;background:#585d565e;box-shadow:-5px 0 15px #343b3422}
+.study-2{background:radial-gradient(ellipse at 70% 37%,#eeebe2,#c4cbbd 50%,#8a988e)!important}
+.study-2:after{content:"";position:absolute;left:-10%;bottom:20%;width:125%;height:1px;background:#fff9;transform:rotate(-11deg)}
+.study-3{background:linear-gradient(80deg,#a7aea2 0 42%,#dfded3 43% 47%,#9da69b 48% 56%,#dad9ce 57%)!important}
+.study-3:before{content:"";position:absolute;inset:20%;border:1px solid #ece7db91}
+.method-card .study-num{position:absolute;bottom:11px;left:13px;z-index:3;font:10px var(--en);letter-spacing:.17em}
+.method-card h3{font-family:var(--eng-book);font-size:clamp(36px,4.1vw,67px);font-style:italic;font-weight:300;margin:0 0 6px;line-height:.98;letter-spacing:-.04em}
+.method-card h4{font:400 clamp(16px,1.4vw,23px) var(--cn-book);letter-spacing:.17em;margin:8px 0 9px}
+.method-card p{font-size:clamp(12px,1vw,15px);line-height:2.05;letter-spacing:.075em;margin:0;max-width:350px}
+/* 06 QUIET PAGE */
+.manifesto{background:#777c72;color:#f6f2e9}
+.manifesto-layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:10vw;height:100%;align-items:center}
+.manifesto-left .book-serif{font-size:clamp(46px,6.2vw,96px);line-height:.92;letter-spacing:-.04em;display:block;margin-bottom:clamp(35px,8vh,95px)}
+.manifesto-left .small-note{color:#e5e6da}
+.manifesto-essay{border-left:1px solid #ebe9df58;padding-left:5.2vw}
+.manifesto-essay p{font-family:var(--cn-book);font-size:clamp(20px,2.17vw,35px);letter-spacing:.115em;line-height:2.06;margin:0 0 14px}
+.manifesto-essay .last{color:#e4d7c7}
+/* 07 PALETTE */
+.colors{background:var(--paper)}
+.colors-layout{display:flex;flex-direction:column;justify-content:center;height:100%}
+.colors-top{display:flex;align-items:end;justify-content:space-between;gap:5vw;margin-bottom:5vh}
+.colors-top h2{font-family:var(--eng-book);font-size:clamp(72px,10vw,160px);line-height:.8;letter-spacing:-.055em;font-weight:300;font-style:italic;margin:0}
+.colors-top .cn-text{margin:0;max-width:350px;font-size:clamp(13px,1vw,16px)}
+.color-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;height:clamp(250px,37vh,360px)}
+.color{border:1px solid #30312f18;display:flex;flex-direction:column;justify-content:space-between;text-align:left;cursor:pointer;padding:clamp(14px,1.7vw,24px);transition:transform .2s ease,box-shadow .2s;position:relative;color:var(--ink)}
+.color:hover{transform:translateY(-5px);box-shadow:0 15px 24px #50453713}
+.color-no{font-family:var(--eng-book);font-style:italic;font-size:19px;opacity:.61}
+.color h3{font-family:var(--eng-book);font-size:clamp(25px,2.35vw,40px);font-style:italic;font-weight:400;margin:0 0 9px;line-height:1.03}
+.color-code{font-family:var(--en);font-size:11px;letter-spacing:.14em;opacity:.78}
+.color-tip{font-size:11px;letter-spacing:.1em;margin:22px 0 0;opacity:.62}
+/* 08 TYPOGRAPHY */
+.typography{background:var(--fog)}
+.type-layout{height:100%;display:grid;grid-template-columns:1.07fr .93fr;gap:7vw;align-items:center}
+.type-quote{font-family:var(--cn-book);font-size:clamp(38px,4.6vw,74px);line-height:1.79;letter-spacing:.14em;font-weight:400;margin:0 0 27px}
+.type-quote span{position:relative;white-space:nowrap}
+.type-quote span:after{content:"";position:absolute;bottom:-6px;left:0;right:0;height:1px;background:currentColor;opacity:.4}
+.type-left-note{font-family:var(--eng-book);font-style:italic;font-size:clamp(21px,2vw,32px)}
+.type-right{padding-left:5vw;border-left:1px solid var(--edge)}
+.type-right h2{font-family:var(--eng-book);font-size:clamp(44px,5.4vw,86px);line-height:.84;font-style:italic;font-weight:300;letter-spacing:-.055em;margin:0 0 48px}
+.type-sample{padding:14px 0 17px;border-top:1px solid var(--edge);display:grid;grid-template-columns:100px 1fr;gap:18px;align-items:baseline}
+.type-sample span:first-child{font-family:var(--en);font-size:10px;letter-spacing:.13em;text-transform:uppercase;opacity:.56}
+.type-sample .sample-serif{font-family:var(--eng-book);font-style:italic;font-size:28px}
+.type-sample .sample-cn{font-family:var(--cn-book);font-size:20px;letter-spacing:.07em}
+.type-sample .sample-sans{font-family:var(--cn-text);font-size:15px;letter-spacing:.09em}
+.type-foot{margin-top:25px;font-size:11px;line-height:1.8;opacity:.55}
+/* 09 UNIVERSE */
+.universe{background:var(--brown)}
+.universe-layout{display:grid;grid-template-columns:1fr 1fr;gap:10vw;height:100%;align-items:center}
+.universe-left h2{font-family:var(--eng-book);font-size:clamp(60px,8vw,128px);font-style:italic;font-weight:300;letter-spacing:-.045em;line-height:.86;margin:0 0 40px}
+.universe-left p{max-width:390px;font-size:clamp(13px,1.14vw,17px);line-height:2.35;margin:0}
+.universe-right{border-top:1px solid #3e3d396b}
+.work-item{display:grid;grid-template-columns:36px 1fr auto;gap:13px;align-items:baseline;padding:clamp(12px,2.4vh,22px) 0;border-bottom:1px solid #3e3d396b}
+.work-item .num{font-family:var(--eng-book);font-style:italic;font-size:20px;opacity:.65}
+.work-item .title{font-family:var(--eng-book);font-size:clamp(27px,3vw,49px);font-style:italic;line-height:.95;letter-spacing:-.03em}
+.work-item .meaning{font-size:clamp(11px,.9vw,13px);letter-spacing:.1em}
+.universe-foot{font-size:11px;letter-spacing:.13em;margin-top:25px}
+/* 10 ENDING */
+.end{background:var(--paper)}
+.end-layout{display:grid;grid-template-columns:.96fr 1.04fr;gap:7vw;height:100%;align-items:center}
+.end-left{display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.end-left .tiny-rule{height:1px;width:35px;background:currentColor;margin-bottom:48px;opacity:.55}
+.end-left h2{font-family:var(--eng-book);font-size:clamp(43px,5.35vw,91px);line-height:.93;letter-spacing:-.045em;font-style:italic;font-weight:300;margin:0 0 38px}
+.end-left .cn-serif{font-size:clamp(22px,2vw,33px);letter-spacing:.12em;margin:0 0 48px}
+.end-left .signature{font:300 clamp(75px,10.5vw,160px)/.9 var(--en);letter-spacing:-.11em;margin-left:-.067em}
+.end-left .jp{margin-top:15px;font-size:13px}
+.end-right{height:min(64vh,570px);display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;border-left:1px solid var(--edge);padding-left:6vw}
+.end-quote{font-family:var(--cn-book);font-size:clamp(19px,1.92vw,32px);line-height:2.15;letter-spacing:.1em;margin:55px 0 0}
+.end-aside{margin-bottom:25px;font-family:var(--eng-book);font-style:italic;font-size:clamp(23px,2.2vw,37px)}
+/* Minimal navigational framing */
+.toolbar{position:fixed;left:0;bottom:0;right:0;z-index:50;height:69px;background:rgba(244,240,232,.96);backdrop-filter:blur(16px);border-top:1px solid #30312f24;padding:0 clamp(24px,4.3vw,68px);display:flex;align-items:center;gap:24px;color:var(--ink)}
+.toolbar-title{font:300 23px var(--en);letter-spacing:-.08em;white-space:nowrap}
+.toolbar-edition{font:10px var(--en);letter-spacing:.16em;text-transform:uppercase;opacity:.56;padding-left:17px;white-space:nowrap}
+.toolbar-center{margin-left:auto;display:flex;align-items:center;gap:20px}
+.toolbar-current{font-family:var(--eng-book);font-style:italic;font-size:17px;white-space:nowrap;opacity:.65}
+.toolbar-progress{display:flex;align-items:center;gap:14px}
+.toolbar-count{font:12px var(--en);letter-spacing:.08em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.toolbar-track{height:1px;width:clamp(65px,14vw,190px);background:#30312f42;position:relative}
+.toolbar-fill{height:2px;position:absolute;top:-.5px;left:0;width:10%;background:var(--ink);transition:width .3s}
+.toolbar-controls{display:flex;gap:7px;margin-left:8px}
+.arrow{height:38px;width:46px;display:grid;place-items:center;border:1px solid #30312f51;background:transparent;font:24px var(--eng-book);cursor:pointer;transition:background .16s,color .16s}
+.arrow:hover:not(:disabled){background:var(--ink);color:var(--paper)}
+.arrow:disabled{opacity:.28;cursor:default}
+.rail{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:40;display:flex;flex-direction:column;gap:13px}
+.rail button{width:18px;height:10px;border:0;background:transparent;display:flex;align-items:center;justify-content:flex-end;cursor:pointer;padding:0}
+.rail button:after{content:"";width:6px;height:1px;background:var(--ink);opacity:.5;transition:width .2s,opacity .2s}
+.rail button.active:after{width:14px;opacity:.95}
+.toast{position:fixed;bottom:84px;left:50%;transform:translate(-50%,6px);color:var(--paper);background:var(--ink);padding:12px 20px;font:11px var(--en);letter-spacing:.14em;z-index:80;pointer-events:none;opacity:0;transition:.2s}
+.toast.active{opacity:1;transform:translate(-50%,0)}
+@media(max-width:1120px) and (min-width:771px){
+ .spread{min-height:590px;padding:30px 47px 94px}.page-bottom{left:47px;right:47px;bottom:92px}.page-no{right:47px;bottom:108px}
+ .cover-logo{font-size:clamp(95px,13vw,170px)}.cover-intro h2{font-size:clamp(39px,4.1vw,59px)}
+ .preface-index{font-size:110px;margin-bottom:28px}.preface-lead{font-size:29px}.preface-layout{gap:6vw}
+ .philo-text blockquote{font-size:24px}.name-part{grid-template-columns:.32fr 1fr;gap:15px}.name-part .letters{font-size:65px}
+ .name-part .desc{font-size:12px}.method-card .study{height:140px}.method-heading h2{font-size:74px}
+ .manifesto-essay p{font-size:23px}.type-quote{font-size:43px}.type-right{padding-left:25px}
+}
+@media (max-width:770px),(orientation:portrait) and (max-width:1024px){
+ .book{height:auto;display:block;overflow:visible;scroll-snap-type:none}
+ .spread{height:auto;min-height:0;padding:28px 24px 86px;display:block}
+ .paper-fold,.page-bottom,.page-no{display:none}
+ .page-top{margin-bottom:35px}.page-top .top-right{font-size:15px}
+ .cover{min-height:100svh}.cover-layout{display:flex;flex-direction:column;gap:38px;padding-top:7px}
+ .cover-col{display:block;padding-right:0}.cover-logo{font-size:clamp(93px,24vw,160px);margin-top:50px}.cover-namejp{font-size:13px}
+ .cover-intro{margin:55px 0 0}.cover-intro h2{font-size:clamp(39px,10vw,61px)}.cover-intro p{font-size:14px}.cover-signature{margin:33px 0 0}
+ .cover-photo{height:64vh;min-height:380px}
+ .preface-layout,.philosophy-layout,.universe-layout,.type-layout,.manifesto-layout,.end-layout{display:block}
+ .preface-index{font-size:102px;margin:45px 0 35px}.preface-lead{font-size:clamp(28px,7vw,42px)}.preface-aside{padding-top:56px}.preface-aside .book-serif{font-size:38px;margin-bottom:28px}.preface-aside p{font-size:15px}.preface-aside .author{font-size:24px}
+ .philosophy-layout{padding-top:8px}.window-scene{height:95vw;max-height:480px;min-height:330px;margin-bottom:48px}.philo-text .book-serif{font-size:36px}.philo-text blockquote{font-size:26px}.philo-text p{font-size:14px}
+ .naming-head{display:block;margin-top:65px}.naming-logo{font-size:clamp(105px,28vw,200px)}.naming-head p{margin:42px 0 24px;font-size:14px}
+ .name-study{display:block}.name-part{grid-template-columns:90px 1fr;gap:13px;border-bottom:1px solid var(--edge);padding:22px 0!important;border-left:0!important}.name-part:last-child{border-bottom:0}.name-part .letters{font-size:74px}.name-part .meaning{font-size:30px}.name-part .desc{font-size:13px}.naming-foot{margin-bottom:20px}
+ .method-heading{display:block;margin:50px 0 24px}.method-heading h2{font-size:clamp(65px,17vw,115px)}.method-heading p{margin-top:28px;font-size:14px}.method-cards{display:block}.method-card{margin-bottom:35px}.method-card .study{height:58vw;max-height:240px}.method-card h3{font-size:55px}.method-card h4{font-size:22px}.method-card p{font-size:14px}
+ .manifesto-left{padding-top:55px}.manifesto-left .book-serif{font-size:67px;margin-bottom:36px}.manifesto-essay{margin-top:45px;padding:5px 0 0 20px}.manifesto-essay p{font-size:clamp(23px,6vw,33px)}
+ .colors-top{display:block;margin:65px 0 30px}.colors-top h2{font-size:90px;margin-bottom:37px}.colors-top .cn-text{font-size:14px}.color-grid{grid-template-columns:repeat(2,1fr);gap:9px;height:auto}.color{height:175px;padding:18px}.color:first-child{grid-column:span 2;height:155px}.color h3{font-size:32px}.color-tip{line-height:1.8}
+ .type-quote{font-size:clamp(36px,10.7vw,62px);margin:70px 0 28px}.type-left-note{font-size:26px}.type-right{margin-top:75px;border-left:0;border-top:1px solid var(--edge);padding:40px 0 0}.type-right h2{font-size:69px;margin-bottom:30px}.type-sample{grid-template-columns:85px 1fr}.type-sample .sample-serif{font-size:28px}
+ .universe-left{padding-top:50px}.universe-left h2{font-size:clamp(65px,16vw,105px);margin-bottom:33px}.universe-left p{font-size:15px;margin-bottom:55px}.work-item .title{font-size:35px}.work-item .meaning{font-size:12px}
+ .end-left{padding-top:70px}.end-left h2{font-size:clamp(52px,12vw,74px)}.end-left .cn-serif{font-size:25px}.end-left .signature{font-size:123px}.end-right{border-left:0;border-top:1px solid var(--edge);margin-top:55px;padding:0;height:auto}.end-quote{font-size:24px;margin:40px 0 50px}.end-aside{font-size:26px;margin-bottom:35px}
+ .toolbar{height:58px;padding:0 18px;gap:10px}.toolbar-title{font-size:21px}.toolbar-edition,.toolbar-current{display:none}.toolbar-center{margin-left:auto}.toolbar-track{width:55px}.toolbar-progress{gap:8px}.toolbar-count{font-size:11px}.toolbar-controls{margin-left:0}.arrow{height:34px;width:36px;font-size:22px}
+ .rail{display:none}.toast{bottom:73px}.spread:last-child{padding-bottom:135px}
+}
+@media(max-width:370px){.spread{padding-left:19px;padding-right:19px}.cover-logo{font-size:96px}.toolbar-track{display:none}.method-heading h2{font-size:66px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition-duration:0s!important}}
+@media print{
+ @page{size:landscape;margin:0}html,body{background:white;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ .book{display:block;height:auto;overflow:visible}.spread{width:100%;height:100vh;min-height:0;break-after:page;page-break-after:always}.toolbar,.rail,.toast{display:none}
+}
+
+/* Brand-book navigation in the main reifo site. */
+.return-to-reifo{
+ position:fixed;z-index:55;left:clamp(15px,2.1vw,33px);top:clamp(12px,2.1vw,28px);
+ display:inline-flex;align-items:center;gap:9px;padding:10px 14px;
+ background:rgba(244,240,232,.85);backdrop-filter:blur(12px);border:1px solid rgba(48,49,47,.13);
+ color:#30312F;font:400 10px/1.3 "Helvetica Neue",Arial,sans-serif;letter-spacing:.14em;text-decoration:none;
+ transition:background .2s ease;
+}
+.return-to-reifo:hover{background:#F4F0E8}
+.return-to-reifo:focus-visible{outline:2px solid #30312F;outline-offset:3px}
+@media(max-width:770px){
+ .return-to-reifo{top:10px;left:12px;padding:7px 10px;letter-spacing:.07em;font-size:9px}
+}
+@media print{.return-to-reifo{display:none}}
+</style>
+</head>
+<body>
+<a class="return-to-reifo" href="../" aria-label="返回 reifo 創作首頁">← &nbsp; REIFO / INDEX</a>
+<main class="book" id="book" aria-label="reifo 獨立攝影集風格品牌展示">
+<!-- 01 Cover -->
+<section class="spread cover" data-label="Cover" id="cover" aria-label="封面">
+ <div class="page-top"><span class="kicker">reifo / a personal creative identity</span><span class="top-right">Vol. 01 &nbsp; — &nbsp; 2026</span></div>
+ <div class="layout cover-layout">
+  <div class="cover-col">
+   <div><p class="cover-edition en">Notes on seeing, noticing &amp; rediscovering.</p><h1 class="cover-logo">reifo.</h1><div class="cover-namejp jp">レイフォ</div></div>
+   <div class="cover-intro"><h2>to see what<br>was always there.</h2><p class="cn-serif">去看見那些一直都在的事物。</p><div class="cover-signature">An exercise in noticing</div></div>
+  </div>
+  <figure class="photo cover-photo" style="margin:0" role="img" aria-label="霧中遠山的抽象攝影意象"><svg viewBox="0 0 600 780" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="sky" x1="0" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#e7e4da"/><stop offset=".45" stop-color="#cfcfbe"/><stop offset="1" stop-color="#9ca89d"/></linearGradient>
+              <radialGradient id="sun"><stop offset="0" stop-color="#f4efdc" stop-opacity=".95"/><stop offset=".65" stop-color="#efe8d5" stop-opacity=".64"/><stop offset="1" stop-color="#ece7db" stop-opacity="0"/></radialGradient>
+              <linearGradient id="dune" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a8a99a"/><stop offset="1" stop-color="#7d8a80"/></linearGradient>
+              <filter id="blur"><feGaussianBlur stdDeviation="25"/></filter>
+            </defs>
+            <rect width="600" height="780" fill="url(#sky)"/>
+            <circle cx="396" cy="244" r="190" fill="url(#sun)"/>
+            <circle cx="397" cy="237" r="73" fill="#eae5d4" opacity=".73" filter="url(#blur)"/>
+            <path d="M-40 465 Q130 360 284 428 T660 402 V780 H-40Z" fill="#bcbdb0" opacity=".48"/>
+            <path d="M-30 519 C112 483 201 429 343 464 S544 481 650 442 V780 H-30Z" fill="#a2aa9e" opacity=".56"/>
+            <path d="M-30 565 Q150 480 311 518 Q468 562 650 475 V780 H-30Z" fill="url(#dune)" opacity=".8"/>
+            <path d="M-30 666 C147 578 209 595 337 633 C476 676 568 612 640 574 V780 H-30Z" fill="#707e74" opacity=".86"/>
+            <path d="M-30 728 C135 670 250 688 377 725 Q491 751 650 675 V780 H-30Z" fill="#46584e" opacity=".5"/>
+            <path d="M0 540 H600" stroke="#ecebde" opacity=".45" stroke-width="2"/>
+            <rect x="0" y="0" width="600" height="780" fill="#9a8b75" opacity=".035"/>
+          </svg><span class="photo-corner">+</span><figcaption class="photo-caption">Plate no. 01 — The ordinary</figcaption></figure>
+ </div><div class="page-bottom"></div><div class="page-no">01</div>
+</section>
+<!-- 02 The preface -->
+<section class="spread preface" data-label="Preface" id="preface" aria-label="序言">
+ <div class="page-top"><span class="kicker">01 / Preface</span><span class="top-right">An invitation to look again</span></div>
+ <div class="layout preface-layout">
+  <div><div class="preface-index">01</div><h2 class="preface-lead">我們每天都在看。<br>但我們真的<br>看見了多少？</h2></div>
+  <div class="preface-aside"><span class="book-serif">Somewhere between<br>looking and noticing.</span><div class="book-hr" style="margin-bottom:34px"></div><p class="cn-text">熟悉的街道、相同的路口，還有窗外不斷變化的光線。它們每天都在發生，卻不一定真正進入我們的視線。</p><p class="cn-text">一道午後的光、一段偶然的對話、一個不起眼的角落。世界或許從未停止給我們驚喜，只是我們偶爾忘記了留意。</p><div class="author">— reifo.</div></div>
+ </div><div class="page-bottom"></div><div class="page-no">02</div>
+</section>
+<!-- 03 philosophy -->
+<section class="spread philosophy" data-label="Perspective" id="philosophy" aria-label="品牌哲學">
+ <div class="page-top"><span class="kicker">02 / A change of perspective</span><span class="top-right">Notes on the ordinary</span></div>
+ <div class="layout philosophy-layout">
+  <figure class="window-scene" style="margin:0" role="img" aria-label="窗邊柔和日光的抽象圖像"><span class="scene-sun"></span><span class="scene-rectangle"></span><figcaption class="scene-caption">FIG. 02 &nbsp; / &nbsp; AFTERNOON LIGHT</figcaption></figure>
+  <div class="philo-text"><span class="book-serif">The world is still there.</span><blockquote class="cn-serif">世界未必改變了。<br>也許改變的，<br>是我們觀看它的方式。</blockquote><div class="book-hr" style="max-width:370px;margin:0 0 22px"></div><p class="cn-text">同一個地方，在攝影師、建築師、旅人或長久居住於此的人眼中，可能有截然不同的模樣。觀看不只是接收畫面，也是理解世界的過程。</p></div>
+ </div><div class="page-bottom"></div><div class="page-no">03</div>
+</section>
+<!-- 04 Name -->
+<section class="spread naming" data-label="The name" id="name" aria-label="品牌名稱">
+ <div class="page-top"><span class="kicker">03 / The name</span><span class="top-right">An invented word, a private meaning</span></div>
+ <div class="layout naming-layout">
+  <div class="naming-head"><h2 class="naming-logo">reifo.</h2><p class="cn-text">從 Jeffrey 的聲音輪廓出發，<br>重新拆解、排列與命名。<br>這個不存在的詞，留下一個尚待寫下的故事。</p></div>
+  <div class="name-study">
+   <div class="name-part"><div class="letters">re</div><div><span class="meaning">again.</span><div class="desc cn-text">再次、重新。<br>讓熟悉的事物，有機會被重新理解。</div></div></div>
+   <div class="name-part"><div class="letters">i</div><div><span class="meaning">eye / I.</span><div class="desc cn-text">眼睛，也是自我。<br>我們總是帶著自己的視角觀看。</div></div></div>
+   <div class="name-part"><div class="letters">fo</div><div><span class="meaning">focus.</span><div class="desc cn-text">聚焦、留意。<br>讓被忽略的細節，再次浮現。</div></div></div>
+  </div>
+  <div class="naming-foot cn-text">* RE / I / FO 是品牌自行設計的象徵性拆解，並非正式的英文或日文字源。</div>
+ </div><div class="page-bottom"></div><div class="page-no">04</div>
+</section>
+<!-- 05 Method -->
+<section class="spread method" data-label="The practice" id="practice" aria-label="創作方法">
+ <div class="page-top"><span class="kicker">04 / The practice</span><span class="top-right">Three ways to begin</span></div>
+ <div class="layout method-layout">
+  <div class="method-heading"><h2>an exercise<br>in noticing.</h2><p class="cn-text">每一次創作，都是一場觀看的練習。<br>不必急著找到答案，<br>只需要願意從新的問題開始。</p></div>
+  <div class="method-cards">
+   <article class="method-card"><div class="study study-1"><span class="study-num">STUDY / 01</span></div><h3>Notice.</h3><h4>察覺</h4><p class="cn-text">留意那些被習慣掩蓋的細節。從一句「為什麼」開始。</p></article>
+   <article class="method-card"><div class="study study-2"><span class="study-num">STUDY / 02</span></div><h3>Reframe.</h3><h4>重新觀看</h4><p class="cn-text">換一個位置、一種構圖，或另一種提問方式。</p></article>
+   <article class="method-card"><div class="study study-3"><span class="study-num">STUDY / 03</span></div><h3>Discover.</h3><h4>重新發現</h4><p class="cn-text">不一定有結論。能帶著新的眼光離開，就已是一種發現。</p></article>
+  </div>
+ </div><div class="page-bottom"></div><div class="page-no">05</div>
+</section>
+<!-- 06 manifesto -->
+<section class="spread manifesto" data-label="A few words" id="words" aria-label="品牌宣言">
+ <div class="page-top"><span class="kicker">05 / A few words</span><span class="top-right">Fragments of a manifesto</span></div>
+ <div class="layout manifesto-layout">
+  <div class="manifesto-left"><span class="book-serif">ordinary<br>moments,<br>other<br>worlds.</span><div class="small-note">Not all discoveries are far away.<br>Some have always been here.</div></div>
+  <div class="manifesto-essay"><p>我們總以為，<br>要走得更遠，<br>才能看見不一樣的風景。</p><p>但也許，<br>我們從來不缺少<br>值得發現的事物。</p><p class="last">有時候，<br>只需要換一個角度。</p></div>
+ </div><div class="page-bottom"></div><div class="page-no">06</div>
+</section>
+<!-- 07 palette -->
+<section class="spread colors" data-label="The colors" id="colors" aria-label="品牌色票">
+ <div class="page-top"><span class="kicker">06 / Color notes</span><span class="top-right">Light, texture and memory</span></div>
+ <div class="layout colors-layout">
+  <div class="colors-top"><h2>quiet<br>colors.</h2><p class="cn-text">像紙、霧、樹影，和午後的舊照片。<br>色彩不需要成為主角，只要替作品留下一點溫度。</p></div>
+  <div class="color-grid" aria-label="點擊色票複製色碼">
+   <button type="button" class="color" data-color="#F4F0E8" style="background:#F4F0E8"><span class="color-no">01</span><span><h3>Warm<br>Ivory</h3><span class="color-code">#F4F0E8</span></span></button>
+   <button type="button" class="color" data-color="#30312F" style="background:#30312F;color:#F4F0E8"><span class="color-no">02</span><span><h3>Charcoal</h3><span class="color-code">#30312F</span></span></button>
+   <button type="button" class="color" data-color="#A6AA96" style="background:#A6AA96"><span class="color-no">03</span><span><h3>Muted<br>Sage</h3><span class="color-code">#A6AA96</span></span></button>
+   <button type="button" class="color" data-color="#B5A18F" style="background:#B5A18F"><span class="color-no">04</span><span><h3>Dusty<br>Brown</h3><span class="color-code">#B5A18F</span></span></button>
+   <button type="button" class="color" data-color="#D8D9D4" style="background:#D8D9D4"><span class="color-no">05</span><span><h3>Fog<br>Grey</h3><span class="color-code">#D8D9D4</span></span></button>
+  </div><p class="color-tip cn-text">點選色票即可複製 HEX 色碼。</p>
+ </div><div class="page-bottom"></div><div class="page-no">07</div>
+</section>
+<!-- 08 typography -->
+<section class="spread typography" data-label="Type and tone" id="type" aria-label="字體與語氣">
+ <div class="page-top"><span class="kicker">07 / Type &amp; tone</span><span class="top-right">The feeling between the lines</span></div>
+ <div class="layout type-layout">
+  <div><h2 class="type-quote">去看見<br>那些<span>一直都在</span>的<br>事物。</h2><div class="type-left-note">the art of paying attention.</div></div>
+  <div class="type-right"><h2>Words,<br>with room<br>to breathe.</h2>
+   <div class="type-sample"><span>identity</span><span class="sample-serif">reifo. &nbsp; / &nbsp; レイフォ</span></div>
+   <div class="type-sample"><span>headlines</span><span class="sample-cn">日常裡的另一種可能。</span></div>
+   <div class="type-sample"><span>narrative</span><span class="sample-sans">每一次觀看，都可能成為一次新的探索。</span></div>
+   <p class="type-foot cn-text">中文字體偏向有筆觸的人文明體；內文使用清晰、溫和的黑體。英文標語搭配輕盈襯線斜體，讓整個版面更像一本可以慢慢翻閱的攝影集。</p>
+  </div>
+ </div><div class="page-bottom"></div><div class="page-no">08</div>
+</section>
+<!-- 09 Creative universe -->
+<section class="spread universe" data-label="The works" id="works" aria-label="創作宇宙">
+ <div class="page-top"><span class="kicker">08 / The works</span><span class="top-right">One curiosity, many mediums</span></div>
+ <div class="layout universe-layout">
+  <div class="universe-left"><h2>different<br>forms,<br>one way<br>of seeing.</h2><p class="cn-text">攝影、影像、文字、走訪與實驗。<br>形式可以不斷改變，<br>但對世界的好奇心不必改變。</p></div>
+  <div><div class="universe-right">
+   <div class="work-item"><span class="num">01</span><span class="title">films</span><span class="meaning">影像・紀錄</span></div>
+   <div class="work-item"><span class="num">02</span><span class="title">photographs</span><span class="meaning">攝影・日常</span></div>
+   <div class="work-item"><span class="num">03</span><span class="title">notes</span><span class="meaning">文字・觀點</span></div>
+   <div class="work-item"><span class="num">04</span><span class="title">fieldwork</span><span class="meaning">走訪・觀察</span></div>
+   <div class="work-item"><span class="num">05</span><span class="title">experiments</span><span class="meaning">實驗・互動</span></div>
+  </div><p class="universe-foot">PHOTO QUEST <span style="opacity:.64">— a project by reifo.</span></p></div>
+ </div><div class="page-bottom"></div><div class="page-no">09</div>
+</section>
+<!-- 10 Closing -->
+<section class="spread end" data-label="An invitation" id="ending" aria-label="品牌結語">
+ <div class="page-top"><span class="kicker">09 / An invitation</span><span class="top-right">End / Begin again</span></div>
+ <div class="layout end-layout">
+  <div class="end-left"><div class="tiny-rule"></div><h2>to see what<br>was always there.</h2><p class="cn-serif">去看見那些一直都在的事物。</p><div class="signature">reifo.</div><div class="jp">レイフォ</div></div>
+  <div class="end-right"><blockquote class="end-quote">不一定要讓世界變得不一樣。<br><br>只是希望我們能發現，<br>原來世界就有那麼多不一樣。</blockquote><div><div class="end-aside">stay curious about the ordinary.</div><div class="small-note">A personal creative identity / reifo.</div></div></div>
+ </div><div class="page-bottom"></div><div class="page-no">10</div>
+</section>
+</main>
+<nav class="rail" id="rail" aria-label="章節快速切換"></nav>
+<footer class="toolbar" aria-label="翻頁導覽"><div class="toolbar-title">reifo.</div><span class="toolbar-edition">The art of noticing / Vol. 01</span><div class="toolbar-center"><span class="toolbar-current" id="currentLabel">Cover</span><div class="toolbar-progress"><span class="toolbar-count" id="counter">01 / 10</span><div class="toolbar-track"><div class="toolbar-fill" id="fill"></div></div></div><div class="toolbar-controls"><button class="arrow" id="prev" aria-label="上一頁" type="button">←</button><button class="arrow" id="next" aria-label="下一頁" type="button">→</button></div></div></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(()=>{
+ const book=document.getElementById('book'), pages=Array.from(book.querySelectorAll('.spread'));
+ const count=document.getElementById('counter'),fill=document.getElementById('fill'),currentLabel=document.getElementById('currentLabel');
+ const prev=document.getElementById('prev'),next=document.getElementById('next'),rail=document.getElementById('rail');
+ const mobile=()=>window.matchMedia('(max-width:770px), (orientation:portrait) and (max-width:1024px)').matches;
+ let active=0, wheelLock=false, toastTimer;
+ pages.forEach((page,i)=>{let b=document.createElement('button');b.type='button';b.setAttribute('aria-label',`${String(i+1).padStart(2,'0')} / ${page.dataset.label}`);b.title=page.dataset.label;b.onclick=()=>go(i);rail.appendChild(b)});
+ const dots=Array.from(rail.children);
+ function update(i){active=Math.max(0,Math.min(pages.length-1,i));count.textContent=`${String(active+1).padStart(2,'0')} / ${String(pages.length).padStart(2,'0')}`;fill.style.width=((active+1)/pages.length*100)+'%';currentLabel.textContent=pages[active].dataset.label;prev.disabled=active===0;next.disabled=active===pages.length-1;dots.forEach((el,n)=>el.classList.toggle('active',n===active))}
+ function go(i){i=Math.max(0,Math.min(pages.length-1,i));if(mobile()){pages[i].scrollIntoView({behavior:'smooth',block:'start'})}else{book.scrollTo({left:pages[i].offsetLeft,behavior:'smooth'})}update(i)}
+ prev.onclick=()=>go(active-1);next.onclick=()=>go(active+1);
+ document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(['ArrowRight','PageDown'].includes(e.key)){e.preventDefault();go(active+1)}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(active-1)}else if(e.key==='Home'){e.preventDefault();go(0)}else if(e.key==='End'){e.preventDefault();go(pages.length-1)}});
+ book.addEventListener('scroll',()=>{if(mobile())return;let idx=Math.round(book.scrollLeft/Math.max(book.clientWidth,1));if(idx!==active)update(idx)},{passive:true});
+ book.addEventListener('wheel',e=>{if(mobile()||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;if(Math.abs(e.deltaY)<10||wheelLock)return;e.preventDefault();wheelLock=true;go(active+(e.deltaY>0?1:-1));setTimeout(()=>wheelLock=false,470)},{passive:false});
+ if('IntersectionObserver' in window){const observer=new IntersectionObserver(es=>{if(!mobile())return;let visible=es.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);if(visible[0])update(pages.indexOf(visible[0].target))},{threshold:[.2,.4,.6,.75]});pages.forEach(x=>observer.observe(x))}
+ window.addEventListener('resize',()=>update(active));
+ const toast=document.getElementById('toast');function feedback(t){toast.textContent=t;toast.classList.add('active');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('active'),1700)}
+ document.querySelectorAll('.color').forEach(c=>c.onclick=async()=>{try{await navigator.clipboard.writeText(c.dataset.color);feedback(c.dataset.color+' copied')}catch(_){let tmp=document.createElement('textarea');tmp.value=c.dataset.color;document.body.appendChild(tmp);tmp.select();try{document.execCommand('copy');feedback(c.dataset.color+' copied')}catch(e){feedback(c.dataset.color)}tmp.remove()}});
+ update(0);
+})();
+</script>
+<script>
+if (location.protocol === 'file:') {
+  const back = document.querySelector('.return-to-reifo');
+  if (back) back.href = '../index.html';
+}
+</script>
+</body></html>

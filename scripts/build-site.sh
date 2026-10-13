@@ -27,10 +27,13 @@ done
 # Keep Photo Quest at the original public path: /photo-quest/.
 if [[ -d photo-quest ]]; then cp -a photo-quest dist/; fi
 
-for file in index.html works.html about.html services.html contact.html site.css CNAME photo-quest/index.html; do
+# Publish reifo as an independent creative practice at /reifo/.
+if [[ -d reifo ]]; then cp -a reifo dist/; fi
+
+for file in index.html works.html about.html services.html contact.html site.css CNAME photo-quest/index.html reifo/index.html reifo/about/index.html; do
   if [[ ! -f "dist/$file" ]]; then
     printf 'Build failed: dist/%s does not exist\n' "$file" >&2
     exit 1
   fi
 done
-echo "Built dist/ from $( [[ -d muwei-website ]] && echo muwei-website/ || echo repository-root/ ) plus photo-quest/"
+echo "Built dist/ from $( [[ -d muwei-website ]] && echo muwei-website/ || echo repository-root/ ) plus photo-quest/ and reifo/"

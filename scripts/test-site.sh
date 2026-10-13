@@ -4,6 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 [[ -f dist/index.html ]] && [[ -f dist/site.css ]] && [[ -f dist/photo-quest/index.html ]]
 [[ -f dist/CNAME ]] && [[ -f dist/.nojekyll ]]
+[[ -f dist/reifo/index.html && -f dist/reifo/about/index.html ]]
 grep -Fxq 'www.muweifilm.com' dist/CNAME
 
 if [[ -f muwei-website/index.html ]]; then source_dir='muwei-website'; else source_dir='.'; fi
@@ -24,6 +25,10 @@ while IFS= read -r -d '' file; do
   cmp "$file" "dist/$file"
 done < <(find photo-quest -type f -print0)
 
+# Verify the two new routes were copied without modifying their HTML.
+cmp reifo/index.html dist/reifo/index.html
+cmp reifo/about/index.html dist/reifo/about/index.html
+
 # Pages must receive the portfolio at /, not /muwei-website/.
 [[ ! -d dist/muwei-website ]]
-printf 'PASS: portfolio, domain, styles, images and Photo Quest are preserved in dist/\n'
+printf 'PASS: portfolio, domain, styles, images Photo Quest and reifo are preserved in dist/\n'
