@@ -500,6 +500,37 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
   }
 }
 
+
+/* Mobile card #03: a little more quiet space between the photograph and its reflection. */
+@media (max-width:770px),(orientation:portrait) and (max-width:1024px){
+ #mobileBook .mobile-page:nth-child(3) .mc-window + .mc-content{
+   margin-top:clamp(41px,6.7dvh,76px);
+ }
+ #mobileBook .mobile-page:nth-child(3) .mobile-sheet.mc-condensed .mc-window + .mc-content{
+   margin-top:clamp(23px,3.4dvh,35px);
+ }
+ .toolbar .back-to-cover{
+   display:none;
+   box-sizing:border-box;
+   width:44px;height:44px;flex:0 0 44px;place-items:center;
+   padding:0;margin-left:3px;
+   border:1px solid rgba(48,49,47,.30);border-radius:50%;
+   color:var(--ink);background:transparent;cursor:pointer;
+   -webkit-tap-highlight-color:transparent;
+ }
+ .toolbar .back-to-cover:not([hidden]){display:grid}
+ .toolbar .back-to-cover[hidden]{display:none!important}
+ .toolbar .back-to-cover:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+}
+@media (max-width:770px) and (max-height:730px){
+ #mobileBook .mobile-page:nth-child(3) .mc-window + .mc-content{
+   margin-top:clamp(27px,4.2dvh,40px);
+ }
+ #mobileBook .mobile-page:nth-child(3) .mobile-sheet.mc-condensed .mc-window + .mc-content{
+   margin-top:clamp(19px,3dvh,27px);
+ }
+}
+
 </style>
 </head>
 <body>
@@ -782,14 +813,14 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
  </section>
 </main>
 <nav class="rail" id="rail" aria-label="章節快速切換"></nav>
-<footer class="toolbar" aria-label="翻頁導覽"><div class="toolbar-title">reifo.</div><span class="toolbar-edition">The art of noticing / Vol. 01</span><div class="toolbar-center"><span class="toolbar-current" id="currentLabel">Cover</span><div class="toolbar-progress"><span class="toolbar-count" id="counter">01 / 10</span><div class="toolbar-track"><div class="toolbar-fill" id="fill"></div></div></div><div class="toolbar-controls"><button class="arrow" id="prev" aria-label="上一頁" type="button">←</button><button class="arrow" id="next" aria-label="下一頁" type="button">→</button></div></div></footer>
+<footer class="toolbar" aria-label="翻頁導覽"><div class="toolbar-title">reifo.</div><span class="toolbar-edition">The art of noticing / Vol. 01</span><div class="toolbar-center"><span class="toolbar-current" id="currentLabel">Cover</span><div class="toolbar-progress"><span class="toolbar-count" id="counter">01 / 10</span><div class="toolbar-track"><div class="toolbar-fill" id="fill"></div></div></div><div class="toolbar-controls"><button class="arrow" id="prev" aria-label="上一頁" type="button">←</button><button class="arrow" id="next" aria-label="下一頁" type="button">→</button></div><button class="back-to-cover" id="backToCover" type="button" aria-label="返回第一張封面" title="返回封面" hidden><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10l6-6 6 6M12 4v15"/></svg></button></footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 (()=>{
  const book=document.getElementById('book'),desktopPages=Array.from(book.querySelectorAll('.spread'));
  const mobileBook=document.getElementById('mobileBook'),mobilePages=Array.from(mobileBook.querySelectorAll('.mobile-page'));
  const count=document.getElementById('counter'),fill=document.getElementById('fill'),currentLabel=document.getElementById('currentLabel');
- const prev=document.getElementById('prev'),next=document.getElementById('next'),rail=document.getElementById('rail');
+ const prev=document.getElementById('prev'),next=document.getElementById('next'),rail=document.getElementById('rail'),backToCover=document.getElementById('backToCover');
  const mobile=()=>window.matchMedia('(max-width:770px), (orientation:portrait) and (max-width:1024px)').matches;
  const pages=()=>mobile()?mobilePages:desktopPages;
  let active=0,wheelLock=false,toastTimer,scrollFrame=0;
@@ -811,6 +842,7 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
    count.textContent=`${String(active+1).padStart(2,'0')} / ${String(all.length).padStart(2,'0')}`;
    fill.style.width=((active+1)/all.length*100)+'%';currentLabel.textContent=all[active].dataset.label;
    prev.disabled=active===0;next.disabled=active===all.length-1;
+   backToCover.hidden=!mobile()||active===0;
    dots.forEach((el,n)=>el.classList.toggle('active',!mobile()&&n===active));
  }
  function go(i){
@@ -820,6 +852,12 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
    update(i);
  }
  prev.onclick=()=>go(active-1);next.onclick=()=>go(active+1);
+ backToCover.addEventListener('click',()=>{
+   if(!mobile())return;
+   // Jump directly without touring every intermediate card.
+   mobileBook.scrollTo({top:0,behavior:'instant'});
+   update(0);
+ });
  document.addEventListener('keydown',e=>{
    if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
    if(['ArrowRight','ArrowDown','PageDown'].includes(e.key)){e.preventDefault();go(active+1)}
