@@ -445,6 +445,26 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
  .mc-foot{padding-top:6px}
 }
 
+/* Keep every sentence accessible even on compact devices or enlarged system text. */
+@media (max-width:770px),(orientation:portrait) and (max-width:1024px){
+ .mobile-sheet.mc-condensed{padding:13px 16px;gap:5px}
+ .mc-condensed .mc-study-art.study,.mc-condensed .mc-window.window-scene{height:clamp(72px,13dvh,115px)}
+ .mc-condensed .mc-visual{height:clamp(95px,15dvh,140px)}
+ .mc-condensed .mc-display{font-size:clamp(42px,11vw,60px);margin:3px 0}
+ .mc-condensed .mc-roman{font-size:clamp(30px,8vw,42px)}
+ .mc-condensed .mc-quote{font-size:clamp(19px,5vw,25px);line-height:1.55}
+ .mc-condensed .mc-text{font-size:12.5px;line-height:1.63}
+ .mc-condensed .mc-preface{font-size:clamp(22px,5.9vw,28px)}
+ .mc-condensed .mc-solo-number{font-size:51px}
+ .mc-condensed .mc-manifesto{font-size:clamp(17px,4.7vw,22px);line-height:1.45}
+ .mc-condensed .mc-manifesto p{margin-bottom:7px}
+ .mc-condensed .mc-name-parts>div{padding:7px 0}
+ .mc-condensed .mc-swatch{min-height:36px}
+ .mc-condensed .mc-type-list>div{padding:6px 0}
+ .mc-condensed .mc-work-list>div{padding:5px 0}
+ .mobile-sheet.mc-allow-scroll{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+}
+
 </style>
 </head>
 <body>
@@ -738,6 +758,16 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
  const mobile=()=>window.matchMedia('(max-width:770px), (orientation:portrait) and (max-width:1024px)').matches;
  const pages=()=>mobile()?mobilePages:desktopPages;
  let active=0,wheelLock=false,toastTimer,scrollFrame=0;
+ // Compact only when the rendered content needs it; tiny screens can still read all copy.
+ function fitMobileCards(){
+   if(!mobile())return;
+   mobilePages.forEach(page=>{
+     const sheet=page.querySelector('.mobile-sheet');
+     sheet.classList.remove('mc-condensed','mc-allow-scroll');
+     if(sheet.scrollHeight>sheet.clientHeight+3)sheet.classList.add('mc-condensed');
+     if(sheet.scrollHeight>sheet.clientHeight+3)sheet.classList.add('mc-allow-scroll');
+   });
+ }
  desktopPages.forEach((page,i)=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',`${String(i+1).padStart(2,'0')} / ${page.dataset.label}`);b.title=page.dataset.label;b.onclick=()=>go(i);rail.appendChild(b)});
  const dots=Array.from(rail.children);
  function update(i){
@@ -779,9 +809,15 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
    e.preventDefault();wheelLock=true;go(active+(e.deltaY>0?1:-1));setTimeout(()=>wheelLock=false,470);
  },{passive:false});
  const mq=window.matchMedia('(max-width:770px), (orientation:portrait) and (max-width:1024px)');
- const sync=()=>{active=0;book.scrollTo({left:0,behavior:'instant'});mobileBook.scrollTo({top:0,behavior:'instant'});update(0)};
+ const sync=()=>{active=0;book.scrollTo({left:0,behavior:'instant'});mobileBook.scrollTo({top:0,behavior:'instant'});update(0);requestAnimationFrame(fitMobileCards)};
  if(mq.addEventListener)mq.addEventListener('change',sync);else mq.addListener(sync);
- window.addEventListener('resize',()=>{if(mobile())return;update(Math.round(book.scrollLeft/Math.max(book.clientWidth,1)))});
+ let resizeFrame=0;
+ window.addEventListener('resize',()=>{
+   if(resizeFrame)cancelAnimationFrame(resizeFrame);
+   resizeFrame=requestAnimationFrame(()=>{resizeFrame=0;if(mobile())fitMobileCards();else update(Math.round(book.scrollLeft/Math.max(book.clientWidth,1)))});
+ });
+ if(document.fonts?.ready)document.fonts.ready.then(()=>requestAnimationFrame(fitMobileCards));
+ requestAnimationFrame(fitMobileCards);
  const toast=document.getElementById('toast');
  function feedback(t){toast.textContent=t;toast.classList.add('active');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('active'),1700)}
  document.querySelectorAll('[data-color]').forEach(c=>c.onclick=async()=>{
