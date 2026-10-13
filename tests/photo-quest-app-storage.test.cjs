@@ -33,7 +33,7 @@ const unsupported={...f.saved(),version:99};f=boot(unsupported);assert.equal(f.s
 // Desktop cards: click side sets flip direction; dragging tracks the pointer and
 // suppresses the synthetic click that may follow pointerup.
 f=boot();
-const desktopCard=f.elements.get('desktopCard'),desktopInner=f.elements.get('desktopInner');
+const desktopCard=f.context.document.getElementById('desktopCard'),desktopInner=f.context.document.getElementById('desktopInner');
 desktopCard.dataset.flip='camera';
 desktopCard.querySelector=()=>desktopInner;
 desktopCard.getBoundingClientRect=()=>({left:100,width:200});
