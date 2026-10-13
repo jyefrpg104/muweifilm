@@ -357,6 +357,83 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
 @media print{.mobile-book{display:none!important}}
 @media(prefers-reduced-motion:reduce){.mobile-book{scroll-behavior:auto!important}}
 
+
+/* 2026-10-13 — quieter studies: remove illustrative rules on both desktop and mobile.
+   Previous positioned pseudo-elements escaped the mobile illustration and crossed text. */
+.study-1,.study-2,.study-3{position:relative;overflow:hidden;isolation:isolate}
+.study-1{
+ background:radial-gradient(ellipse at 21% 30%,rgba(246,242,229,.93),transparent 68%),
+            radial-gradient(ellipse at 80% 78%,rgba(157,171,158,.65),transparent 68%),
+            linear-gradient(145deg,#d0d4c7,#b1baad)!important
+}
+.study-2{
+ background:radial-gradient(ellipse at 65% 33%,rgba(241,239,222,.96),transparent 63%),
+            radial-gradient(ellipse at 20% 85%,rgba(145,162,149,.62),transparent 72%),
+            linear-gradient(130deg,#c9d0c2,#b1bbae)!important
+}
+.study-3{
+ background:radial-gradient(ellipse at 80% 30%,rgba(240,239,223,.86),transparent 60%),
+            radial-gradient(ellipse at 13% 80%,rgba(128,148,137,.65),transparent 69%),
+            linear-gradient(140deg,#a6b3a6,#d9dacf)!important
+}
+.study-1::after,.study-2::after,.study-3::before{content:none!important;display:none!important}
+/* On handheld, each swipe has one exact snap destination instead of proximity scrolling. */
+@media (max-width:770px),(orientation:portrait) and (max-width:1024px){
+ .mobile-book{
+  scroll-snap-type:y mandatory;
+  scroll-padding-block:0;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+ }
+ .mobile-page{
+  height:100dvh;min-height:100dvh;
+  padding:clamp(45px,6.3dvh,57px) 13px calc(57px + env(safe-area-inset-bottom,0px));
+  scroll-snap-align:start;scroll-snap-stop:always;
+ }
+ .mobile-sheet{
+  height:100%;min-height:0;max-height:100%;
+  padding:clamp(16px,2.9dvh,25px);
+  gap:clamp(7px,1.2dvh,13px);
+  overflow:hidden;
+  justify-content:space-between;
+ }
+ /* Reduce overgrown study art and oversized blocks while retaining reading-size copy. */
+ .mc-study-art.study{
+   height:clamp(95px,18dvh,172px);
+   flex:0 1 auto;min-height:86px;max-height:172px;
+   position:relative;overflow:hidden;
+ }
+ .mc-study-no{font-size:9px}
+ .mc-display{font-size:clamp(52px,13.2vw,77px);margin:7px 0 7px;line-height:.94}
+ .mc-subtitle{font-size:clamp(16px,4.2vw,19px);line-height:1.6}
+ .mc-content{gap:clamp(8px,1.2dvh,14px)}
+ .mc-content .mc-quote{font-size:clamp(21px,5.65vw,29px);line-height:1.69}
+ .mc-content .mc-text{font-size:clamp(12.8px,3.28vw,14px);line-height:1.8}
+ .mc-foot{padding-top:9px}
+ /* Reading first. Arrows remain available on desktop, mobile navigation follows the scroll. */
+ .toolbar{
+   height:calc(49px + env(safe-area-inset-bottom,0px));
+   padding:0 22px env(safe-area-inset-bottom,0px);
+ }
+ .toolbar-controls{display:none}
+ .toolbar-track{width:70px;display:block}
+ .toolbar-title{font-size:20px}
+ .toolbar-count{font-size:11px}
+ .toast{bottom:calc(59px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:770px) and (max-height:730px){
+ .mobile-page{padding:43px 12px calc(53px + env(safe-area-inset-bottom,0px))}
+ .mobile-sheet{padding:14px 19px;gap:6px}
+ .mc-study-art.study{height:clamp(72px,15dvh,124px);min-height:72px}
+ .mc-display{font-size:clamp(44px,12vw,64px);margin:4px 0}
+ .mc-subtitle{font-size:16px}
+ .mc-content .mc-quote{font-size:clamp(20px,5.5vw,26px);line-height:1.53}
+ .mc-content .mc-text{font-size:12.5px;line-height:1.65}
+ .mc-meta,.mc-foot{font-size:8.5px}
+ .mc-foot{padding-top:6px}
+}
+
 </style>
 </head>
 <body>
