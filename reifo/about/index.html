@@ -246,6 +246,117 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
  .return-to-reifo{top:10px;left:12px;padding:7px 10px;letter-spacing:.07em;font-size:9px}
 }
 @media print{.return-to-reifo{display:none}}
+
+/* Mobile photo-book, one considered card per gesture. Desktop 16:9 book stays intact. */
+.mobile-book{display:none}
+@media (max-width:770px),(orientation:portrait) and (max-width:1024px){
+ html,body{height:100%;overflow:hidden}
+ .book{display:none!important}
+ .mobile-book{display:block!important;height:100dvh;overflow-y:auto;overflow-x:hidden;position:relative;
+   scroll-snap-type:y proximity;scrollbar-width:none;scroll-behavior:smooth;overscroll-behavior-y:contain}
+ .mobile-book::-webkit-scrollbar{display:none}
+ .mobile-page{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;
+   padding:60px 16px calc(78px + env(safe-area-inset-bottom,0px));scroll-snap-align:start;scroll-snap-stop:always}
+ .mobile-sheet{min-height:calc(100dvh - 138px - env(safe-area-inset-bottom,0px));width:100%;
+   padding:clamp(22px,5.4vw,35px);display:flex;flex-direction:column;justify-content:space-between;
+   gap:17px;background:var(--paper);border:1px solid rgba(48,49,47,.1);
+   box-shadow:0 10px 33px rgba(48,49,47,.055);position:relative;isolation:isolate}
+ .mobile-sheet:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:10;opacity:.09;
+   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.32' filter='url(%23noise)'/%3E%3C/svg%3E")}
+ .mc-meta,.mc-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;font:400 9px/1.5 var(--en);
+   text-transform:uppercase;letter-spacing:.125em;opacity:.7}
+ .mc-meta span:first-child,.mc-foot span:first-child{max-width:75%}
+ .mc-foot{padding-top:14px;border-top:1px solid rgba(48,49,47,.23);margin-top:auto}
+ .mc-rule{height:1px;background:currentColor;opacity:.23;width:100%;flex:0 0 auto}
+ .mc-ivory{background:var(--paper)}.mc-warm{background:#ede9e0}.mc-fog{background:var(--fog)}
+ .mc-sage{background:#d4d8ca}.mc-brown{background:var(--brown)}.mc-dark{background:#777c72;color:#f6f2e9}
+ .mc-cover-top{padding-top:6px}
+ .mc-logo{font:300 clamp(95px,23.5vw,155px)/.8 var(--en);letter-spacing:-.102em;margin:0 0 12px -.07em}
+ .mc-logo-small{font-size:clamp(88px,21vw,145px)}
+ .mc-jp{font-size:12px;letter-spacing:.35em}
+ .mc-cover-words{padding-bottom:3px}
+ .mc-roman{font:italic 300 clamp(37px,10vw,54px)/1 var(--eng-book);letter-spacing:-.03em;margin:0 0 14px}
+ .mc-small-cn{font:400 15px/1.7 var(--cn-book);letter-spacing:.12em;margin:0}
+ .mc-visual{height:clamp(135px,23dvh,230px);flex:0 0 auto;position:relative;overflow:hidden;background:#a4aa9d}
+ .mc-visual svg{width:100%;height:100%;display:block;filter:saturate(.72)}
+ .mc-visual span{position:absolute;bottom:11px;left:12px;color:#f9f5ed;
+   font:400 9px/1.2 var(--en);letter-spacing:.12em;text-shadow:0 1px 3px #30312f88}
+ .mc-solo-number{font:italic 300 90px/.75 var(--eng-book);color:#b8ae9f}
+ .mc-quote{font:400 clamp(23px,6.35vw,32px)/1.85 var(--cn-book);letter-spacing:.09em;margin:0}
+ .mc-preface{font-size:clamp(26px,7vw,35px)}
+ .mc-text{font:310 14px/2 var(--cn-text);letter-spacing:.065em;margin:0}
+ .mc-text p{margin:0 0 13px}.mc-text p:last-child{margin-bottom:0}
+ .mc-window.window-scene{min-height:0;height:clamp(130px,21dvh,215px);max-height:none;flex:0 0 auto;margin:0}
+ .mc-window .scene-caption{font-size:9px}
+ .mc-content{display:flex;flex-direction:column;gap:15px}
+ .mc-content .mc-roman{font-size:clamp(32px,8.5vw,45px);margin:0}
+ .mc-name-intro{margin-top:12px}
+ .mc-name-parts{border-top:1px solid var(--edge)}
+ .mc-name-parts>div{display:grid;grid-template-columns:52px 1fr;gap:14px;align-items:baseline;
+   border-bottom:1px solid var(--edge);padding:11px 0}
+ .mc-name-parts>div>span{font:italic 300 47px/.9 var(--eng-book)}
+ .mc-name-parts p{font:310 13px/1.65 var(--cn-text);margin:0;letter-spacing:.02em}
+ .mc-name-parts em{font:italic 400 24px/1.1 var(--eng-book)}
+ .mc-fine{font:310 11px/1.65 var(--cn-text);opacity:.66;margin:0;letter-spacing:.035em}
+ .mc-study-no{font:400 10px var(--en);letter-spacing:.12em;opacity:.7}
+ .mc-display{font:italic 300 clamp(58px,16vw,88px)/.92 var(--eng-book);letter-spacing:-.045em;margin:10px 0 10px}
+ .mc-subtitle{font:400 18px/1.7 var(--cn-book);letter-spacing:.14em;margin:0}
+ .mc-study-art.study{height:clamp(135px,22dvh,214px);min-height:0;flex:0 0 auto;margin:0}
+ .mc-manifesto{font:400 clamp(20px,5.55vw,28px)/1.8 var(--cn-book);letter-spacing:.08em}
+ .mc-manifesto p{margin:0 0 12px}.mc-manifesto p:last-child{margin:0;color:#e4d7c7}
+ .mc-dark-title{font-size:clamp(39px,10vw,55px);margin:0}
+ .mc-colors-heading{font-size:clamp(54px,13vw,72px);margin:0 0 9px}
+ .mc-palette{display:flex;flex-direction:column;gap:6px}
+ .mc-swatch{min-height:43px;display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:11px;
+   padding:0 3px;background:none;border:0;border-bottom:1px solid var(--edge);color:inherit;text-align:left;cursor:pointer}
+ .mc-swatch:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+ .mc-swatch i{height:35px;width:35px;border:1px solid #30312f26}
+ .mc-swatch span{font:italic 400 25px var(--eng-book)}
+ .mc-swatch small{font:400 10px var(--en);letter-spacing:.06em;opacity:.76}
+ .mc-type-quote{font-size:clamp(30px,7.5vw,42px);line-height:1.7}
+ .mc-type-roman{font-size:clamp(24px,7vw,37px);margin-top:10px}
+ .mc-type-list>div{display:grid;grid-template-columns:65px 1fr;gap:15px;
+   padding:10px 0;border-bottom:1px solid var(--edge);align-items:baseline}
+ .mc-type-list>div:first-child{border-top:1px solid var(--edge)}
+ .mc-type-list small{font:400 10px var(--en);opacity:.65}
+ .mc-type-list span{font:310 13px/1.65 var(--cn-text)}
+ .mc-type-list .mc-serif{font-family:var(--cn-book);font-size:16px}
+ .mc-type-list .mc-roman{font-size:23px}
+ .mc-works-title{font-size:clamp(39px,10vw,57px);margin-bottom:12px}
+ .mc-work-list{border-top:1px solid var(--edge)}
+ .mc-work-list>div{display:grid;grid-template-columns:25px 1fr auto;align-items:baseline;gap:10px;
+   padding:9px 0;border-bottom:1px solid var(--edge)}
+ .mc-work-list small{font:italic 400 18px var(--eng-book);opacity:.7}
+ .mc-work-list span{font:italic 400 clamp(29px,7.8vw,41px)/1 var(--eng-book)}
+ .mc-work-list em{font:400 11px var(--cn-text);font-style:normal;letter-spacing:.02em}
+ .mc-closing{background:var(--paper)}
+ .mc-closing-head{font-size:clamp(45px,11vw,70px)}
+ .mc-closing-quote{font-size:clamp(21px,5.4vw,27px)}
+ .mc-closing-logo{font-size:clamp(90px,22vw,140px);margin-bottom:11px}
+ .toolbar{padding-bottom:env(safe-area-inset-bottom,0px);height:calc(58px + env(safe-area-inset-bottom,0px))}
+ .return-to-reifo{top:max(10px,env(safe-area-inset-top,0px))}
+ .toast{bottom:calc(75px + env(safe-area-inset-bottom,0px))}
+}
+@media(max-width:350px),(max-height:680px) and (max-width:770px){
+ .mobile-page{padding:48px 12px calc(73px + env(safe-area-inset-bottom,0px))}
+ .mobile-sheet{padding:18px;gap:10px;min-height:calc(100dvh - 121px - env(safe-area-inset-bottom,0px))}
+ .mc-logo{font-size:clamp(84px,23vw,115px)}.mc-logo-small{font-size:clamp(83px,21vw,106px)}
+ .mc-visual{height:clamp(106px,19dvh,170px)}
+ .mc-window.window-scene,.mc-study-art.study{height:clamp(105px,19dvh,165px)}
+ .mc-roman{font-size:clamp(31px,9.3vw,44px)}
+ .mc-quote{font-size:clamp(21px,6vw,28px);line-height:1.7}
+ .mc-text{font-size:13px;line-height:1.85}
+ .mc-display{font-size:clamp(52px,15vw,75px)}
+ .mc-foot{padding-top:9px}.mc-manifesto{font-size:clamp(18px,5.1vw,23px);line-height:1.68}
+ .mc-manifesto p{margin-bottom:8px}
+ .mc-swatch{min-height:38px}.mc-swatch i{height:30px;width:30px}
+ .mc-works-title{font-size:clamp(35px,9.5vw,49px)}
+ .mc-work-list>div{padding:6px 0}
+ .mc-solo-number{font-size:71px}
+}
+@media print{.mobile-book{display:none!important}}
+@media(prefers-reduced-motion:reduce){.mobile-book{scroll-behavior:auto!important}}
+
 </style>
 </head>
 <body>
@@ -378,28 +489,218 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
  </div><div class="page-bottom"></div><div class="page-no">10</div>
 </section>
 </main>
+
+<!-- Mobile-only: vertically paged photo cards. Desktop spreads remain unchanged. -->
+<main class="mobile-book" id="mobileBook" aria-label="About reifo 手機直式攝影卡片集">
+ <section class="mobile-page" data-label="Cover" aria-label="封面">
+  <article class="mobile-sheet mc-cover">
+   <div class="mc-meta"><span>reifo / a personal creative identity</span><span>01 / 12</span></div>
+   <div class="mc-cover-top"><h1 class="mc-logo">reifo.</h1><div class="mc-jp jp">レイフォ</div></div>
+   <div class="mc-visual" role="img" aria-label="霧中遠山的抽象攝影意象"><svg viewBox="0 0 600 780" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="sky" x1="0" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#e7e4da"/><stop offset=".45" stop-color="#cfcfbe"/><stop offset="1" stop-color="#9ca89d"/></linearGradient>
+              <radialGradient id="sun"><stop offset="0" stop-color="#f4efdc" stop-opacity=".95"/><stop offset=".65" stop-color="#efe8d5" stop-opacity=".64"/><stop offset="1" stop-color="#ece7db" stop-opacity="0"/></radialGradient>
+              <linearGradient id="dune" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a8a99a"/><stop offset="1" stop-color="#7d8a80"/></linearGradient>
+              <filter id="blur"><feGaussianBlur stdDeviation="25"/></filter>
+            </defs>
+            <rect width="600" height="780" fill="url(#sky)"/>
+            <circle cx="396" cy="244" r="190" fill="url(#sun)"/>
+            <circle cx="397" cy="237" r="73" fill="#eae5d4" opacity=".73" filter="url(#blur)"/>
+            <path d="M-40 465 Q130 360 284 428 T660 402 V780 H-40Z" fill="#bcbdb0" opacity=".48"/>
+            <path d="M-30 519 C112 483 201 429 343 464 S544 481 650 442 V780 H-30Z" fill="#a2aa9e" opacity=".56"/>
+            <path d="M-30 565 Q150 480 311 518 Q468 562 650 475 V780 H-30Z" fill="url(#dune)" opacity=".8"/>
+            <path d="M-30 666 C147 578 209 595 337 633 C476 676 568 612 640 574 V780 H-30Z" fill="#707e74" opacity=".86"/>
+            <path d="M-30 728 C135 670 250 688 377 725 Q491 751 650 675 V780 H-30Z" fill="#46584e" opacity=".5"/>
+            <path d="M0 540 H600" stroke="#ecebde" opacity=".45" stroke-width="2"/>
+            <rect x="0" y="0" width="600" height="780" fill="#9a8b75" opacity=".035"/>
+          </svg><span>PLATE NO. 01 / THE ORDINARY</span></div>
+   <div class="mc-cover-words"><h2 class="mc-roman">to see what<br>was always there.</h2><p class="mc-small-cn">去看見那些一直都在的事物。</p></div>
+   <div class="mc-foot"><span>AN EXERCISE IN NOTICING</span><span>SWIPE TO READ ↓</span></div>
+  </article>
+ </section>
+ <section class="mobile-page" data-label="Preface" aria-label="序言">
+  <article class="mobile-sheet mc-warm">
+   <div class="mc-meta"><span>01 / PREFACE</span><span>02 / 12</span></div>
+   <div class="mc-solo-number">01</div>
+   <h2 class="mc-quote mc-preface">我們每天都在看。<br>但我們真的<br>看見了多少？</h2>
+   <div class="mc-rule"></div>
+   <div class="mc-text"><p>熟悉的街道、相同的路口，還有窗外不斷變化的光線。它們每天都在發生，卻不一定真正進入我們的視線。</p><p>一道午後的光、一段偶然的對話、一個不起眼的角落。世界或許從未停止給我們驚喜，只是我們偶爾忘記了留意。</p></div>
+   <div class="mc-foot"><span>LOOKING / NOTICING</span><span>— REIFO.</span></div>
+  </article>
+ </section>
+ <section class="mobile-page" data-label="Perspective" aria-label="品牌哲學">
+  <article class="mobile-sheet mc-fog">
+   <div class="mc-meta"><span>02 / PERSPECTIVE</span><span>03 / 12</span></div>
+   <div class="mc-window window-scene" role="img" aria-label="窗邊柔和日光的抽象景象"><span class="scene-sun"></span><span class="scene-rectangle"></span><span class="scene-caption">FIG. 02 / AFTERNOON LIGHT</span></div>
+   <div class="mc-content"><h2 class="mc-roman">The world is still there.</h2><p class="mc-quote">世界未必改變了。<br>也許改變的，<br>是我們觀看它的方式。</p><p class="mc-text">同一個地方，在不同的人眼中可能有截然不同的模樣。觀看不只是接收畫面，也是理解世界的過程。</p></div>
+   <div class="mc-foot"><span>THE ART OF SEEING</span><span>REIFO / 03</span></div>
+  </article>
+ </section>
+ <section class="mobile-page" data-label="The name" aria-label="名稱詮釋">
+  <article class="mobile-sheet mc-ivory">
+   <div class="mc-meta"><span>03 / THE NAME</span><span>04 / 12</span></div>
+   <div><h2 class="mc-logo mc-logo-small">reifo.</h2><p class="mc-text mc-name-intro">從 Jeffrey 的聲音輪廓出發，重新拆解、排列與命名。這個不存在的詞，留下一個尚待寫下的故事。</p></div>
+   <div class="mc-name-parts">
+    <div><span>re</span><p><em>again.</em><br>再次、重新理解。</p></div>
+    <div><span>i</span><p><em>eye / I.</em><br>眼睛，也是自我視角。</p></div>
+    <div><span>fo</span><p><em>focus.</em><br>聚焦被忽略的細節。</p></div>
+   </div>
+   <p class="mc-fine">* RE / I / FO 是品牌自行設計的象徵性拆解，並非正式詞源。</p>
+   <div class="mc-foot"><span>AN INVENTED WORD</span><span>RE / I / FO</span></div>
+  </article>
+ </section>
+ <section class="mobile-page" data-label="Notice" aria-label="創作方法：察覺">
+  <article class="mobile-sheet mc-sage">
+   <div class="mc-meta"><span>04 / THE PRACTICE</span><span>05 / 12</span></div>
+   <div><span class="mc-study-no">STUDY / 01</span><h2 class="mc-display">Notice.</h2><p class="mc-subtitle">察覺</p></div>
+   <div class="mc-study-art study study-1" role="img" aria-label="由光線與幾何形狀構成的觀看練習"></div>
+   <div class="mc-content"><p class="mc-quote">從一句<br>「為什麼」開始。</p><p class="mc-text">留意那些被習慣掩蓋的細節。每一次創作，都是一場觀看的練習。</p></div>
+   <div class="mc-foot"><span>NOTICE</span><span>01 / 03</span></div>
+  </article>
+ </section>
+ <section class="mobile-page" data-label="Reframe" aria-label="創作方法：重新觀看">
+  <article class="mobile-sheet mc-fog">
+   <div class="mc-meta"><span>04 / THE PRACTICE</span><span>06 / 12</span></div>
+   <div><span class="mc-study-no">STUDY / 02</span><h2 class="mc-display">Reframe.</h2><p class="mc-subtitle">重新觀看</p></div>
+   <div class="mc-study-art study study-2" role="img" aria-label="柔和的光斑與斜向線條"></div>
+   <div class="mc-content"><p class="mc-quote">換一個角度，<br>也是一種開始。</p><p class="mc-text">換一個位置、一種構圖，或另一種提問方式。讓熟悉的事情，有機會呈現不同的面貌。</p></div>
+   <div class="mc-foot"><span>REFRAME</span><span>02 / 03</span></div>
+  </article>
+ </section>
+ <section class="mobile-page" data-label="Discover" aria-label="創作方法：重新發現">
+  <article class="mobile-sheet mc-warm">
+   <div class="mc-meta"><span>04 / THE PRACTICE</span><span>07 / 12</span></div>
+   <div><span class="mc-study-no">STUDY / 03</span><h2 class="mc-display">Discover.</h2><p class="mc-subtitle">重新發現</p></div>
+   <div class="mc-study-art study study-3" role="img" aria-label="交錯色塊與矩形框線"></div>
+   <div class="mc-content"><p class="mc-quote">不一定要<br>找到答案。</p><p class="mc-text">能帶著新的眼光離開，就已是一種發現。好奇心本身，便值得被保留。</p></div>
+   <div class="mc-foot"><span>DISCOVER</span><span>03 / 03</span></div>
+  </article>
+ </section>
+ <section class="mobile-page" data-label="A few words" aria-label="品牌宣言">
+  <article class="mobile-sheet mc-dark">
+   <div class="mc-meta"><span>05 / A FEW WORDS</span><span>08 / 12</span></div>
+   <h2 class="mc-roman mc-dark-title">ordinary moments,<br>other worlds.</h2>
+   <div class="mc-rule"></div>
+   <div class="mc-manifesto"><p>我們總以為，<br>要走得更遠，<br>才能看見不一樣的風景。</p><p>但也許，<br>我們從來不缺少<br>值得發現的事物。</p><p>有時候，<br>只需要換一個角度。</p></div>
+   <div class="mc-foot"><span>NOT ALL DISCOVERIES ARE FAR AWAY</span><span>REIFO / 08</span></div>
+  </article>
+ </section>
+ <section class="mobile-page" data-label="The colors" aria-label="品牌色票">
+  <article class="mobile-sheet mc-ivory">
+   <div class="mc-meta"><span>06 / COLOR NOTES</span><span>09 / 12</span></div>
+   <div><h2 class="mc-display mc-colors-heading">quiet colors.</h2><p class="mc-text">像紙、霧、樹影，和午後的舊照片。色彩不需要成為主角，只要替作品留下一點溫度。</p></div>
+   <div class="mc-palette" aria-label="點選色票複製色碼">
+    <button class="mc-swatch" type="button" data-color="#F4F0E8"><i style="background:#F4F0E8"></i><span>Warm Ivory</span><small>#F4F0E8</small></button>
+    <button class="mc-swatch" type="button" data-color="#30312F"><i style="background:#30312F"></i><span>Charcoal</span><small>#30312F</small></button>
+    <button class="mc-swatch" type="button" data-color="#A6AA96"><i style="background:#A6AA96"></i><span>Muted Sage</span><small>#A6AA96</small></button>
+    <button class="mc-swatch" type="button" data-color="#B5A18F"><i style="background:#B5A18F"></i><span>Dusty Brown</span><small>#B5A18F</small></button>
+    <button class="mc-swatch" type="button" data-color="#D8D9D4"><i style="background:#D8D9D4"></i><span>Fog Grey</span><small>#D8D9D4</small></button>
+   </div>
+   <div class="mc-foot"><span>TAP A COLOR TO COPY ITS HEX</span><span>REIFO / 09</span></div>
+  </article>
+ </section>
+ <section class="mobile-page" data-label="Type and tone" aria-label="字體與語氣">
+  <article class="mobile-sheet mc-fog">
+   <div class="mc-meta"><span>07 / TYPE &amp; TONE</span><span>10 / 12</span></div>
+   <div><h2 class="mc-quote mc-type-quote">去看見<br>那些一直都在的<br>事物。</h2><p class="mc-roman mc-type-roman">the art of paying attention.</p></div>
+   <div class="mc-rule"></div>
+   <div class="mc-type-list">
+    <div><small>identity</small><span class="mc-roman">reifo. / レイフォ</span></div>
+    <div><small>headlines</small><span class="mc-serif">日常裡的另一種可能。</span></div>
+    <div><small>narrative</small><span>每一次觀看，都可能成為一次新的探索。</span></div>
+   </div>
+   <p class="mc-fine">有筆觸的人文明體、溫和的黑體，以及輕盈的英文斜體。讓文字像攝影集一樣，有餘裕被慢慢閱讀。</p>
+   <div class="mc-foot"><span>WORDS WITH ROOM TO BREATHE</span><span>REIFO / 10</span></div>
+  </article>
+ </section>
+ <section class="mobile-page" data-label="The works" aria-label="創作宇宙">
+  <article class="mobile-sheet mc-brown">
+   <div class="mc-meta"><span>08 / THE WORKS</span><span>11 / 12</span></div>
+   <div><h2 class="mc-display mc-works-title">different forms,<br>one way of seeing.</h2><p class="mc-text">形式可以不斷改變，但對世界的好奇心不必改變。</p></div>
+   <div class="mc-work-list">
+    <div><small>01</small><span>films</span><em>影像・紀錄</em></div>
+    <div><small>02</small><span>photographs</span><em>攝影・日常</em></div>
+    <div><small>03</small><span>notes</span><em>文字・觀點</em></div>
+    <div><small>04</small><span>fieldwork</span><em>走訪・觀察</em></div>
+    <div><small>05</small><span>experiments</span><em>實驗・互動</em></div>
+   </div>
+   <div class="mc-foot"><span>PHOTO QUEST — A PROJECT BY REIFO</span><span>REIFO / 11</span></div>
+  </article>
+ </section>
+ <section class="mobile-page" data-label="An invitation" aria-label="品牌結語">
+  <article class="mobile-sheet mc-closing">
+   <div class="mc-meta"><span>09 / AN INVITATION</span><span>12 / 12</span></div>
+   <h2 class="mc-roman mc-closing-head">to see what<br>was always there.</h2>
+   <p class="mc-quote">不一定要讓世界<br>變得不一樣。</p>
+   <p class="mc-quote mc-closing-quote">只是希望我們能發現，<br>原來世界就有那麼多不一樣。</p>
+   <div><div class="mc-logo mc-closing-logo">reifo.</div><div class="mc-jp jp">レイフォ</div></div>
+   <div class="mc-foot"><span>STAY CURIOUS ABOUT THE ORDINARY</span><span>END / BEGIN AGAIN</span></div>
+  </article>
+ </section>
+</main>
 <nav class="rail" id="rail" aria-label="章節快速切換"></nav>
 <footer class="toolbar" aria-label="翻頁導覽"><div class="toolbar-title">reifo.</div><span class="toolbar-edition">The art of noticing / Vol. 01</span><div class="toolbar-center"><span class="toolbar-current" id="currentLabel">Cover</span><div class="toolbar-progress"><span class="toolbar-count" id="counter">01 / 10</span><div class="toolbar-track"><div class="toolbar-fill" id="fill"></div></div></div><div class="toolbar-controls"><button class="arrow" id="prev" aria-label="上一頁" type="button">←</button><button class="arrow" id="next" aria-label="下一頁" type="button">→</button></div></div></footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 (()=>{
- const book=document.getElementById('book'), pages=Array.from(book.querySelectorAll('.spread'));
+ const book=document.getElementById('book'),desktopPages=Array.from(book.querySelectorAll('.spread'));
+ const mobileBook=document.getElementById('mobileBook'),mobilePages=Array.from(mobileBook.querySelectorAll('.mobile-page'));
  const count=document.getElementById('counter'),fill=document.getElementById('fill'),currentLabel=document.getElementById('currentLabel');
  const prev=document.getElementById('prev'),next=document.getElementById('next'),rail=document.getElementById('rail');
  const mobile=()=>window.matchMedia('(max-width:770px), (orientation:portrait) and (max-width:1024px)').matches;
- let active=0, wheelLock=false, toastTimer;
- pages.forEach((page,i)=>{let b=document.createElement('button');b.type='button';b.setAttribute('aria-label',`${String(i+1).padStart(2,'0')} / ${page.dataset.label}`);b.title=page.dataset.label;b.onclick=()=>go(i);rail.appendChild(b)});
+ const pages=()=>mobile()?mobilePages:desktopPages;
+ let active=0,wheelLock=false,toastTimer,scrollFrame=0;
+ desktopPages.forEach((page,i)=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',`${String(i+1).padStart(2,'0')} / ${page.dataset.label}`);b.title=page.dataset.label;b.onclick=()=>go(i);rail.appendChild(b)});
  const dots=Array.from(rail.children);
- function update(i){active=Math.max(0,Math.min(pages.length-1,i));count.textContent=`${String(active+1).padStart(2,'0')} / ${String(pages.length).padStart(2,'0')}`;fill.style.width=((active+1)/pages.length*100)+'%';currentLabel.textContent=pages[active].dataset.label;prev.disabled=active===0;next.disabled=active===pages.length-1;dots.forEach((el,n)=>el.classList.toggle('active',n===active))}
- function go(i){i=Math.max(0,Math.min(pages.length-1,i));if(mobile()){pages[i].scrollIntoView({behavior:'smooth',block:'start'})}else{book.scrollTo({left:pages[i].offsetLeft,behavior:'smooth'})}update(i)}
+ function update(i){
+   const all=pages();
+   active=Math.max(0,Math.min(all.length-1,i));
+   count.textContent=`${String(active+1).padStart(2,'0')} / ${String(all.length).padStart(2,'0')}`;
+   fill.style.width=((active+1)/all.length*100)+'%';currentLabel.textContent=all[active].dataset.label;
+   prev.disabled=active===0;next.disabled=active===all.length-1;
+   dots.forEach((el,n)=>el.classList.toggle('active',!mobile()&&n===active));
+ }
+ function go(i){
+   const all=pages();i=Math.max(0,Math.min(all.length-1,i));
+   if(mobile())all[i].scrollIntoView({behavior:'smooth',block:'start'});
+   else book.scrollTo({left:all[i].offsetLeft,behavior:'smooth'});
+   update(i);
+ }
  prev.onclick=()=>go(active-1);next.onclick=()=>go(active+1);
- document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(['ArrowRight','PageDown'].includes(e.key)){e.preventDefault();go(active+1)}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(active-1)}else if(e.key==='Home'){e.preventDefault();go(0)}else if(e.key==='End'){e.preventDefault();go(pages.length-1)}});
- book.addEventListener('scroll',()=>{if(mobile())return;let idx=Math.round(book.scrollLeft/Math.max(book.clientWidth,1));if(idx!==active)update(idx)},{passive:true});
- book.addEventListener('wheel',e=>{if(mobile()||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;if(Math.abs(e.deltaY)<10||wheelLock)return;e.preventDefault();wheelLock=true;go(active+(e.deltaY>0?1:-1));setTimeout(()=>wheelLock=false,470)},{passive:false});
- if('IntersectionObserver' in window){const observer=new IntersectionObserver(es=>{if(!mobile())return;let visible=es.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);if(visible[0])update(pages.indexOf(visible[0].target))},{threshold:[.2,.4,.6,.75]});pages.forEach(x=>observer.observe(x))}
- window.addEventListener('resize',()=>update(active));
- const toast=document.getElementById('toast');function feedback(t){toast.textContent=t;toast.classList.add('active');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('active'),1700)}
- document.querySelectorAll('.color').forEach(c=>c.onclick=async()=>{try{await navigator.clipboard.writeText(c.dataset.color);feedback(c.dataset.color+' copied')}catch(_){let tmp=document.createElement('textarea');tmp.value=c.dataset.color;document.body.appendChild(tmp);tmp.select();try{document.execCommand('copy');feedback(c.dataset.color+' copied')}catch(e){feedback(c.dataset.color)}tmp.remove()}});
+ document.addEventListener('keydown',e=>{
+   if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
+   if(['ArrowRight','ArrowDown','PageDown'].includes(e.key)){e.preventDefault();go(active+1)}
+   else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();go(active-1)}
+   else if(e.key==='Home'){e.preventDefault();go(0)}
+   else if(e.key==='End'){e.preventDefault();go(pages().length-1)}
+ });
+ book.addEventListener('scroll',()=>{if(mobile())return;const idx=Math.round(book.scrollLeft/Math.max(book.clientWidth,1));if(idx!==active)update(idx)},{passive:true});
+ mobileBook.addEventListener('scroll',()=>{
+   if(!mobile()||scrollFrame)return;
+   scrollFrame=requestAnimationFrame(()=>{
+     scrollFrame=0;
+     const edge=mobileBook.getBoundingClientRect().top;
+     let best=0,d=Infinity;
+     mobilePages.forEach((p,i)=>{const distance=Math.abs(p.getBoundingClientRect().top-edge);if(distance<d){d=distance;best=i}});
+     if(best!==active)update(best);
+   });
+ },{passive:true});
+ book.addEventListener('wheel',e=>{
+   if(mobile()||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
+   if(Math.abs(e.deltaY)<10||wheelLock)return;
+   e.preventDefault();wheelLock=true;go(active+(e.deltaY>0?1:-1));setTimeout(()=>wheelLock=false,470);
+ },{passive:false});
+ const mq=window.matchMedia('(max-width:770px), (orientation:portrait) and (max-width:1024px)');
+ const sync=()=>{active=0;book.scrollTo({left:0,behavior:'instant'});mobileBook.scrollTo({top:0,behavior:'instant'});update(0)};
+ if(mq.addEventListener)mq.addEventListener('change',sync);else mq.addListener(sync);
+ window.addEventListener('resize',()=>{if(mobile())return;update(Math.round(book.scrollLeft/Math.max(book.clientWidth,1)))});
+ const toast=document.getElementById('toast');
+ function feedback(t){toast.textContent=t;toast.classList.add('active');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('active'),1700)}
+ document.querySelectorAll('[data-color]').forEach(c=>c.onclick=async()=>{
+   try{await navigator.clipboard.writeText(c.dataset.color);feedback(c.dataset.color+' copied')}
+   catch(_){const tmp=document.createElement('textarea');tmp.value=c.dataset.color;document.body.appendChild(tmp);tmp.select();
+     try{document.execCommand('copy');feedback(c.dataset.color+' copied')}catch(e){feedback(c.dataset.color)}tmp.remove()}
+ });
  update(0);
 })();
 </script>
