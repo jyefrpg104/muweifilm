@@ -30,6 +30,38 @@ f.run('undoRecordsDeletion()');assert.equal(f.saved().archived.length,1);assert.
 const payload=f.run('backupPayload()');assert.equal(f.run('parseBackup('+JSON.stringify(payload)+').archived.length'),1);
 f.run('pendingCloudRestore='+JSON.stringify(completed));f.elements.get('cloudRestoreAccept').events.click();assert.equal(f.saved().current.completedAt,completed.completedAt);
 const unsupported={...f.saved(),version:99};f=boot(unsupported);assert.equal(f.saved().version,99);assert.equal(f.run('taskStorageState'),'unsupported');
+// Desktop cards: click side sets flip direction; dragging tracks the pointer and
+// suppresses the synthetic click that may follow pointerup.
+f=boot();
+const desktopCard=f.elements.get('desktopCard'),desktopInner=f.elements.get('desktopInner');
+desktopCard.dataset.flip='camera';
+desktopCard.querySelector=()=>desktopInner;
+desktopCard.getBoundingClientRect=()=>({left:100,width:200});
+const grid=f.elements.get('questGrid');
+const target={closest:selector=>selector==='[data-flip]'?desktopCard:null};
+const click=(x,detail=1)=>grid.events.click({target,clientX:x,detail});
+click(120);
+assert.equal(f.run('flipStates.camera'),true);
+assert.equal(desktopInner.style.transform,'rotateY(-180deg)');
+click(280);
+assert.equal(f.run('flipStates.camera'),false);
+assert.equal(desktopInner.style.transform,'rotateY(0deg)');
+click(280);
+assert.equal(f.run('flipStates.camera'),true);
+assert.equal(desktopInner.style.transform,'rotateY(180deg)');
+grid.events.pointerdown({target,pointerId:17,clientX:180,clientY:20,timeStamp:1000,isPrimary:true,button:0});
+grid.events.pointermove({pointerId:17,clientX:100,clientY:20,timeStamp:1200,preventDefault(){}});
+assert.equal(desktopInner.style.transform,'rotateY(108deg)');
+grid.events.pointerup({pointerId:17,clientX:100,clientY:20,timeStamp:1230});
+assert.equal(f.run('flipStates.camera'),false);
+assert.equal(desktopInner.style.transform,'rotateY(0deg)');
+click(120); // Suppress the click emitted after the drag.
+assert.equal(f.run('flipStates.camera'),false);
+click(120,0); // Keyboard activation must still flip.
+assert.equal(f.run('flipStates.camera'),true);
+assert.equal(desktopInner.style.transform,'rotateY(180deg)');
+console.log('PASS desktop directional clicks, live drag angle, release, click suppression and keyboard fallback');
+
 console.log('PASS actual App boot, v4 migration, favorite/delete/undo metadata, backup parsing, cloud restore, future-version protection');
 
 
