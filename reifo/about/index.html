@@ -501,6 +501,7 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
 }
 
 
+.toolbar .back-to-cover{display:none}
 /* Mobile card #03: a little more quiet space between the photograph and its reflection. */
 @media (max-width:770px),(orientation:portrait) and (max-width:1024px){
  #mobileBook .mobile-page:nth-child(3) .mc-window + .mc-content{
@@ -509,28 +510,40 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
  #mobileBook .mobile-page:nth-child(3) .mobile-sheet.mc-condensed .mc-window + .mc-content{
    margin-top:clamp(23px,3.4dvh,35px);
  }
- /* Keep a 44px tap target, but draw a smaller 32px circle around the same 19px arrow. */
- .toolbar .toolbar-center{gap:13px}
+ /* Keep the 19px arrow, 32px outline and a full 44px touch target.
+    The expanding flex item nudges the page counter / progress gently left. */
+ .toolbar .toolbar-center{gap:0}
  .toolbar .back-to-cover{
-   display:none;position:relative;
+   display:grid;position:relative;
    box-sizing:border-box;
-   width:44px;height:44px;flex:0 0 44px;place-items:center;
-   padding:0;margin-left:6px;
+   width:0;height:44px;flex:0 0 0;place-items:center;
+   padding:0;margin-left:0;min-width:0;
    border:0;border-radius:50%;
    color:var(--ink);background:transparent;cursor:pointer;
+   opacity:0;transform:translateX(15px);pointer-events:none;
+   transition:flex-basis 420ms cubic-bezier(.22,1,.36,1),
+              width 420ms cubic-bezier(.22,1,.36,1),
+              margin-left 420ms cubic-bezier(.22,1,.36,1),
+              transform 420ms cubic-bezier(.22,1,.36,1),
+              opacity 320ms ease-out;
    -webkit-tap-highlight-color:transparent;
+ }
+ .toolbar .back-to-cover.is-visible{
+   width:44px;flex-basis:44px;margin-left:9px;
+   opacity:1;transform:translateX(0);pointer-events:auto;
  }
  .toolbar .back-to-cover::before{
    content:"";position:absolute;inset:6px;
    border:1px solid rgba(48,49,47,.30);border-radius:50%;
    pointer-events:none;
  }
- .toolbar .back-to-cover svg{position:relative;z-index:1}
- .toolbar .back-to-cover:not([hidden]){display:grid}
- .toolbar .back-to-cover[hidden]{display:none!important}
+ .toolbar .back-to-cover svg{position:relative;z-index:1;flex:none}
  .toolbar .back-to-cover:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
  /* Disable mandatory snap only during the intentional eased return journey. */
  .mobile-book.is-returning{scroll-snap-type:none!important;scroll-behavior:auto!important}
+}
+@media (prefers-reduced-motion: reduce){
+ .toolbar .back-to-cover{transition:none!important}
 }
 @media (max-width:770px) and (max-height:730px){
  #mobileBook .mobile-page:nth-child(3) .mc-window + .mc-content{
@@ -823,7 +836,7 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
  </section>
 </main>
 <nav class="rail" id="rail" aria-label="章節快速切換"></nav>
-<footer class="toolbar" aria-label="翻頁導覽"><div class="toolbar-title">reifo.</div><span class="toolbar-edition">The art of noticing / Vol. 01</span><div class="toolbar-center"><span class="toolbar-current" id="currentLabel">Cover</span><div class="toolbar-progress"><span class="toolbar-count" id="counter">01 / 10</span><div class="toolbar-track"><div class="toolbar-fill" id="fill"></div></div></div><div class="toolbar-controls"><button class="arrow" id="prev" aria-label="上一頁" type="button">←</button><button class="arrow" id="next" aria-label="下一頁" type="button">→</button></div><button class="back-to-cover" id="backToCover" type="button" aria-label="返回第一張封面" title="返回封面" hidden><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10l6-6 6 6M12 4v15"/></svg></button></div></footer>
+<footer class="toolbar" aria-label="翻頁導覽"><div class="toolbar-title">reifo.</div><span class="toolbar-edition">The art of noticing / Vol. 01</span><div class="toolbar-center"><span class="toolbar-current" id="currentLabel">Cover</span><div class="toolbar-progress"><span class="toolbar-count" id="counter">01 / 10</span><div class="toolbar-track"><div class="toolbar-fill" id="fill"></div></div></div><div class="toolbar-controls"><button class="arrow" id="prev" aria-label="上一頁" type="button">←</button><button class="arrow" id="next" aria-label="下一頁" type="button">→</button></div><button class="back-to-cover" id="backToCover" type="button" aria-label="返回第一張封面" title="返回封面" aria-hidden="true" tabindex="-1" disabled><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10l6-6 6 6M12 4v15"/></svg></button></div></footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 (()=>{
@@ -852,7 +865,11 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
    count.textContent=`${String(active+1).padStart(2,'0')} / ${String(all.length).padStart(2,'0')}`;
    fill.style.width=((active+1)/all.length*100)+'%';currentLabel.textContent=all[active].dataset.label;
    prev.disabled=active===0;next.disabled=active===all.length-1;
-   backToCover.hidden=!mobile()||active===0;
+   const showBack=mobile()&&active>0;
+   backToCover.classList.toggle('is-visible',showBack);
+   backToCover.setAttribute('aria-hidden',String(!showBack));
+   backToCover.tabIndex=showBack?0:-1;
+   backToCover.disabled=!showBack;
    dots.forEach((el,n)=>el.classList.toggle('active',!mobile()&&n===active));
  }
  function go(i){
