@@ -357,6 +357,114 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
 @media print{.mobile-book{display:none!important}}
 @media(prefers-reduced-motion:reduce){.mobile-book{scroll-behavior:auto!important}}
 
+
+/* 2026-10-13 — quieter studies: remove illustrative rules on both desktop and mobile.
+   Previous positioned pseudo-elements escaped the mobile illustration and crossed text. */
+.study-1,.study-2,.study-3{position:relative;overflow:hidden;isolation:isolate}
+.study-1{
+ background:radial-gradient(ellipse at 21% 30%,rgba(246,242,229,.93),transparent 68%),
+            radial-gradient(ellipse at 80% 78%,rgba(157,171,158,.65),transparent 68%),
+            linear-gradient(145deg,#d0d4c7,#b1baad)!important
+}
+.study-2{
+ background:radial-gradient(ellipse at 65% 33%,rgba(241,239,222,.96),transparent 63%),
+            radial-gradient(ellipse at 20% 85%,rgba(145,162,149,.62),transparent 72%),
+            linear-gradient(130deg,#c9d0c2,#b1bbae)!important
+}
+.study-3{
+ background:radial-gradient(ellipse at 80% 30%,rgba(240,239,223,.86),transparent 60%),
+            radial-gradient(ellipse at 13% 80%,rgba(128,148,137,.65),transparent 69%),
+            linear-gradient(140deg,#a6b3a6,#d9dacf)!important
+}
+.study-1::after,.study-2::after,.study-3::before{content:none!important;display:none!important}
+/* These dense editorial cards need a shorter measure on smaller handsets. */
+@media (max-width:770px),(orientation:portrait) and (max-width:1024px){
+ .mc-solo-number{font-size:clamp(52px,8.7dvh,78px)}
+ .mc-preface{font-size:clamp(24px,6.5vw,31px);line-height:1.65}
+ .mc-warm .mc-text p{margin-bottom:9px}
+ .mc-manifesto{font-size:clamp(19px,5.05vw,25px);line-height:1.58}
+ .mc-manifesto p{margin-bottom:11px}
+ .mc-cover .mc-visual{max-height:clamp(120px,20dvh,192px)}
+ .mc-meta{flex:0 0 auto}
+ .mc-foot{flex:0 0 auto}
+}
+/* On handheld, each swipe has one exact snap destination instead of proximity scrolling. */
+@media (max-width:770px),(orientation:portrait) and (max-width:1024px){
+ .mobile-book{
+  scroll-snap-type:y mandatory;
+  scroll-padding-block:0;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+ }
+ .mobile-page{
+  height:100dvh;min-height:100dvh;
+  padding:clamp(45px,6.3dvh,57px) 13px calc(57px + env(safe-area-inset-bottom,0px));
+  scroll-snap-align:start;scroll-snap-stop:always;
+ }
+ .mobile-sheet{
+  height:100%;min-height:0;max-height:100%;
+  padding:clamp(16px,2.9dvh,25px);
+  gap:clamp(7px,1.2dvh,13px);
+  overflow:hidden;
+  justify-content:space-between;
+ }
+ /* Reduce overgrown study art and oversized blocks while retaining reading-size copy. */
+ .mc-study-art.study{
+   height:clamp(95px,18dvh,172px);
+   flex:0 1 auto;min-height:86px;max-height:172px;
+   position:relative;overflow:hidden;
+ }
+ .mc-study-no{font-size:9px}
+ .mc-display{font-size:clamp(52px,13.2vw,77px);margin:7px 0 7px;line-height:.94}
+ .mc-subtitle{font-size:clamp(16px,4.2vw,19px);line-height:1.6}
+ .mc-content{gap:clamp(8px,1.2dvh,14px)}
+ .mc-content .mc-quote{font-size:clamp(21px,5.65vw,29px);line-height:1.69}
+ .mc-content .mc-text{font-size:clamp(12.8px,3.28vw,14px);line-height:1.8}
+ .mc-foot{padding-top:9px}
+ /* Reading first. Arrows remain available on desktop, mobile navigation follows the scroll. */
+ .toolbar{
+   height:calc(49px + env(safe-area-inset-bottom,0px));
+   padding:0 22px env(safe-area-inset-bottom,0px);
+ }
+ .toolbar-controls{display:none}
+ .toolbar-track{width:70px;display:block}
+ .toolbar-title{font-size:20px}
+ .toolbar-count{font-size:11px}
+ .toast{bottom:calc(59px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:770px) and (max-height:730px){
+ .mobile-page{padding:43px 12px calc(53px + env(safe-area-inset-bottom,0px))}
+ .mobile-sheet{padding:14px 19px;gap:6px}
+ .mc-study-art.study{height:clamp(72px,15dvh,124px);min-height:72px}
+ .mc-display{font-size:clamp(44px,12vw,64px);margin:4px 0}
+ .mc-subtitle{font-size:16px}
+ .mc-content .mc-quote{font-size:clamp(20px,5.5vw,26px);line-height:1.53}
+ .mc-content .mc-text{font-size:12.5px;line-height:1.65}
+ .mc-meta,.mc-foot{font-size:8.5px}
+ .mc-foot{padding-top:6px}
+}
+
+/* Keep every sentence accessible even on compact devices or enlarged system text. */
+@media (max-width:770px),(orientation:portrait) and (max-width:1024px){
+ .mobile-sheet.mc-condensed{padding:13px 16px;gap:5px}
+ .mc-condensed .mc-study-art.study,.mc-condensed .mc-window.window-scene{height:clamp(72px,13dvh,115px)}
+ .mc-condensed .mc-visual{height:clamp(95px,15dvh,140px)}
+ .mc-condensed .mc-display{font-size:clamp(42px,11vw,60px);margin:3px 0}
+ .mc-condensed .mc-roman{font-size:clamp(30px,8vw,42px)}
+ .mc-condensed .mc-quote{font-size:clamp(19px,5vw,25px);line-height:1.55}
+ .mc-condensed .mc-text{font-size:12.5px;line-height:1.63}
+ .mc-condensed .mc-preface{font-size:clamp(22px,5.9vw,28px)}
+ .mc-condensed .mc-solo-number{font-size:51px}
+ .mc-condensed .mc-manifesto{font-size:clamp(17px,4.7vw,22px);line-height:1.45}
+ .mc-condensed .mc-manifesto p{margin-bottom:7px}
+ .mc-condensed .mc-name-parts>div{padding:7px 0}
+ .mc-condensed .mc-swatch{min-height:36px}
+ .mc-condensed .mc-type-list>div{padding:6px 0}
+ .mc-condensed .mc-work-list>div{padding:5px 0}
+ .mobile-sheet.mc-allow-scroll{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+}
+
 </style>
 </head>
 <body>
@@ -650,6 +758,16 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
  const mobile=()=>window.matchMedia('(max-width:770px), (orientation:portrait) and (max-width:1024px)').matches;
  const pages=()=>mobile()?mobilePages:desktopPages;
  let active=0,wheelLock=false,toastTimer,scrollFrame=0;
+ // Compact only when the rendered content needs it; tiny screens can still read all copy.
+ function fitMobileCards(){
+   if(!mobile())return;
+   mobilePages.forEach(page=>{
+     const sheet=page.querySelector('.mobile-sheet');
+     sheet.classList.remove('mc-condensed','mc-allow-scroll');
+     if(sheet.scrollHeight>sheet.clientHeight+3)sheet.classList.add('mc-condensed');
+     if(sheet.scrollHeight>sheet.clientHeight+3)sheet.classList.add('mc-allow-scroll');
+   });
+ }
  desktopPages.forEach((page,i)=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',`${String(i+1).padStart(2,'0')} / ${page.dataset.label}`);b.title=page.dataset.label;b.onclick=()=>go(i);rail.appendChild(b)});
  const dots=Array.from(rail.children);
  function update(i){
@@ -691,9 +809,15 @@ button{font:inherit}button:focus-visible{outline:1px solid currentColor;outline-
    e.preventDefault();wheelLock=true;go(active+(e.deltaY>0?1:-1));setTimeout(()=>wheelLock=false,470);
  },{passive:false});
  const mq=window.matchMedia('(max-width:770px), (orientation:portrait) and (max-width:1024px)');
- const sync=()=>{active=0;book.scrollTo({left:0,behavior:'instant'});mobileBook.scrollTo({top:0,behavior:'instant'});update(0)};
+ const sync=()=>{active=0;book.scrollTo({left:0,behavior:'instant'});mobileBook.scrollTo({top:0,behavior:'instant'});update(0);requestAnimationFrame(fitMobileCards)};
  if(mq.addEventListener)mq.addEventListener('change',sync);else mq.addListener(sync);
- window.addEventListener('resize',()=>{if(mobile())return;update(Math.round(book.scrollLeft/Math.max(book.clientWidth,1)))});
+ let resizeFrame=0;
+ window.addEventListener('resize',()=>{
+   if(resizeFrame)cancelAnimationFrame(resizeFrame);
+   resizeFrame=requestAnimationFrame(()=>{resizeFrame=0;if(mobile())fitMobileCards();else update(Math.round(book.scrollLeft/Math.max(book.clientWidth,1)))});
+ });
+ if(document.fonts?.ready)document.fonts.ready.then(()=>requestAnimationFrame(fitMobileCards));
+ requestAnimationFrame(fitMobileCards);
  const toast=document.getElementById('toast');
  function feedback(t){toast.textContent=t;toast.classList.add('active');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('active'),1700)}
  document.querySelectorAll('[data-color]').forEach(c=>c.onclick=async()=>{
