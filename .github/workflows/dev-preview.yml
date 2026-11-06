@@ -1,0 +1,105 @@
+name: Dev check and preview
+
+# DEV environment.
+# Every push to any branch other than main:
+#   1. runs all checks (job "verify" — required before merging into main)
+#   2. publishes dist/ to a Cloudflare Pages preview URL (job "preview";
+#      public link but noindex, so search engines skip it)
+# Nothing here touches www.muweifilm.com. Production only deploys from main
+# (see deploy-pages.yml).
+on:
+  push:
+    branches-ignore: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: dev-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CF_PAGES_PROJECT: muweifilm-dev
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run all checks (tests, build, dist verification)
+        run: bash scripts/run-checks.sh
+      - name: Keep build as downloadable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-build-preview
+          path: dist/
+          include-hidden-files: true
+          retention-days: 7
+
+  preview:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+      url: ${{ steps.url.outputs.preview_url }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Explain missing Cloudflare setup
+        if: env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == ''
+        run: |
+          echo "::warning::Dev preview skipped: add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repository secrets (see README → Dev 預覽設定)."
+          echo "### Dev preview skipped" >> "$GITHUB_STEP_SUMMARY"
+          echo "Cloudflare secrets are not configured yet. Use \`bash scripts/preview.sh\` locally, or download the site-build-preview artifact." >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/checkout@v4
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+
+      - name: Build dist/
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        run: |
+          bash scripts/build-site.sh
+          # Preview must never be indexed by search engines (Cloudflare Pages _headers file).
+          printf '/*\n  X-Robots-Tag: noindex, nofollow\n' > dist/_headers
+
+      - name: Create Cloudflare Pages project on first run
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        run: |
+          npx --yes wrangler@4 pages project list | grep -q "$CF_PAGES_PROJECT" \
+            || npx --yes wrangler@4 pages project create "$CF_PAGES_PROJECT" --production-branch=main
+
+      - name: Publish to dev preview
+        id: deploy
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4"
+          command: pages deploy dist --project-name=${{ env.CF_PAGES_PROJECT }} --branch=${{ github.ref_name }} --commit-hash=${{ github.sha }} --commit-dirty=true
+
+      - name: Report preview URL
+        id: url
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        env:
+          ALIAS_URL: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          url="${ALIAS_URL:-$DEPLOY_URL}"
+          echo "preview_url=$url" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Dev preview is live"
+            echo ""
+            echo "| | URL |"
+            echo "|---|---|"
+            echo "| 官網 | $url/ |"
+            echo "| Photo Quest | $url/photo-quest/ |"
+            echo "| reifo | $url/reifo/ |"
+            echo "| This exact commit | $DEPLOY_URL |"
+          } >> "$GITHUB_STEP_SUMMARY"
