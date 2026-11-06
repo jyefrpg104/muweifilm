@@ -1,6 +1,13 @@
 /* Quest Archive: local-first metadata, Drive-owned original images. No OAuth of its own. */
 (function(root){
   'use strict';
+  // Drive namespace: production data lives only on the production domain.
+  // Every other host (dev previews, localhost) uses a separate tag and folder,
+  // so dev testing can never read or write the real Photo Quest backup.
+  const DRIVE_HOST=root.location?.hostname;
+  const DRIVE_ENV=!DRIVE_HOST||['www.muweifilm.com','muweifilm.com'].includes(DRIVE_HOST)
+    ?{dev:false,tag:'v1',folder:'Photo Quest'}
+    :{dev:true,tag:'dev-v1',folder:'Photo Quest (dev)'};
   const STORAGE_KEY='photo-quest:quest-archive:v1';
   const API='https://www.googleapis.com/drive/v3';
   const UPLOAD='https://www.googleapis.com/upload/drive/v3';
@@ -9,8 +16,8 @@
   const CHUNK=4*1024*1024; // multiple of Drive's 256 KiB requirement
   const copy=value=>JSON.parse(JSON.stringify(value));
   const quote=value=>String(value).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-  const tags=(kind,taskId)=>({photoQuest:'v1',kind,...(taskId?{taskId}:{})});
-  const query=(kind,taskId)=>`trashed = false and appProperties has { key='photoQuest' and value='v1' } and appProperties has { key='kind' and value='${quote(kind)}' }${taskId?` and appProperties has { key='taskId' and value='${quote(taskId)}' }`:''}`;
+  const tags=(kind,taskId)=>({photoQuest:DRIVE_ENV.tag,kind,...(taskId?{taskId}:{})});
+  const query=(kind,taskId)=>`trashed = false and appProperties has { key='photoQuest' and value='${DRIVE_ENV.tag}' } and appProperties has { key='kind' and value='${quote(kind)}' }${taskId?` and appProperties has { key='taskId' and value='${quote(taskId)}' }`:''}`;
   const validId=value=>typeof value==='string'&&/^[a-zA-Z0-9_-]{1,200}$/.test(value);
   function folderName(task,card){
     const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(task.completedAt));
@@ -273,5 +280,5 @@
     function stop(){halted=true;clearTimeout(scheduled);scheduled=null;unsubscribe();notify(null);}
     return {observe,state,ensure,flush,uploadPhotos,thumbnail,stop,storageKey:STORAGE_KEY};
   }
-  root.PhotoQuestArchive={create,folderName,cardFileName,questDocument,mimeType,STORAGE_KEY};
+  root.PhotoQuestArchive={DRIVE_ENV,create,folderName,cardFileName,questDocument,mimeType,STORAGE_KEY};
 })(typeof window==='undefined'?globalThis:window);

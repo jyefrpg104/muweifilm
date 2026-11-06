@@ -1,6 +1,13 @@
 /* Photo Quest personal Drive backup. Access tokens remain in memory only. */
 (function(root){
   'use strict';
+  // Drive namespace: production data lives only on the production domain.
+  // Every other host (dev previews, localhost) uses a separate tag and folder,
+  // so dev testing can never read or write the real Photo Quest backup.
+  const DRIVE_HOST=root.location?.hostname;
+  const DRIVE_ENV=!DRIVE_HOST||['www.muweifilm.com','muweifilm.com'].includes(DRIVE_HOST)
+    ?{dev:false,tag:'v1',folder:'Photo Quest'}
+    :{dev:true,tag:'dev-v1',folder:'Photo Quest (dev)'};
   const CLIENT_ID='579396068050-tl6uftta9310m7mh4t8fas3l6s3gg7do.apps.googleusercontent.com';
   const SCOPE='https://www.googleapis.com/auth/drive.file';
   // Pin the personal account without publishing its email address in the site.
@@ -80,6 +87,7 @@
       else if(remembered&&!usableToken()){status='需要重新連線';detail='按「重新連線」後，會補傳此裝置的最新資料。';}
       else if(remembered&&dirty){status='尚未同步';detail='資料已保存在此裝置，準備同步到 Google Drive。';}
       else if(remembered){status='已同步';detail=lastSyncedAt?`上次同步：${new Intl.DateTimeFormat('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(lastSyncedAt))}`:'已連接 Google Drive。';}
+      if(DRIVE_ENV.dev)detail+=' ［DEV 環境：寫入「Photo Quest (dev)」資料夾，與正式資料完全分開］';
       adapter.render({status,detail,remembered,connected:!!usableToken(),busy:authPending||syncing,loading:libraryLoading,restoreAvailable:!!cloudCurrent&&!syncing&&!authPending,folderId});
       listeners.forEach(listener=>listener());
     }
@@ -125,10 +133,10 @@
       do{const value=await request('/files?'+new URLSearchParams({q,pageSize:'1000',fields:'nextPageToken,files(id,name,appProperties,modifiedTime,createdTime)',...(pageToken?{pageToken}:{})}),{},generation);files.push(...value.files);pageToken=value.nextPageToken||'';if(files.length>2000)throw Error('雲端備份檔案過多，已暫停同步。')}while(pageToken);
       return files;
     }
-    const tagQuery=kind=>`trashed = false and appProperties has { key='photoQuest' and value='v1' } and appProperties has { key='kind' and value='${kind}' }`;
+    const tagQuery=kind=>`trashed = false and appProperties has { key='photoQuest' and value='${DRIVE_ENV.tag}' } and appProperties has { key='kind' and value='${kind}' }`;
     async function upload(id,name,kind,payload,generation,extra={}){
       const boundary='pq_'+uuid().replace(/[^a-z0-9]/gi,'');
-      const metadata={name,mimeType:'application/json',appProperties:{photoQuest:'v1',kind,...extra},...(!id?{parents:[folderId]}:{})};
+      const metadata={name,mimeType:'application/json',appProperties:{photoQuest:DRIVE_ENV.tag,kind,...extra},...(!id?{parents:[folderId]}:{})};
       const body=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(payload)}\r\n--${boundary}--`;
       return request(`/files${id?'/'+encodeURIComponent(id):''}?uploadType=multipart&fields=id`,{method:id?'PATCH':'POST',headers:{'Content-Type':`multipart/related; boundary=${boundary}`},body},generation,true);
     }
@@ -157,7 +165,7 @@
       const run=async()=>{
         guard(generation);
         const folders=await list(tagQuery('folder'),generation);folderId=folders.sort((a,b)=>String(a.createdTime).localeCompare(String(b.createdTime)))[0]?.id;
-        if(!folderId){const folder=await request('/files?fields=id',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'Photo Quest',mimeType:'application/vnd.google-apps.folder',appProperties:{photoQuest:'v1',kind:'folder'}})},generation);folderId=folder.id;}
+        if(!folderId){const folder=await request('/files?fields=id',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:DRIVE_ENV.folder,mimeType:'application/vnd.google-apps.folder',appProperties:{photoQuest:DRIVE_ENV.tag,kind:'folder'}})},generation);folderId=folder.id;}
         const deviceFiles=await list(tagQuery('device'),generation),latestFiles=await list(tagQuery('latest'),generation);
         if(deviceFiles.length>50)throw Error('同步來源超過 50 個裝置，已暫停合併。');
         latestFileId=latestFiles[0]?.id||null;ownFileId=deviceFiles.find(file=>file.appProperties?.deviceId===deviceId)?.id||null;
@@ -245,6 +253,6 @@
       subscribe:listener=>{listeners.add(listener);return ()=>listeners.delete(listener)}};
     return {observe,metadata,start,connect,disconnect,sync,networkChanged,externalChange,restoreCurrent,archiveTransport};
   }
-  root.PhotoQuestDrive={create,mergeBundles,validMeta,seedMeta,fingerprint};
+  root.PhotoQuestDrive={DRIVE_ENV,create,mergeBundles,validMeta,seedMeta,fingerprint};
 })(typeof window==='undefined'?globalThis:window);
 

@@ -68,7 +68,7 @@ bash scripts/run-checks.sh     # 只跑檢查
 | `https://dev.muweifilm-dev.pages.dev` | 所有 branch 中最近一次 push 的版本 | 固定 dev 網址；Photo Quest 的 Google Drive 只在這個 dev 網址可以登入 |
 
 - 預覽網址是公開連結，但設了 `noindex`，不會被搜尋引擎收錄。
-- ⚠️ dev 的 Google Drive 同步和正式站寫入**同一個** Drive「Photo Quest」資料夾。只想測畫面時不要按「連接 Google Drive」，以免測試紀錄合併進真實資料。
+- dev 的 Google Drive 資料和正式站**完全分開**：正式站寫入「Photo Quest」，dev 寫入「Photo Quest (dev)」（依網域判斷，見 `photo-quest/README-drive.md`）。
 
 ### Dev 預覽設定（一次性）
 
