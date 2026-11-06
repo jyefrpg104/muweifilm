@@ -1,8 +1,9 @@
 name: Deploy website to GitHub Pages
 
-# After switching Settings -> Pages -> Source to GitHub Actions, all changes on
-# main get an automatic Pages deploy, with live URL checks. This workflow
-# supports root-layout and the muwei-website/ source folder.
+# PRODUCTION environment (www.muweifilm.com).
+# Only runs for main. main is protected: changes arrive through a pull request
+# that already passed "verify" and was checked on the dev preview URL.
+# Settings -> Pages -> Source must stay "GitHub Actions".
 on:
   push:
     branches: [main]
@@ -24,11 +25,12 @@ jobs:
       - name: Check out website
         uses: actions/checkout@v4
 
-      - name: Build site distribution
-        run: bash scripts/build-site.sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
-      - name: Validate website, domain and Photo Quest
-        run: bash scripts/test-site.sh
+      - name: Run all checks (tests, build, dist verification)
+        run: bash scripts/run-checks.sh
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
