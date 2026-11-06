@@ -43,4 +43,14 @@ for item in "${paths[@]}"; do
   fi
   echo "PASS: ${BASE_URL}${route}"
 done
+if [[ -n "${GITHUB_SHA:-}" ]]; then
+  for attempt in $(seq 1 18); do
+    live="$(curl --fail --location --silent --show-error --header 'Cache-Control: no-cache' "${BASE_URL}/version.json?sha=${BUST}" || true)"
+    if grep -q "\"commit\": \"${GITHUB_SHA}\"" <<<"$live"; then
+      echo "PASS: ${BASE_URL}/version.json reports commit ${GITHUB_SHA}"; break
+    fi
+    echo "version.json not yet at ${GITHUB_SHA} (attempt ${attempt})"; sleep 10
+    [[ "$attempt" == 18 ]] && { echo "FAIL: live version.json does not report ${GITHUB_SHA}" >&2; exit 1; }
+  done
+fi
 echo 'Live website URL and byte-level deployment verification succeeded.'

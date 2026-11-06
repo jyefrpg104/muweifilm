@@ -65,8 +65,10 @@ jobs:
 
       - name: Build dist/
         if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        env:
+          SITE_ENV: dev
         run: |
-          bash scripts/build-site.sh
+          SITE_VERSION="dev-${GITHUB_SHA::7}" bash scripts/build-site.sh
           # Preview must never be indexed by search engines (Cloudflare Pages _headers file).
           printf '/*\n  X-Robots-Tag: noindex, nofollow\n' > dist/_headers
 

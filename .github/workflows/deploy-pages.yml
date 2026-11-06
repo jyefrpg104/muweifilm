@@ -21,15 +21,29 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Check out website
         uses: actions/checkout@v4
+
+      - name: Decide release version (prod-YYYY.MM.DD-N, Taipei date)
+        id: version
+        run: |
+          day="$(TZ=Asia/Taipei date +%Y.%m.%d)"
+          count="$(git ls-remote --tags origin "refs/tags/prod-${day}-*" | wc -l)"
+          version="prod-${day}-$((count + 1))"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "Release version: ${version}"
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - name: Run all checks (tests, build, dist verification)
+        env:
+          SITE_ENV: production
+          SITE_VERSION: ${{ steps.version.outputs.version }}
         run: bash scripts/run-checks.sh
 
       - name: Configure GitHub Pages
@@ -55,7 +69,31 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Rebuild expected deployment files
+        env:
+          SITE_ENV: production
+          SITE_VERSION: ${{ needs.build.outputs.version }}
         run: bash scripts/build-site.sh
 
-      - name: Verify published HTML, CSS, images and Photo Quest
+      - name: Verify published files and live version.json commit
         run: bash scripts/check-live-site.sh
+
+  release:
+    # Only after the live site is verified: tag the exact commit and publish
+    # auto-generated release notes (list of merged PRs since the last release).
+    needs: [build, deploy]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Tag ${{ needs.build.outputs.version }} and publish release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "$VERSION" --generate-notes --latest
+          {
+            echo "### Released ${VERSION}"
+            echo "- Live: https://www.muweifilm.com/version.json"
+            echo "- Notes: https://github.com/${GITHUB_REPOSITORY}/releases/tag/${VERSION}"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -170,3 +170,18 @@ dev preview URLs and `localhost` — uses tag `photoQuest=dev-v1` and its own fo
 `Photo Quest (dev)`, so dev testing can never see, merge into or overwrite real data.
 The dev Drive panel says so in its status line. Google OAuth must list the shared
 dev URL (`https://dev.<project>.pages.dev`) as an authorized JavaScript origin.
+
+## Data format versions (not release versions)
+
+These numbers describe how stored data is read. They are independent of the
+website release (`prod-YYYY.MM.DD-N`). Never bump one because the other changed;
+bumping a data version requires a migration path for the old format.
+
+| Where | Identifier | Current | Notes |
+|---|---|---|---|
+| localStorage, current task | key `photo-quest:current-task:v1`, field `version` | `5` | Loader still reads envelope versions 1–5 |
+| localStorage, Quest Archive | key `photo-quest:quest-archive:v1`, field `version` | `1` | |
+| localStorage, Drive connection | key `photo-quest:drive:connection:v1` | `v1` | |
+| Export / import file | `format: photo-quest-backup`, `version` | `2` | Import accepts 1 and 2 |
+| Drive file tag | appProperty `photoQuest` | `v1` / `dev-v1` | `dev-v1` is the dev namespace, not a newer version |
+| Home screen icon | `apple-touch-icon-v1.png` | `v1` | Rename to `-v2` when the icon changes so phones refetch it |
