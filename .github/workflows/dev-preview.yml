@@ -3,8 +3,10 @@ name: Dev check and preview
 # DEV environment.
 # Every push to any branch other than main:
 #   1. runs all checks (job "verify" — required before merging into main)
-#   2. publishes dist/ to a Cloudflare Pages preview URL (job "preview";
-#      public link but noindex, so search engines skip it)
+#   2. publishes dist/ to Cloudflare Pages (job "preview"; public but noindex):
+#      - per-branch URL:  https://<branch>.<project>.pages.dev
+#      - shared dev URL:  https://dev.<project>.pages.dev  (always the latest push;
+#        this is the origin authorized for Photo Quest's Google Drive OAuth)
 # Nothing here touches www.muweifilm.com. Production only deploys from main
 # (see deploy-pages.yml).
 on:
@@ -84,12 +86,23 @@ jobs:
           wranglerVersion: "4"
           command: pages deploy dist --project-name=${{ env.CF_PAGES_PROJECT }} --branch=${{ github.ref_name }} --commit-hash=${{ github.sha }} --commit-dirty=true
 
+      - name: Publish to shared dev URL (latest push from any branch)
+        id: shared
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4"
+          command: pages deploy dist --project-name=${{ env.CF_PAGES_PROJECT }} --branch=dev --commit-hash=${{ github.sha }} --commit-dirty=true
+
       - name: Report preview URL
         id: url
         if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
         env:
           ALIAS_URL: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
           DEPLOY_URL: ${{ steps.deploy.outputs.deployment-url }}
+          SHARED_URL: ${{ steps.shared.outputs.pages-deployment-alias-url }}
         run: |
           url="${ALIAS_URL:-$DEPLOY_URL}"
           echo "preview_url=$url" >> "$GITHUB_OUTPUT"
@@ -102,4 +115,5 @@ jobs:
             echo "| Photo Quest | $url/photo-quest/ |"
             echo "| reifo | $url/reifo/ |"
             echo "| This exact commit | $DEPLOY_URL |"
+            echo "| Shared dev URL (Google Drive OK) | $SHARED_URL/photo-quest/ |"
           } >> "$GITHUB_STEP_SUMMARY"
