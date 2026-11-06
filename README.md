@@ -81,9 +81,25 @@ bash scripts/run-checks.sh     # 只跑檢查
 
 在設定完成前，`preview` 工作會略過並顯示提示，`verify` 照常執行。
 
+## 版本號
+
+**發布版本**（網站「現在線上是哪一版」）：
+
+- 格式 `prod-YYYY.MM.DD-N`，例如 `prod-2026.11.07-2` 表示台北時間當天第 2 次上線。
+- 正式站部署並驗證成功後，workflow 會自動打 tag，並在 GitHub **Releases** 產生 release notes（列出這次合併的 PR）。不用手動編號。
+- 任何網址都可以打開 `/version.json`，查看它目前跑的是哪一版：
+
+| 網址 | `environment` | `version` |
+|---|---|---|
+| https://www.muweifilm.com/version.json | `production` | `prod-YYYY.MM.DD-N` |
+| https://dev.muweifilm-dev.pages.dev/version.json | `dev` | `dev-<commit 前 7 碼>` |
+| 本機 `scripts/preview.sh` | `local` | `local` |
+
+**資料格式版本**（Photo Quest「這份資料怎麼讀」）跟發布版本完全分開，對照表見 `photo-quest/README-drive.md`。
+
 ## 正式站部署
 
 - GitHub → **Settings → Pages → Source** 必須維持 **GitHub Actions**。不要改回 *Deploy from a branch*，因為根目錄沒有 `index.html`。
 - DNS 在 Squarespace：`www` 的 CNAME 指向 `jyefrpg104.github.io`。
 - 上線後到 Actions 確認 `build` 和 `deploy` 兩個工作都是綠燈。`deploy` 會逐檔比對正式網址上的內容。
-- 出問題要回退：在 GitHub 對該 PR 按 **Revert** 開一個回退 PR，合併後就會自動重新部署。
+- 出問題要回退：在 GitHub 對該 PR 按 **Revert** 開一個回退 PR，合併後就會自動重新部署（並產生新的版本號）。要比對兩個版本的差異，到 Releases 頁看 release notes，或用 `git diff prod-A prod-B`。
