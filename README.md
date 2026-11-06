@@ -60,9 +60,15 @@ bash scripts/run-checks.sh     # 只跑檢查
 
 ### Dev 預覽網址
 
-- 分支固定網址：`https://<branch 名稱轉小寫、斜線變 ->.muweifilm-dev.pages.dev`（實際網址以 Actions 摘要或 PR 的 **View deployment** 為準）
+每次 push 會產生兩個網址（實際網址以 Actions 執行摘要為準）：
+
+| 網址 | 內容 | 用途 |
+|---|---|---|
+| `https://<branch>.muweifilm-dev.pages.dev` | 這個 branch 的最新版本 | 平行開發多個 branch 時互不干擾 |
+| `https://dev.muweifilm-dev.pages.dev` | 所有 branch 中最近一次 push 的版本 | 固定 dev 網址；Photo Quest 的 Google Drive 只在這個 dev 網址可以登入 |
+
 - 預覽網址是公開連結，但設了 `noindex`，不會被搜尋引擎收錄。
-- Photo Quest 的 Google Drive 備份在預覽網址上無法登入（OAuth 只授權正式網域）；其他功能都是本機儲存，可以正常測。
+- dev 的 Google Drive 資料和正式站**完全分開**：正式站寫入「Photo Quest」，dev 寫入「Photo Quest (dev)」（依網域判斷，見 `photo-quest/README-drive.md`）。
 
 ### Dev 預覽設定（一次性）
 

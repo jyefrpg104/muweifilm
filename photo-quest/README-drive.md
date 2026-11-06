@@ -161,3 +161,12 @@ Drive 架構下宣稱完全消除；一般補傳、重開、回應中斷及序�
 真正的 Google OAuth、Drive CORS/resumable Location/Range headers、私人縮圖
 以及 iPhone Safari／Android Chrome 實機選檔與 HEIC 預覽，仍需在可授權的 HTTP(S)
 預覽來源做端到端驗證。自動化使用 Mock API，不建立真實 Drive 測試作品。
+
+## Dev and production data are separate
+
+Only `www.muweifilm.com` / `muweifilm.com` read and write the real backup
+(Drive tag `photoQuest=v1`, folder `Photo Quest`). Every other host — the Cloudflare
+dev preview URLs and `localhost` — uses tag `photoQuest=dev-v1` and its own folder
+`Photo Quest (dev)`, so dev testing can never see, merge into or overwrite real data.
+The dev Drive panel says so in its status line. Google OAuth must list the shared
+dev URL (`https://dev.<project>.pages.dev`) as an authorized JavaScript origin.
