@@ -2,7 +2,7 @@ const {readFileSync}=require('node:fs');
 const vm=require('node:vm');
 const assert=require('node:assert/strict');
 const account='owner@example.com';
-const source=readFileSync(__dirname+'/../photo-quest/cloud-backup.js','utf8').replace(/const ACCOUNT_HASH='[a-f0-9]+'/,"const ACCOUNT_HASH='"+require('node:crypto').createHash('sha256').update(account).digest('hex')+"'");
+const source=readFileSync(__dirname+'/../lab/photo-quest/cloud-backup.js','utf8').replace(/const ACCOUNT_HASH='[a-f0-9]+'/,"const ACCOUNT_HASH='"+require('node:crypto').createHash('sha256').update(account).digest('hex')+"'");
 const task=(id,completed=false)=>({id,createdAt:'2026-10-10T08:00:00.000Z',confirmedAt:null,completedAt:completed?'2026-10-10T09:00:00.000Z':null,shotCount:completed?3:0,pairingEnabled:true,cards:{subject:id},locked:{},covered:{}});
 const backup=(current=task('current'),archived=[],favorites=[],deletedArchives=[])=>({format:'photo-quest-backup',version:2,exportedAt:'2026-10-12T06:00:00.000Z',current,archived,favorites,deletedArchives});
 const clone=x=>JSON.parse(JSON.stringify(x));

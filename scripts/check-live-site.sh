@@ -14,10 +14,14 @@ paths=(
   "/site.css|dist/site.css"
   "/images/about/portrait.jpg|dist/images/about/portrait.jpg"
   "/images/og.jpg|dist/images/og.jpg"
+  "/lab/|dist/lab/index.html"
+  "/lab/reifo/|dist/lab/reifo/index.html"
+  "/lab/reifo/about/|dist/lab/reifo/about/index.html"
+  "/lab/photo-quest/|dist/lab/photo-quest/index.html"
+  "/lab/photo-quest/apple-touch-icon-v1.png|dist/lab/photo-quest/apple-touch-icon-v1.png"
+  "/photo-quest/|dist/photo-quest/index.html"
   "/reifo/|dist/reifo/index.html"
   "/reifo/about/|dist/reifo/about/index.html"
-  "/photo-quest/|dist/photo-quest/index.html"
-  "/photo-quest/apple-touch-icon-v1.png|dist/photo-quest/apple-touch-icon-v1.png"
 )
 for item in "${paths[@]}"; do
   route="${item%%|*}"

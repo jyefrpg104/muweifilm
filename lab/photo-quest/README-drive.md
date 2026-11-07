@@ -1,6 +1,6 @@
 # Photo Quest personal Google Drive backup
 
-Open https://www.muweifilm.com/photo-quest/#records, then choose **連接 Google Drive**.
+Open https://www.muweifilm.com/lab/photo-quest/#records, then choose **連接 Google Drive**.
 Use the Google account configured as the sole OAuth test user. The first connection
 requires Google's consent screen. Once connected, stable task changes are saved
 locally first and automatically synchronized after a short debounce.

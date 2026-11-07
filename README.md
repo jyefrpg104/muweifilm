@@ -1,27 +1,39 @@
 # MUWEI FILM — Websites
 
-一個 repo、三個站，共用 `www.muweifilm.com`：
+一個 repo，共用 `www.muweifilm.com`：木尉影像官網＋木尉實驗室（工具與創作）。
 
 | 原始碼資料夾 | 正式網址 | 內容 |
 |---|---|---|
 | `muwei-website/` | https://www.muweifilm.com/ | 木尉影像官方網站（Astro） |
-| `photo-quest/` | https://www.muweifilm.com/photo-quest/ | PHOTO QUEST 攝影抽卡遊戲 |
-| `reifo/` | https://www.muweifilm.com/reifo/ | reifo 創作空間 |
+| `muwei-website/src/pages/lab/` | https://www.muweifilm.com/lab/ | 木尉實驗室入口（列表來自 `src/data/lab-tools.json`） |
+| `lab/photo-quest/` | https://www.muweifilm.com/lab/photo-quest/ | PHOTO QUEST 攝影抽卡遊戲 |
+| `lab/reifo/` | https://www.muweifilm.com/lab/reifo/ | reifo 創作空間 |
+
+舊網址 `/photo-quest/`、`/reifo/`、`/reifo/about/` 是轉址頁（在 `muwei-website/public/`），會帶著 `?…` 和 `#…` 轉到 `/lab/…`，舊連結和書籤都不會壞。
+
+### 新增一個實驗室工具
+
+1. 把工具放進 `lab/<工具代號>/`（要有 `index.html`），網址就是 `/lab/<工具代號>/`。
+2. 在 `muwei-website/src/data/lab-tools.json` 加一筆（`slug`、`name`、`category`：`tool` 或 `creative`、`summary`、`status`、`access`、`href`）。
+3. 工具頁左上角放一個回 `/lab/` 的連結。
+4. 開 branch → push → 在 dev 確認 → PR。`test-site.sh` 會檢查實驗室頁有列出它、資料夾存在。
 
 ```text
 muweifilm/
 ├── muwei-website/        # 官網（Astro）
-│   ├── src/pages/        #   頁面：index / about / works / services / contact / 404（.astro）
-│   └── public/           #   原樣複製的檔案：site.css、images/
-├── astro.config.mjs      # Astro 設定（網址維持 /about.html 形式）
+│   ├── src/pages/        #   頁面：index / about / works / services / contact / 404、lab/index（.astro）
+│   ├── src/data/         #   lab-tools.json：實驗室工具清單
+│   └── public/           #   原樣複製的檔案：site.css、images/、舊網址轉址頁
+├── astro.config.mjs      # Astro 設定（format: preserve，網址維持 /about.html 形式）
 ├── package.json          # Astro 版本（固定版本號）
-├── photo-quest/          # Photo Quest App
-├── reifo/                # reifo 創作空間
+├── lab/                  # 木尉實驗室：每個資料夾一個工具，原樣複製到 /lab/<工具>/
+│   ├── photo-quest/      #   Photo Quest App
+│   └── reifo/            #   reifo 創作空間
 ├── tests/                # Photo Quest 單元測試
 ├── scripts/
 │   ├── run-checks.sh     # 全部檢查：測試 → build → 比對 dist/
 │   ├── preview.sh        # 本機預覽（http://localhost:8000）
-│   ├── build-site.sh     # Astro 建置官網＋複製 Photo Quest、reifo → dist/
+│   ├── build-site.sh     # Astro 建置官網＋複製 lab/ 各工具 → dist/
 │   ├── test-site.sh      # 驗證 dist/
 │   └── check-live-site.sh# 正式上線後逐檔比對正式網址
 ├── .github/workflows/
@@ -101,7 +113,7 @@ bash scripts/run-checks.sh     # 只跑檢查
 | https://dev.muweifilm-dev.pages.dev/version.json | `dev` | `dev-<commit 前 7 碼>` |
 | 本機 `scripts/preview.sh` | `local` | `local` |
 
-**資料格式版本**（Photo Quest「這份資料怎麼讀」）跟發布版本完全分開，對照表見 `photo-quest/README-drive.md`。
+**資料格式版本**（Photo Quest「這份資料怎麼讀」）跟發布版本完全分開，對照表見 `lab/photo-quest/README-drive.md`。
 
 ## 正式站部署
 
