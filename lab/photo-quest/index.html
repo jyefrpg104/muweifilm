@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#F7F5EE" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/photo-quest/apple-touch-icon-v1.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/lab/photo-quest/apple-touch-icon-v1.png" />
   <meta name="apple-mobile-web-app-title" content="PHOTO QUEST" />
   <meta name="description" content="PHOTO QUEST — 一套以隨機條件重新觀看日常的攝影散步卡牌。抽取任務、瀏覽卡片、列印卡牌。" />
   <title>PHOTO QUEST — An Exercise in Seeing</title>
@@ -30,6 +30,9 @@
     .nav {display:flex; align-items:center; justify-content:space-between; gap:24px}
     .brand {font-size:15px; font-weight:740; letter-spacing:.18em; line-height:1.25}
     .brand small {display:block; font-weight:450; font-size:9px; letter-spacing:.23em; margin-top:6px; color:var(--sub)}
+    .brand-wrap {display:flex; align-items:center; gap:16px}
+    .lab-back {font-size:10px; letter-spacing:.14em; color:var(--sub); border:1px solid #DCDDD1; padding:7px 10px; border-radius:20px; white-space:nowrap}
+    .lab-back:hover {color:var(--ink)}
     .navlinks {display:flex; gap:5px; align-items:center; font-size:13px; color:var(--sub)}
     .page-tab {appearance:none; border:0; background:transparent; color:var(--sub); padding:10px 16px; min-height:44px; border-radius:8px; font-size:13px; transition:background .2s,color .2s; white-space:nowrap}
     .page-tab:hover {color:var(--ink); background:var(--soft)}
@@ -510,7 +513,7 @@
 <body data-page="play">
   <header class="topbar">
     <nav class="nav container" aria-label="主要導覽">
-      <a class="brand" href="#top">PHOTO QUEST<small>AN EXERCISE IN SEEING</small></a>
+      <div class="brand-wrap"><a class="lab-back" href="/lab/" aria-label="返回木尉實驗室">← LAB</a><a class="brand" href="#top">PHOTO QUEST<small>AN EXERCISE IN SEEING</small></a></div>
       <div class="navlinks" id="pageTabs" role="tablist" aria-label="主要功能"><button class="page-tab" id="nav-play" type="button" role="tab" aria-selected="true" aria-controls="page-play" data-page="play">抽取任務</button><button class="page-tab" id="nav-library" type="button" role="tab" aria-selected="false" aria-controls="page-library" tabindex="-1" data-page="library">卡片圖鑑</button><button class="page-tab" id="nav-records" type="button" role="tab" aria-selected="false" aria-controls="page-records" tabindex="-1" data-page="records">任務紀錄</button></div>
       <span class="version">FIELD DECK / VOL. 01</span>
     </nav>
@@ -1917,7 +1920,7 @@
         if(hints.length>2)throw Error('卡片提示無法完整排入分享圖片');hints.forEach((line,i)=>ctx.fillText(line,x+w/2,y+203+i*29));ctx.textAlign='left';
       });
       ctx.fillStyle='#70776D';ctx.font=`22px ${sans}`;ctx.fillText(task.pairingEnabled?'帶著一點偶然，重新觀看世界。':'自由組合 · 器材相容請自行確認',64,1161);
-      ctx.strokeStyle='#E5E3D8';ctx.beginPath();ctx.moveTo(64,1207);ctx.lineTo(1016,1207);ctx.stroke();ctx.font=`20px ${sans}`;ctx.fillText('6 DECKS / ONE WAY OF SEEING',64,1256);ctx.textAlign='right';ctx.fillText('muweifilm.com/photo-quest',1016,1256);
+      ctx.strokeStyle='#E5E3D8';ctx.beginPath();ctx.moveTo(64,1207);ctx.lineTo(1016,1207);ctx.stroke();ctx.font=`20px ${sans}`;ctx.fillText('6 DECKS / ONE WAY OF SEEING',64,1256);ctx.textAlign='right';ctx.fillText('muweifilm.com/lab/photo-quest',1016,1256);
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('圖片產生失敗');return blob;
     }
     async function openTaskShare(source=taskSnapshot()){

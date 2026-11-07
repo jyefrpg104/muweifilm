@@ -1,6 +1,6 @@
 // Dev and production must never share a Drive namespace.
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-const sources=['cloud-backup.js','quest-archive.js'].map(file=>fs.readFileSync(__dirname+'/../photo-quest/'+file,'utf8'));
+const sources=['cloud-backup.js','quest-archive.js'].map(file=>fs.readFileSync(__dirname+'/../lab/photo-quest/'+file,'utf8'));
 function envFor(hostname){
   const context={console,Intl,JSON,Map,Set,URL,location:hostname===undefined?undefined:{hostname}};
   context.window=context;vm.createContext(context);sources.forEach(source=>vm.runInContext(source,context));

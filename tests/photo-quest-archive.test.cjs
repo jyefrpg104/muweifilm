@@ -1,6 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const {webcrypto}=require('node:crypto');
-const source=fs.readFileSync(__dirname+'/../photo-quest/quest-archive.js','utf8');
+const source=fs.readFileSync(__dirname+'/../lab/photo-quest/quest-archive.js','utf8');
 const clone=value=>JSON.parse(JSON.stringify(value));
 const task=id=>({id,createdAt:'2026-10-11T09:00:00Z',confirmedAt:'2026-10-12T04:00:00Z',completedAt:'2026-10-12T06:00:00Z',shotCount:5,pairingEnabled:true,
   cards:{camera:'C01',frame:'F01',time:'T01',subject:'S01',story:'T02',output:'O03'},locked:{camera:true,frame:false,time:false,subject:false,story:false,output:false},covered:{camera:false,frame:false,time:false,subject:false,story:false,output:false}});

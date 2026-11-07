@@ -6,8 +6,8 @@ export default defineConfig({
   srcDir: './muwei-website/src',
   publicDir: './muwei-website/public',
   outDir: './dist',
-  // Keep public URLs unchanged: /about.html, /works.html …
-  build: { format: 'file' },
+  // 'preserve': about.astro → /about.html, lab/index.astro → /lab/index.html
+  build: { format: 'preserve' },
   // Keep the HTML exactly as written for now (v1.2 is a no-visual-change migration).
   compressHTML: false,
 });

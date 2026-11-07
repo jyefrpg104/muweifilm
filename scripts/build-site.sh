@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Build the publishable static site into dist/.
 # Public URL structure:
-#   /              <- muwei-website/ (Astro: src/pages + public)
-#   /photo-quest/  <- photo-quest/   (static, copied as-is)
-#   /reifo/        <- reifo/         (static, copied as-is)
+#   /                  <- muwei-website/ (Astro: src/pages + public, incl. the /lab/ hub)
+#   /lab/<tool>/       <- lab/<tool>/    (static tools, copied as-is)
+#   /photo-quest/, /reifo/  redirect stubs in muwei-website/public/ (old links keep working)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export ASTRO_TELEMETRY_DISABLED=1
@@ -13,8 +13,9 @@ rm -rf dist
 [[ -d node_modules/astro ]] || npm ci --no-audit --no-fund
 npm run build --silent
 
-cp -a photo-quest dist/
-cp -a reifo dist/
+# Every folder in lab/ is one tool, served at /lab/<tool>/.
+mkdir -p dist/lab
+for tool in lab/*/; do cp -a "${tool%/}" dist/lab/; done
 
 # GitHub Pages custom domain and no-Jekyll behavior.
 cp -a CNAME .nojekyll dist/
@@ -35,10 +36,11 @@ cat > dist/version.json <<JSON
 JSON
 
 for file in index.html works.html about.html services.html contact.html 404.html site.css CNAME .nojekyll \
+  lab/index.html lab/photo-quest/index.html lab/reifo/index.html lab/reifo/about/index.html \
   photo-quest/index.html reifo/index.html reifo/about/index.html version.json; do
   if [[ ! -f "dist/$file" ]]; then
     printf 'Build failed: dist/%s does not exist\n' "$file" >&2
     exit 1
   fi
 done
-echo 'Built dist/ from muwei-website/, photo-quest/ and reifo/'
+echo 'Built dist/ from muwei-website/ and lab/'

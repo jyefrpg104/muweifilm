@@ -1,0 +1,20 @@
+[
+  {
+    "slug": "photo-quest",
+    "name": "Photo Quest",
+    "category": "tool",
+    "summary": "以隨機條件重新觀看日常的攝影散步卡牌。抽一張任務，帶著它出門拍；也能瀏覽、列印整副卡。",
+    "status": "穩定",
+    "access": "打開就能用；雲端備份限本人",
+    "href": "/lab/photo-quest/"
+  },
+  {
+    "slug": "reifo",
+    "name": "reifo",
+    "category": "creative",
+    "summary": "to see what was always there. 關於觀看、察覺與重新發現的獨立創作實踐。",
+    "status": "Phase 01",
+    "access": "公開瀏覽",
+    "href": "/lab/reifo/"
+  }
+]

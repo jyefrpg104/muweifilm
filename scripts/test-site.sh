@@ -13,14 +13,14 @@ compare_tree() {
   done < <(find "$source_dir" -type f -print0)
 }
 
-# Every Astro page becomes /<name>.html and keeps its <title>.
-for page in muwei-website/src/pages/*.astro; do
-  name="$(basename "$page" .astro)"
-  built="dist/$name.html"
+# Every Astro page keeps its path (about.astro -> about.html, lab/index.astro -> lab/index.html) and <title>.
+while IFS= read -r -d '' page; do
+  rel="${page#muwei-website/src/pages/}"
+  built="dist/${rel%.astro}.html"
   [[ -f "$built" ]] || { echo "Missing $built" >&2; exit 1; }
   title="$(grep -o '<title>[^<]*</title>' "$page" | head -1)"
   grep -Fq "$title" "$built" || { echo "Title changed in $built" >&2; exit 1; }
-done
+done < <(find muwei-website/src/pages -name '*.astro' -print0)
 
 # Share preview and social image stay in place.
 grep -Fq 'property="og:image" content="https://www.muweifilm.com/images/og.jpg"' dist/index.html
@@ -28,9 +28,24 @@ grep -Fq 'property="og:image" content="https://www.muweifilm.com/images/og.jpg"'
 
 # Static files are copied byte-for-byte.
 compare_tree muwei-website/public dist
-compare_tree photo-quest dist/photo-quest
-compare_tree reifo dist/reifo
+for tool in lab/*/; do compare_tree "${tool%/}" "dist/${tool%/}"; done
+
+# Lab hub lists every tool in the data file, and links to it.
+node -e '
+  const fs=require("fs"); const html=fs.readFileSync("dist/lab/index.html","utf8");
+  for (const t of require("./muwei-website/src/data/lab-tools.json")) {
+    if (!fs.existsSync("lab/"+t.slug+"/index.html")) throw new Error("lab/"+t.slug+"/ missing for "+t.name);
+    if (!html.includes(`href="${t.href}"`)) throw new Error("Lab hub does not link "+t.href);
+  }'
+
+# Main nav links to the lab on every studio page.
+for page in index works about services contact; do grep -Fq '>實驗室</a>' "dist/$page.html"; done
+
+# Old URLs redirect to the lab, keeping ?query and #hash.
+for old in photo-quest reifo reifo/about; do
+  grep -Fq "location.replace('/lab/$old/' + location.search + location.hash)" "dist/$old/index.html"
+done
 
 # Pages must be served at /, not /muwei-website/.
 [[ ! -d dist/muwei-website ]]
-printf 'PASS: pages, titles, domain, static files, Photo Quest and reifo verified in dist/\n'
+printf 'PASS: pages, titles, domain, static files, lab tools, lab hub and redirects verified in dist/\n'

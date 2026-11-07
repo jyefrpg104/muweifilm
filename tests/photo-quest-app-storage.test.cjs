@@ -1,9 +1,9 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-const html=fs.readFileSync(__dirname+'/../photo-quest/index.html','utf8');
+const html=fs.readFileSync(__dirname+'/../lab/photo-quest/index.html','utf8');
 const app=html.split('  <script>')[1].split('  </script>')[0];
-const archiveSource=fs.readFileSync(__dirname+'/../photo-quest/quest-archive.js','utf8');
-const archiveUI=fs.readFileSync(__dirname+'/../photo-quest/quest-archive-ui.js','utf8');
-const source=fs.readFileSync(__dirname+'/../photo-quest/cloud-backup.js','utf8');
+const archiveSource=fs.readFileSync(__dirname+'/../lab/photo-quest/quest-archive.js','utf8');
+const archiveUI=fs.readFileSync(__dirname+'/../lab/photo-quest/quest-archive-ui.js','utf8');
+const source=fs.readFileSync(__dirname+'/../lab/photo-quest/cloud-backup.js','utf8');
 function boot(record){
   const elements=new Map(),storage=new Map(),timers=[],canvases=[];let id=0;
   class Element{
