@@ -4,20 +4,24 @@
 
 | 原始碼資料夾 | 正式網址 | 內容 |
 |---|---|---|
-| `muwei-website/` | https://www.muweifilm.com/ | 木尉影像官方網站 |
+| `muwei-website/` | https://www.muweifilm.com/ | 木尉影像官方網站（Astro） |
 | `photo-quest/` | https://www.muweifilm.com/photo-quest/ | PHOTO QUEST 攝影抽卡遊戲 |
 | `reifo/` | https://www.muweifilm.com/reifo/ | reifo 創作空間 |
 
 ```text
 muweifilm/
-├── muwei-website/        # 官網（index / about / works / services / contact / 404 / site.css / images/）
+├── muwei-website/        # 官網（Astro）
+│   ├── src/pages/        #   頁面：index / about / works / services / contact / 404（.astro）
+│   └── public/           #   原樣複製的檔案：site.css、images/
+├── astro.config.mjs      # Astro 設定（網址維持 /about.html 形式）
+├── package.json          # Astro 版本（固定版本號）
 ├── photo-quest/          # Photo Quest App
 ├── reifo/                # reifo 創作空間
 ├── tests/                # Photo Quest 單元測試
 ├── scripts/
 │   ├── run-checks.sh     # 全部檢查：測試 → build → 比對 dist/
 │   ├── preview.sh        # 本機預覽（http://localhost:8000）
-│   ├── build-site.sh     # 產生 dist/
+│   ├── build-site.sh     # Astro 建置官網＋複製 Photo Quest、reifo → dist/
 │   ├── test-site.sh      # 驗證 dist/
 │   └── check-live-site.sh# 正式上線後逐檔比對正式網址
 ├── .github/workflows/
@@ -52,6 +56,8 @@ muweifilm/
 4. 給 AI coding agent 的指示一律是「開 branch 和 PR」，不要「推到 main」。
 
 ### 本機預覽
+
+需要 Node.js 22 以上；第一次執行會自動 `npm ci` 安裝 Astro。
 
 ```bash
 bash scripts/preview.sh        # 跑完全部檢查後開 http://localhost:8000

@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 # Build the publishable static site into dist/.
 # Public URL structure:
-#   /              <- muwei-website/
-#   /photo-quest/  <- photo-quest/
-#   /reifo/        <- reifo/
+#   /              <- muwei-website/ (Astro: src/pages + public)
+#   /photo-quest/  <- photo-quest/   (static, copied as-is)
+#   /reifo/        <- reifo/         (static, copied as-is)
 set -euo pipefail
 cd "$(dirname "$0")/.."
+export ASTRO_TELEMETRY_DISABLED=1
 rm -rf dist
-mkdir -p dist
 
-cp -a muwei-website/. dist/
+# Astro builds the studio site into dist/.
+[[ -d node_modules/astro ]] || npm ci --no-audit --no-fund
+npm run build --silent
+
 cp -a photo-quest dist/
 cp -a reifo dist/
 

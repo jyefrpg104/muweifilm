@@ -39,6 +39,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
       - name: Run all checks (tests, build, dist verification)
         env:
@@ -67,6 +68,11 @@ jobs:
 
       - name: Check out for byte-level live verification
         uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
       - name: Rebuild expected deployment files
         env:
